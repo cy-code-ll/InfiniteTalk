@@ -14,9 +14,9 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
         {/* Partner Sites - Only show if there are links */}
         {friendlyLinks && friendlyLinks.length > 0 && (
           <div className="mb-10 pb-6 border-b border-muted">
-            <h3 className="font-semibold text-base text-foreground mb-4">
+            <div className="font-semibold text-base text-foreground mb-4">
               PartnerSites
-            </h3>
+            </div>
             <div className="flex flex-wrap gap-x-3 gap-y-1">
               {friendlyLinks.map((link) => (
                 <a
@@ -59,9 +59,9 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
           
           {/* Quick Links */}
           <div className="md:col-span-1">
-            <h3 className="font-semibold text-lg mb-4 text-foreground">
+            <div className="font-semibold text-lg mb-4 text-foreground">
               Navigation
-            </h3>
+            </div>
             <ul className="space-y-2">
               <li>
                 <Link 
@@ -84,9 +84,9 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
           
           {/* Legal */}
           <div className="md:col-span-1">
-            <h3 className="font-semibold text-lg mb-4 text-foreground">
+            <div className="font-semibold text-lg mb-4 text-foreground">
               Legal
-            </h3>
+            </div>
             <ul className="space-y-2">
               <li>
                 <Link 
