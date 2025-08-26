@@ -32,50 +32,40 @@ export function Navbar() {
 
   const renderNavLinks = (isMobile = false) => (
     <>
-        <Link
-            href="/"
-            className={cn(
-              'nav-link-item px-4 py-2 rounded-md transition-colors',
-              pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-            )}
-        >
-          Home
-        </Link>
-
-        <Link
-            href="/blog"
-            className={cn(
-              'nav-link-item px-4 py-2 rounded-md transition-colors',
-              pathname.startsWith(`/blog`) ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-            )}
-        >
-          Blog
-        </Link>
+      <Link
+        href="/"
+        className={cn(
+          'nav-link-item px-4 py-2 rounded-md transition-colors',
+          pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+        )}
+      >
+        Home
+      </Link>
     </>
   );
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background shadow-nav">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Left: Logo */}
           <div className="w-[180px] 2xl:w-[200px] flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
-              <span className="font-fredoka text-xl font-bold text-primary">
-                QuickMedCert
+              <span className="font-poppins text-xl font-bold text-primary">
+                Infinite Talk AI
               </span>
             </Link>
           </div>
-          
+
           {/* Middle: Desktop Nav Links */}
-          <div className="hidden md:flex items-center justify-center flex-1">
-            <div className="flex items-center space-x-1">
+          <div className="hidden md:flex items-center justify-center flex-1 ">
+            <div className="flex items-center space-x-1 hidden">
               {renderNavLinks(false)}
             </div>
           </div>
-          
+
           {/* Right Section */}
-          <div className="w-[180px] 2xl:w-[200px] flex items-center justify-end gap-2">
+          <div className=" hidden w-[180px] 2xl:w-[200px] flex items-center justify-end gap-2">
             {/* Desktop: Auth Button */}
             <div className="hidden md:flex items-center gap-4">
               {/* 用户积分显示 */}

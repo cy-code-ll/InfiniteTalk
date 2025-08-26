@@ -1,5 +1,5 @@
 import './globals.css'
-import { Inter, Playfair_Display, Fredoka, Nunito, Baloo_2 } from 'next/font/google';
+import { Inter, Playfair_Display, Poppins, Nunito, Baloo_2 } from 'next/font/google';
 import type { Metadata } from 'next'
 import Script from 'next/script';
 import PaymentStatusModal from '@/components/payment-status-modal';
@@ -12,7 +12,7 @@ import { metadata, schemaData } from '@/lib/seo-config';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
 const playfair = Playfair_Display({ subsets: ['latin'], variable: '--font-playfair' });
-const fredoka = Fredoka({ subsets: ['latin'], variable: '--font-fredoka', weight: ['300', '400', '500', '600', '700'] });
+const poppins = Poppins({ subsets: ['latin'], variable: '--font-poppins', weight: ['300', '400', '500', '600', '700'] });
 const baloo = Baloo_2({ subsets: ['latin'], variable: '--font-baloo', weight: ['400', '500', '600', '700', '800'] });
 const nunito = Nunito({ subsets: ['latin'], variable: '--font-nunito', weight: ['200', '300', '400', '500', '600', '700', '800', '900'] });
 
@@ -27,7 +27,7 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${inter.variable} ${playfair.variable} ${fredoka.variable} ${baloo.variable} ${nunito.variable} bg-background text-foreground`}>
+      <body className={`${inter.variable} ${playfair.variable} ${poppins.variable} ${baloo.variable} ${nunito.variable} bg-background text-foreground`}>
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}

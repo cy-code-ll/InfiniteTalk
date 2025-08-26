@@ -3,7 +3,7 @@ import { serverCmsApi } from './server-api';
 
 // !!! IMPORTANT: Replace with your actual production domain !!!
 // You can use environment variables like process.env.NEXT_PUBLIC_SITE_URL
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.seedancepro.com';
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.infinitetalk.net';
 
 // 生成博客文章slug
 function generateSlug(title: string, url?: string): string {

@@ -25,7 +25,7 @@ module.exports = {
       fontFamily: {
         playfair: ['var(--font-playfair)'],
         inter: ['var(--font-inter)'],
-        fredoka: ['Fredoka One', 'cursive'],
+        poppins: ['var(--font-poppins)'],
         baloo: ['var(--font-baloo)'],
         nunito: ['var(--font-nunito)']
       },
@@ -36,35 +36,35 @@ module.exports = {
         border: "var(--border)",
         input: "var(--input)",
         ring: "var(--ring)",
-        background: "#FFFFFF",
-        foreground: "#212121",
+        background: "#000000",
+        foreground: "#FFFFFF",
         primary: {
-          DEFAULT: "rgba(0, 151, 167, 0.8)",
-          foreground: "#FFFFFF",
+          DEFAULT: "#D4AF37",
+          foreground: "#000000",
         },
         secondary: {
-          DEFAULT: "#F5F5F5",
-          foreground: "#212121",
+          DEFAULT: "#1A1A1A",
+          foreground: "#FFFFFF",
         },
         destructive: {
           DEFAULT: "#E63946",
           foreground: "#FFFFFF",
         },
         muted: {
-          DEFAULT: "#E0E0E0",
-          foreground: "#757575",
+          DEFAULT: "#333333",
+          foreground: "#CCCCCC",
         },
         accent: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#212121",
+          DEFAULT: "#1A1A1A",
+          foreground: "#FFFFFF",
         },
         popover: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#212121",
+          DEFAULT: "#111111",
+          foreground: "#FFFFFF",
         },
         card: {
-          DEFAULT: "#FFFFFF",
-          foreground: "#212121",
+          DEFAULT: "#111111",
+          foreground: "#FFFFFF",
         },
         info: "#2196F3",
         success: "#4CAF50",
