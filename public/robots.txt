@@ -1,0 +1,50 @@
+# =====================================
+# 🤖 Robots.txt for https://www.4oimagex.com
+# =====================================
+
+# -------------------------------------
+# 🌐 General rules for all crawlers
+# -------------------------------------
+User-agent: *
+Allow: /
+Disallow: /api/        # API endpoints (not meant for indexing)
+Disallow: /_next/      # Next.js internal assets
+Disallow: /admin/      # Admin dashboard (protected)
+# Note: Static assets are allowed (no Disallow for /static/)
+
+# -------------------------------------
+# 🔍 Googlebot rules
+# -------------------------------------
+User-agent: Googlebot
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+# -------------------------------------
+# 🔎 Bingbot rules (search indexing allowed)
+# -------------------------------------
+User-agent: Bingbot
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+# -------------------------------------
+# 🔎 Baiduspider rules
+# -------------------------------------
+User-agent: Baiduspider
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+# -------------------------------------
+# 🤖 AI Crawler Rules (LLM-specific bots - restricted)
+# -------------------------------------
+User-agent: GPTBot
+User-agent: anthropic-ai
+Allow: /llms.txt
+Disallow: /
+
+# -------------------------------------
+# 📌 Sitemap
+# -------------------------------------
+Sitemap: https://www.4oimagex.com/sitemap.xml

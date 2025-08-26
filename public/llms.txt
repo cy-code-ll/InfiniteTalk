@@ -1,0 +1,34 @@
+# llms.txt for https://www.4oimagex.com
+# This file provides guidance to LLM crawlers on allowed content
+
+# -------------------------------------
+# ✅ Website Information
+Website: https://www.4oimagex.com
+Name: 4oimagex
+Description: AI Image Generator | Create stunning visuals with cutting-edge AI technology. Transform your ideas into artistic images with 4oimagex, the advanced AI image generator that helps you create beautiful illustrations and artwork instantly.
+
+# -------------------------------------
+# ✅ Core Content Sections
+Allow: /#how-it-works
+Allow: /#showcase
+Allow: /#testimonials
+Allow: /#pricing
+Allow: /#faq
+Allow: /blog
+Allow: /blog/*
+
+
+# -------------------------------------
+# ✅ Important Legal Pages
+Allow: /terms
+Allow: /privacy
+
+# -------------------------------------
+# ❌ Disallowed API or Internal Paths (implicitly via robots.txt)
+Disallow: /api/
+Disallow: /_next/
+Disallow: /admin/
+
+# -------------------------------------
+# 📌 Sitemap for better discovery
+Sitemap: https://www.4oimagex.com/sitemap.xml

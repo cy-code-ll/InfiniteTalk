@@ -1,0 +1,468 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@font-face {
+  font-family: 'HomemadeApple';
+  src: url('/font/HomemadeApple-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-inter);
+  --font-mono: var(--font-mono);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: #FFFFFF;
+  --foreground: #212121;
+  --card: #FFFFFF;
+  --card-foreground: #212121;
+  --popover: #FFFFFF;
+  --popover-foreground: #212121;
+  --primary: rgba(0, 151, 167, 1);
+  --primary-foreground: rgba(255, 255, 255, 1);
+  --secondary: #F5F5F5;
+  --secondary-foreground: #212121;
+  --muted: #E0E0E0;
+  --muted-foreground: #757575;
+  --accent: #FFFFFF;
+  --accent-foreground: #212121;
+  --destructive: #E63946;
+  --border: #E0E0E0;
+  --input: #E0E0E0;
+  --ring: rgba(0, 151, 167, 0.8);
+  --info: #2196F3;
+  --success: #4CAF50;
+  --warning: #FFC107;
+  --chart-1: #3498db;
+  --chart-2: #2ecc71;
+  --chart-3: #9b59b6;
+  --chart-4: #f1c40f;
+  --chart-5: #e74c3c;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #212121;
+  --sidebar-primary: rgba(0, 151, 167, 0.8);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #F5F5F5;
+  --sidebar-accent-foreground: #212121;
+  --sidebar-border: #E0E0E0;
+  --sidebar-ring: rgba(0, 151, 167, 0.8);
+}
+
+.dark {
+  --background: #121212;
+  --foreground: #FFFFFF;
+  --card: #1E1E1E;
+  --card-foreground: #FFFFFF;
+  --popover: #1E1E1E;
+  --popover-foreground: #FFFFFF;
+  --primary: rgba(0, 151, 167, 0.8);
+  --primary-foreground: #FFFFFF;
+  --secondary: #2D2D2D;
+  --secondary-foreground: #FFFFFF;
+  --muted: #424242;
+  --muted-foreground: #BDBDBD;
+  --accent: #1E1E1E;
+  --accent-foreground: #FFFFFF;
+  --destructive: #E63946;
+  --border: #424242;
+  --input: #424242;
+  --ring: rgba(0, 151, 167, 0.8);
+  --chart-1: #7b68ee;
+  --chart-2: #00bcd4;
+  --chart-3: #ffa500;
+  --chart-4: #9c27b0;
+  --chart-5: #ff5722;
+  --sidebar: #1E1E1E;
+  --sidebar-foreground: #FFFFFF;
+  --sidebar-primary: rgba(0, 151, 167, 0.8);
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #2D2D2D;
+  --sidebar-accent-foreground: #FFFFFF;
+  --sidebar-border: #424242;
+  --sidebar-ring: rgba(0, 151, 167, 0.8);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  
+  /* 自定义字体样式 */
+  .font-playfair {
+    font-family: var(--font-playfair);
+  }
+  
+  .font-inter {
+    font-family: var(--font-inter);
+  }
+  
+  .font-fredoka {
+    font-family: var(--font-fredoka);
+  }
+  
+  .font-baloo {
+    font-family: var(--font-baloo);
+  }
+  
+  .font-nunito {
+    font-family: var(--font-nunito);
+  }
+  
+  /* UI风格 */
+  .shadow-custom {
+    box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
+  }
+  
+  /* 覆盖默认边距，使用更大的内边距 */
+  .p-large {
+    padding: 2rem;
+  }
+  
+  /* 圆角样式 */
+  .rounded-xl {
+    border-radius: 1rem;
+  }
+  
+  .rounded-2xl {
+    border-radius: 1.5rem;
+  }
+}
+
+@layer components {
+  .nav-container {
+    @apply fixed top-0 z-50 w-full bg-white border-b border-muted shadow-md;
+  }
+
+  .nav-content {
+    @apply container mx-auto px-6 h-16 flex items-center max-w-7xl;
+  }
+
+  .nav-logo {
+    @apply w-[180px] flex-none 2xl:w-[200px];
+  }
+
+  .nav-logo-text {
+    @apply text-xl font-bold text-primary;
+    font-family: var(--font-fredoka);
+  }
+
+  .nav-links {
+    @apply hidden lg:flex flex-1 items-center justify-center gap-8 px-4;
+  }
+
+  .nav-link {
+    @apply px-4 py-2 text-foreground hover:text-primary transition-colors rounded-md whitespace-nowrap;
+    font-family: var(--font-nunito);
+  }
+
+  .nav-link.active {
+    @apply text-primary font-semibold;
+  }
+
+  .nav-auth {
+    @apply hidden lg:flex w-[180px] flex-none items-center justify-end 2xl:w-[200px];
+  }
+
+  .nav-mobile {
+    @apply lg:hidden;
+  }
+
+  .footer-container {
+    @apply bg-white border-t border-muted;
+  }
+
+  .footer-content {
+    @apply container mx-auto px-6 py-12;
+  }
+
+  .footer-grid {
+    @apply grid grid-cols-1 md:grid-cols-4 gap-8;
+  }
+
+  .footer-logo {
+    @apply flex items-center space-x-2 mb-4;
+  }
+
+  .footer-copyright {
+    @apply mt-4 text-sm text-muted-foreground;
+  }
+
+  .footer-email {
+    @apply text-sm text-primary hover:text-primary/80 transition-colors;
+  }
+
+  .footer-section-title {
+    @apply font-semibold text-lg mb-4 text-foreground;
+  }
+
+  .footer-link {
+    @apply text-sm text-muted-foreground hover:text-primary transition-colors;
+  }
+
+  .pricing-section {
+    @apply py-20 px-6 relative;
+    background-color: #f8f9fa;
+    border-top: 1px solid #f0f0f0;
+  }
+
+  .pricing-section::before,
+  .pricing-section::after {
+    display: none;
+  }
+
+  .pricing-container {
+    @apply container mx-auto;
+  }
+
+  .pricing-title {
+    @apply text-3xl md:text-4xl font-bold text-center mb-6 text-foreground;
+    font-family: var(--font-fredoka);
+  }
+
+  .pricing-subtitle {
+    @apply text-lg text-muted-foreground text-center mb-16 max-w-3xl mx-auto;
+  }
+
+  .pricing-grid {
+    @apply grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto;
+  }
+
+  .pricing-card {
+    @apply rounded-2xl p-8 flex flex-col h-full relative bg-white shadow-lg;
+  }
+
+  .pricing-card.popular {
+    @apply bg-foreground text-background border-2 border-primary;
+  }
+
+  .pricing-badge {
+    @apply absolute -top-4 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground px-4 py-1 rounded-full text-sm font-bold shadow-md;
+  }
+
+  .pricing-card-title {
+    @apply text-2xl font-semibold mb-2 text-center;
+  }
+
+  .pricing-card-price {
+    @apply text-center mb-8;
+  }
+
+  .pricing-price-value {
+    @apply text-5xl font-bold;
+  }
+
+  .pricing-price-period {
+    @apply text-muted-foreground text-lg ml-1;
+  }
+
+  .pricing-features {
+    @apply flex-grow border-t border-muted pt-6;
+  }
+
+  .pricing-feature-item {
+    @apply flex items-start space-y-3;
+  }
+
+  .pricing-feature-icon {
+    @apply w-5 h-5 mr-2 flex-shrink-0;
+  }
+
+  .pricing-feature-text {
+    @apply text-sm;
+  }
+
+  .disclaimer-bg {
+    @apply w-full min-h-[320px] bg-gradient-to-br from-[#f8fafc] via-[#e0e7ef] to-[#f0f4ff] flex items-center justify-center py-12 px-4;
+  }
+
+  .disclaimer-container {
+    @apply max-w-2xl w-full mx-auto;
+  }
+
+  .disclaimer-card {
+    @apply rounded-2xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 p-10;
+  }
+
+  .disclaimer-title {
+    @apply text-2xl font-extrabold text-blue-800 mb-5 font-sans tracking-wide text-center drop-shadow-sm;
+  }
+
+  .disclaimer-content {
+    @apply text-gray-700 text-base leading-relaxed font-sans space-y-4 text-center;
+  }
+
+  .disclaimer-note {
+    @apply text-sm text-blue-500 mt-6 italic;
+  }
+
+  .howtowork-section {
+    @apply py-16 relative;
+    background-color: #ffffff;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .howtowork-section::before,
+  .howtowork-section::after {
+    display: none;
+  }
+
+  .howtowork-title {
+    @apply text-3xl md:text-4xl font-bold text-center mb-10 text-foreground drop-shadow-sm;
+    font-family: 'Fredoka', 'Fredoka One', cursive, sans-serif;
+  }
+  .howtowork-list {
+    @apply grid grid-cols-1 md:grid-cols-3 gap-8;
+  }
+  .howtowork-step {
+    @apply bg-white/90 rounded-2xl shadow-card p-8 flex flex-col items-center text-center border border-blue-100 transition-transform hover:-translate-y-2 hover:shadow-2xl duration-200;
+  }
+  .howtowork-icon {
+    @apply text-5xl mb-4;
+  }
+  .howtowork-step-title {
+    @apply text-xl font-semibold mb-2 text-primary;
+    font-family: 'Fredoka', 'Fredoka One', cursive, sans-serif;
+  }
+  .howtowork-step-desc {
+    @apply text-gray-600 text-base leading-relaxed;
+  }
+
+  .shadow-nav {
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  /* 自定义 react-datepicker 样式 */
+  .react-datepicker {
+    font-family: var(--font-nunito) !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid var(--border) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08) !important;
+  }
+
+  .react-datepicker__header {
+    background-color: var(--accent) !important;
+    border-bottom: 1px solid var(--border) !important;
+    border-top-left-radius: 0.75rem !important;
+    border-top-right-radius: 0.75rem !important;
+    padding-top: 0.8rem !important;
+  }
+
+  .react-datepicker__current-month {
+    font-weight: 600 !important;
+    font-size: 1rem !important;
+    color: var(--foreground) !important;
+  }
+
+  .react-datepicker__day-name {
+    color: var(--muted-foreground) !important;
+    font-weight: 500 !important;
+  }
+
+  .react-datepicker__day {
+    border-radius: 50% !important;
+    transition: all 0.2s !important;
+  }
+
+  .react-datepicker__day:hover {
+    background-color: var(--secondary) !important;
+    border-radius: 50% !important;
+  }
+
+  .react-datepicker__day--selected {
+    background-color: var(--primary) !important;
+    color: var(--primary-foreground) !important;
+    font-weight: 600 !important;
+  }
+
+  .react-datepicker__day--today {
+    font-weight: 600 !important;
+    color: var(--primary) !important;
+  }
+
+  .react-datepicker__navigation {
+    top: 1rem !important;
+  }
+
+  .react-datepicker__navigation-icon::before {
+    border-color: var(--foreground) !important;
+  }
+
+  .react-datepicker__input-container input {
+    width: 100% !important;
+    padding: 0.5rem 1rem !important;
+    border-radius: 0.75rem !important;
+    border: 1px solid var(--border) !important;
+    background-color: var(--background) !important;
+    color: var(--foreground) !important;
+    outline: none !important;
+  }
+
+  .react-datepicker__input-container input:focus {
+    border-color: var(--primary) !important;
+    box-shadow: 0 0 0 2px rgba(0, 151, 167, 0.2) !important;
+  }
+
+  .react-datepicker__triangle {
+    display: none !important;
+  }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* 自定义动画 */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
