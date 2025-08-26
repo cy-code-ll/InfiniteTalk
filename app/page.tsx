@@ -4,6 +4,7 @@ import PricingSection from '../components/PricingSection';
 import { Footer } from '../components/Footer';
 import { serverCmsApi, FriendLink } from '../lib/server-api';
 import { GoogleOneTapAuth } from '../components/auth';
+import { Hero, WhatIsIt, WhySparseFrame, KeyFeatures, HowItWorks, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction } from '../components/home';
 // 启用ISR，每小时重新验证数据
 export const revalidate = 1200;
 
@@ -26,7 +27,19 @@ export default async function Home() {
         signInForceRedirectUrl="/"
         signUpForceRedirectUrl="/"
       /> */}
-      <main className="flex-grow">
+      <main className="flex-grow bg-background">
+        <Hero />
+        <WhatIsIt />
+        <WhySparseFrame />
+        <KeyFeatures />
+        <HowItWorks />
+        <QuickInferenceTips />
+        <UseCases />
+        <Comparisons />
+        <TechHighlights />
+        <GettingStarted />
+        <FAQs />
+        <CallToAction />
         {/* <PricingSection /> */}
       </main>
       <Footer friendlyLinks={friendlyLinks} />
