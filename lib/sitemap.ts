@@ -27,7 +27,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Static pages (relative to root)
   const staticPages = [
     '/',
-    '/blog',
     '/terms',
     '/privacy'
   ];
