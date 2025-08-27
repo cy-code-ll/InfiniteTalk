@@ -42,7 +42,7 @@ export default async function Home() {
         <CallToAction />
         {/* <PricingSection /> */}
       </main>
-      <Footer friendlyLinks={friendlyLinks} />
+      <Footer />
     </div>
   );
 }
