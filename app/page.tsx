@@ -88,7 +88,7 @@ export default async function Home() {
           '@type': 'HowTo',
           name: 'How to Use Infinite Talk AI',
           description: 'Learn how to create infinite-length talking videos with Infinite Talk AI in three simple steps.',
-          image: 'https://infinitetalk.ai/og-image.jpg',
+          image: 'https://www.infinitetalk.net/og-image.jpg',
           totalTime: 'PT5M',
           estimatedCost: {
             '@type': 'MonetaryAmount',
@@ -109,7 +109,7 @@ export default async function Home() {
             {
               '@type': 'SoftwareApplication',
               name: 'Infinite Talk AI',
-              url: 'https://infinitetalk.ai'
+              url: 'https://www.infinitetalk.net'
             }
           ],
           step: [
@@ -117,22 +117,22 @@ export default async function Home() {
               '@type': 'HowToStep',
               name: 'Upload Source & Audio',
               text: 'Choose a video or image and upload your speech, podcast, or dialogue to dub with Infinite Talk AI.',
-              url: 'https://infinitetalk.ai#step1',
-              image: 'https://infinitetalk.ai/step1.jpg'
+              url: 'https://www.infinitetalk.net#step1',
+              image: 'https://www.infinitetalk.net/step1.jpg'
             },
             {
               '@type': 'HowToStep',
               name: 'Generate with Infinite Talk AI',
               text: 'Instantly produce a lip‑synced, full‑body animated video using Infinite Talk AI.',
-              url: 'https://infinitetalk.ai#step2',
-              image: 'https://infinitetalk.ai/step2.jpg'
+              url: 'https://www.infinitetalk.net#step2',
+              image: 'https://www.infinitetalk.net/step2.jpg'
             },
             {
               '@type': 'HowToStep',
               name: 'Export & Share',
               text: 'Download in 480p/720p and share anywhere. Created with Infinite Talk AI.',
-              url: 'https://infinitetalk.ai#step3',
-              image: 'https://infinitetalk.ai/step3.jpg'
+              url: 'https://www.infinitetalk.net#step3',
+              image: 'https://www.infinitetalk.net/step3.jpg'
             }
           ]
         }) }}

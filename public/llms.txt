@@ -1,22 +1,24 @@
-# llms.txt for https://www.4oimagex.com
+# llms.txt for https://www.infinitetalk.net
 # This file provides guidance to LLM crawlers on allowed content
 
 # -------------------------------------
 # ✅ Website Information
-Website: https://www.4oimagex.com
-Name: 4oimagex
-Description: AI Image Generator | Create stunning visuals with cutting-edge AI technology. Transform your ideas into artistic images with 4oimagex, the advanced AI image generator that helps you create beautiful illustrations and artwork instantly.
+Website: https://www.infinitetalk.net
+Name: Infinite Talk AI
+Description: Infinite Talk AI is an advanced audio-driven video generation platform that creates infinite-length talking videos from any video or image. Features accurate lip synchronization, natural full-body motion, and consistent identity preservation powered by sparse-frame video dubbing technology.
 
 # -------------------------------------
-# ✅ Core Content Sections
-Allow: /#how-it-works
-Allow: /#showcase
-Allow: /#testimonials
-Allow: /#pricing
-Allow: /#faq
+# ✅ Core Content Sections (based on actual page structure)
+Allow: /#hero
+Allow: /#getting-started
+Allow: /#key-features
+Allow: /#quick-inference-tips
+Allow: /#use-cases
+Allow: /#comparisons
+Allow: /#tech-highlights
+Allow: /#faqs
 Allow: /blog
 Allow: /blog/*
-
 
 # -------------------------------------
 # ✅ Important Legal Pages
@@ -28,7 +30,23 @@ Allow: /privacy
 Disallow: /api/
 Disallow: /_next/
 Disallow: /admin/
+Disallow: /sign-in
+Disallow: /sign-up
+Disallow: /profile
 
 # -------------------------------------
 # 📌 Sitemap for better discovery
-Sitemap: https://www.4oimagex.com/sitemap.xml
+Sitemap: https://www.infinitetalk.net/sitemap.xml
+
+# -------------------------------------
+# 🎯 Key Features to Highlight (from actual content)
+# - Sparse-frame video dubbing technology
+# - Audio-driven full-body animation
+# - Infinite-length video generation
+# - Identity and scene preservation
+# - Support for both video-to-video and image-to-video
+# - 480p/720p output resolutions
+# - Lip synchronization accuracy
+# - Natural motion generation
+# - Global dubbing/localization use cases
+# - Creator workflows and studio pipelines

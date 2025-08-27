@@ -1,5 +1,5 @@
 # =====================================
-# 🤖 Robots.txt for https://www.4oimagex.com
+# 🤖 Robots.txt for https://www.infinitetalk.net
 # =====================================
 
 # -------------------------------------
@@ -10,6 +10,9 @@ Allow: /
 Disallow: /api/        # API endpoints (not meant for indexing)
 Disallow: /_next/      # Next.js internal assets
 Disallow: /admin/      # Admin dashboard (protected)
+Disallow: /sign-in/    # Authentication pages
+Disallow: /sign-up/    # Authentication pages
+Disallow: /profile/    # User profile pages
 # Note: Static assets are allowed (no Disallow for /static/)
 
 # -------------------------------------
@@ -19,6 +22,9 @@ User-agent: Googlebot
 Allow: /
 Disallow: /api/
 Disallow: /_next/
+Disallow: /sign-in/
+Disallow: /sign-up/
+Disallow: /profile/
 
 # -------------------------------------
 # 🔎 Bingbot rules (search indexing allowed)
@@ -27,6 +33,9 @@ User-agent: Bingbot
 Allow: /
 Disallow: /api/
 Disallow: /_next/
+Disallow: /sign-in/
+Disallow: /sign-up/
+Disallow: /profile/
 
 # -------------------------------------
 # 🔎 Baiduspider rules
@@ -35,16 +44,27 @@ User-agent: Baiduspider
 Allow: /
 Disallow: /api/
 Disallow: /_next/
+Disallow: /sign-in/
+Disallow: /sign-up/
+Disallow: /profile/
 
 # -------------------------------------
 # 🤖 AI Crawler Rules (LLM-specific bots - restricted)
 # -------------------------------------
 User-agent: GPTBot
 User-agent: anthropic-ai
+User-agent: CCBot
+User-agent: ChatGPT-User
+User-agent: Omgilibot
 Allow: /llms.txt
 Disallow: /
 
 # -------------------------------------
 # 📌 Sitemap
 # -------------------------------------
-Sitemap: https://www.4oimagex.com/sitemap.xml
+Sitemap: https://www.infinitetalk.net/sitemap.xml
+
+# -------------------------------------
+# 🎯 Crawl-delay for respectful crawling
+# -------------------------------------
+Crawl-delay: 1
