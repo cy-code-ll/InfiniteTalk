@@ -61,7 +61,7 @@ export default function Hero() {
 
           {/* Subhead */}
           <p className="text-base md:text-xl lg:text-2xl text-muted-foreground/80 max-w-3xl mx-auto leading-relaxed mb-10 md:mb-14 font-light">
-            Create infinite‑length talking videos from any video or image. <span className="text-primary font-semibold">Infinite Talk AI</span>
+            Create infinite‑length talking videos from any video or image. <span className="text-primary font-semibold">Infinite Talk AI </span>
             delivers razor‑accurate lip sync, expressive full‑body motion, and rock‑solid identity preservation—powered by next‑gen sparse‑frame technology.
           </p>
 
