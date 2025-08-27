@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 
 // Icon components
 const VideoIcon = () => (
@@ -30,6 +30,12 @@ const CpuIcon = () => (
 const PlayIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.828 14.828a4 4 0 01-5.656 0M9 10h1m4 0h1m-6 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>
+);
+
+const PlayButtonIcon = () => (
+  <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 24 24">
+    <path d="M8 5v14l11-7z"/>
   </svg>
 );
 
@@ -120,7 +126,7 @@ function GlowCard({ children, className = '' }: React.PropsWithChildren<{ classN
   return (
     <div className={`group relative ${className}`}>
       {/* Transparent glass card */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
+      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
         {children}
       </div>
     </div>
@@ -197,7 +203,7 @@ export function KeyFeatures() {
                 <VideoIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Sparse-Frame Video Dubbing</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Sparse-Frame Video Dubbing</h3>
                 <p>Infinite Talk AI animates not just lips, but also head, body, and expressions for natural results.</p>
               </div>
             </div>
@@ -210,7 +216,7 @@ export function KeyFeatures() {
                 <ZapIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Infinite-Length Generation</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Infinite-Length Generation</h3>
                 <p>Infinite Talk AI supports long, continuous talking videos with smooth motion across segments.</p>
               </div>
             </div>
@@ -223,7 +229,7 @@ export function KeyFeatures() {
                 <SparklesIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Flexible Inputs</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Flexible Inputs</h3>
                 <p>Infinite Talk AI supports both video‑to‑video dubbing and image‑to‑video generation from a single image.</p>
               </div>
             </div>
@@ -236,7 +242,7 @@ export function KeyFeatures() {
                 <StarIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Identity & Scene Preservation</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Identity & Scene Preservation</h3>
                 <p>Infinite Talk AI keeps face, posture, lighting, and background consistent throughout the video.</p>
               </div>
             </div>
@@ -249,7 +255,7 @@ export function KeyFeatures() {
                 <CpuIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Stability & Realism</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Stability & Realism</h3>
                 <p>Infinite Talk AI minimizes distortions and jitter, delivering smooth, realistic movement.</p>
               </div>
             </div>
@@ -262,7 +268,7 @@ export function KeyFeatures() {
                 <DownloadIcon />
               </div>
               <div>
-                <h3 className="text-foreground block mb-2">Resolution Options</h3>
+                <h3 className="text-foreground block mb-2 font-semibold">Resolution Options</h3>
                 <p>Infinite Talk AI exports at 480p and 720p today, with higher resolutions planned.</p>
               </div>
             </div>
@@ -318,7 +324,7 @@ export function QuickInferenceTips() {
         ].map(([strong, rest]) => (
           <li key={String(strong)}>
             <GlowCard>
-              <h3 className="text-foreground block mb-2">{strong}</h3>
+              <h3 className="text-foreground block mb-2 font-semibold">{strong}</h3>
               <p>{rest}</p>
             </GlowCard>
           </li>
@@ -353,7 +359,7 @@ export function UseCases() {
         ].map(([strong, rest]) => (
           <li key={String(strong)}>
             <GlowCard>
-              <h3 className="text-foreground block mb-2">{strong}</h3>
+              <h3 className="text-foreground block mb-2 font-semibold">{strong}</h3>
               <p>{rest}</p>
             </GlowCard>
           </li>
@@ -402,7 +408,7 @@ export function TechHighlights() {
         {items.map(([strong, rest]) => (
           <li key={strong}>
             <GlowCard>
-              <h3 className="text-foreground block mb-2">{strong}</h3>
+              <h3 className="text-foreground block mb-2 font-semibold">{strong}</h3>
               <p>{rest}</p>
             </GlowCard>
           </li>
@@ -434,7 +440,7 @@ export function GettingStarted() {
                     {icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-foreground text-lg font-semibold mb-3">{strong}</h4>
+                    <h4 className="text-foreground text-lg font-bold mb-3">{strong}</h4>
                     <p className="text-sm leading-relaxed">{rest}</p>
                   </div>
                 </div>
@@ -481,7 +487,7 @@ export function FAQs() {
         {faqs.map(([q, a]) => (
           <li key={q}>
             <GlowCard>
-              <h3 className="text-foreground mb-1">{q}</h3>
+              <h3 className="text-foreground mb-1 font-semibold">{q}</h3>
               <p>{a}</p>
             </GlowCard>
           </li>
@@ -489,6 +495,94 @@ export function FAQs() {
       </ul>
     </SectionShell>
   )
+}
+
+export function VideoCases() {
+  const [currentPlaying, setCurrentPlaying] = useState<number | null>(null);
+  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
+
+  const videos = [
+    { id: 3, src: '/cases/3.mp4', title: 'Case 3' },
+    { id: 7, src: '/cases/7.mp4', title: 'Case 7' },
+    { id: 8, src: '/cases/8.mp4', title: 'Case 8' },
+    { id: 9, src: '/cases/9.mp4', title: 'Case 9' },
+    { id: 10, src: '/cases/10.mp4', title: 'Case 10' },
+    { id: 13, src: '/cases/13.mp4', title: 'Case 13' },
+  ];
+
+  const handleVideoClick = (index: number) => {
+    const clickedVideo = videoRefs.current[index];
+    if (!clickedVideo) return;
+
+    // Pause all other videos
+    videoRefs.current.forEach((video, i) => {
+      if (video && i !== index) {
+        video.pause();
+      }
+    });
+
+    if (currentPlaying === index) {
+      // Pause current video
+      clickedVideo.pause();
+      setCurrentPlaying(null);
+    } else {
+      // Play clicked video
+      clickedVideo.play();
+      setCurrentPlaying(index);
+    }
+  };
+
+  useEffect(() => {
+    // Set up video event listeners
+    videoRefs.current.forEach((video, index) => {
+      if (video) {
+        const handleEnded = () => {
+          if (currentPlaying === index) {
+            setCurrentPlaying(null);
+          }
+        };
+        video.addEventListener('ended', handleEnded);
+        return () => video.removeEventListener('ended', handleEnded);
+      }
+    });
+  }, [currentPlaying]);
+
+  return (
+    <SectionShell>
+      <SectionHeading title="Video Cases" kicker="Examples" icon={<VideoIcon />} />
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {videos.map((video, index) => (
+          <div key={video.id} className="relative group">
+            <GlowCard className="overflow-hidden">
+              <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
+                <video
+                  ref={(el) => { videoRefs.current[index] = el; }}
+                  src={video.src}
+                  className="w-full h-full object-cover cursor-pointer"
+                  loop
+                  playsInline
+                  preload="metadata"
+                  onClick={() => handleVideoClick(index)}
+                />
+                {/* Play overlay */}
+                {currentPlaying !== index && (
+                  <div 
+                    className="absolute inset-0 bg-black/20 flex items-center justify-center cursor-pointer group-hover:bg-black/30 transition-colors"
+                    onClick={() => handleVideoClick(index)}
+                  >
+                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors">
+                      <PlayButtonIcon />
+                    </div>
+                  </div>
+                )}
+         
+              </div>
+            </GlowCard>
+          </div>
+        ))}
+      </div>
+    </SectionShell>
+  );
 }
 
 export function CallToAction() {

@@ -4,7 +4,7 @@ import PricingSection from '../components/PricingSection';
 import { Footer } from '../components/Footer';
 import { serverCmsApi, FriendLink } from '../lib/server-api';
 import { GoogleOneTapAuth } from '../components/auth';
-import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction } from '../components/home';
+import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction, VideoCases } from '../components/home';
 import Script from 'next/script';
 import { schemaData } from '../lib/seo-config';
 // 启用ISR，每小时重新验证数据
@@ -150,11 +150,13 @@ export default async function Home() {
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
         <Hero />
         <GettingStarted />
+        <VideoCases />
         <KeyFeatures />
         <QuickInferenceTips />
         <UseCases />
         <Comparisons />
         <TechHighlights />
+        
         <FAQs />
         {/* <CallToAction /> */}
         {/* <PricingSection /> */}
