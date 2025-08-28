@@ -562,7 +562,7 @@ export function VideoCases() {
                   loop
                   controls
                   playsInline
-                  preload="metadata"
+                  preload="none"
                   onClick={() => handleVideoClick(index)}
                 />
                 {/* Play overlay */}
