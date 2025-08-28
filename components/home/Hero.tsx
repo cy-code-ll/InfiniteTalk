@@ -51,9 +51,11 @@ export default function Hero() {
             <span className="block text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
               InfiniteTalk AI
             </span>
+            <span> </span>
             <span className="mt-4 block text-2xl md:text-4xl font-semibold text-muted-foreground/90">
               Audio‑Driven Video Generation
             </span>
+            <span> </span>
             <span className="mt-2 block text-xl md:text-3xl font-medium text-primary">
               Without Limits
             </span>
