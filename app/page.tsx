@@ -33,23 +33,23 @@ export default async function Home() {
           mainEntity: [
             {
               '@type': 'Question',
-              name: 'What is Infinite Talk AI?',
+              name: 'What is InfiniteTalk AI?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Infinite Talk AI is an advanced model for audio-driven video generation, enabling lip-synced and body-synced animations beyond traditional dubbing.'
+                text: 'InfiniteTalk AI is an advanced model for audio-driven video generation, enabling lip-synced and body-synced animations beyond traditional dubbing.'
               }
             },
             {
               '@type': 'Question',
-              name: 'How does Infinite Talk AI differ from traditional dubbing?',
+              name: 'How does InfiniteTalk AI differ from traditional dubbing?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Conventional dubbing edits only the mouth. Infinite Talk AI edits the whole frame, synchronizing lips, expressions, head motion, and gestures for natural results.'
+                text: 'Conventional dubbing edits only the mouth. InfiniteTalk AI edits the whole frame, synchronizing lips, expressions, head motion, and gestures for natural results.'
               }
             },
             {
               '@type': 'Question',
-              name: 'What inputs does Infinite Talk AI support?',
+              name: 'What inputs does InfiniteTalk AI support?',
               acceptedAnswer: {
                 '@type': 'Answer',
                 text: 'Provide either a video + audio (video-to-video) or a single image + audio (image-to-video).'
@@ -57,26 +57,26 @@ export default async function Home() {
             },
             {
               '@type': 'Question',
-              name: 'How long can videos generated with Infinite Talk AI be?',
+              name: 'How long can videos generated with InfiniteTalk AI be?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Infinite Talk AI supports unlimited-length generation for long-form content.'
+                text: 'InfiniteTalk AI supports unlimited-length generation for long-form content.'
               }
             },
             {
               '@type': 'Question',
-              name: 'What resolutions are available in Infinite Talk AI?',
+              name: 'What resolutions are available in InfiniteTalk AI?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Infinite Talk AI currently supports 480p and 720p outputs, with higher resolutions planned.'
+                text: 'InfiniteTalk AI currently supports 480p and 720p outputs, with higher resolutions planned.'
               }
             },
             {
               '@type': 'Question',
-              name: 'Is Infinite Talk AI free to use?',
+              name: 'Is InfiniteTalk AI free to use?',
               acceptedAnswer: {
                 '@type': 'Answer',
-                text: 'Infinite Talk AI offers free research access and premium SaaS options. Free users can try short clips; paid tiers unlock longer, higher-quality exports.'
+                text: 'InfiniteTalk AI offers free research access and premium SaaS options. Free users can try short clips; paid tiers unlock longer, higher-quality exports.'
               }
             }
           ]
@@ -86,8 +86,8 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'HowTo',
-          name: 'How to Use Infinite Talk AI',
-          description: 'Learn how to create infinite-length talking videos with Infinite Talk AI in three simple steps.',
+          name: 'How to Use InfiniteTalk AI',
+          description: 'Learn how to create infinite-length talking videos with InfiniteTalk AI in three simple steps.',
           image: 'https://www.infinitetalk.net/og-image.jpg',
           totalTime: 'PT5M',
           estimatedCost: {
@@ -108,7 +108,7 @@ export default async function Home() {
           tool: [
             {
               '@type': 'SoftwareApplication',
-              name: 'Infinite Talk AI',
+              name: 'InfiniteTalk AI',
               url: 'https://www.infinitetalk.net'
             }
           ],
@@ -116,21 +116,21 @@ export default async function Home() {
             {
               '@type': 'HowToStep',
               name: 'Upload Source & Audio',
-              text: 'Choose a video or image and upload your speech, podcast, or dialogue to dub with Infinite Talk AI.',
+              text: 'Choose a video or image and upload your speech, podcast, or dialogue to dub with InfiniteTalk AI.',
               url: 'https://www.infinitetalk.net#step1',
               image: 'https://www.infinitetalk.net/step1.jpg'
             },
             {
               '@type': 'HowToStep',
-              name: 'Generate with Infinite Talk AI',
-              text: 'Instantly produce a lip‑synced, full‑body animated video using Infinite Talk AI.',
+              name: 'Generate with InfiniteTalk AI',
+              text: 'Instantly produce a lip‑synced, full‑body animated video using InfiniteTalk AI.',
               url: 'https://www.infinitetalk.net#step2',
               image: 'https://www.infinitetalk.net/step2.jpg'
             },
             {
               '@type': 'HowToStep',
               name: 'Export & Share',
-              text: 'Download in 480p/720p and share anywhere. Created with Infinite Talk AI.',
+              text: 'Download in 480p/720p and share anywhere. Created with InfiniteTalk AI.',
               url: 'https://www.infinitetalk.net#step3',
               image: 'https://www.infinitetalk.net/step3.jpg'
             }

@@ -8,7 +8,7 @@ export default function TermsOfServicePage() {
   const termsContent = {
     title: "Terms of Service",
     effectiveDate: "Effective Date: August 18, 2025",
-    introduction: "Please read these Terms of Service carefully before using the Infinite Talk AI service. By accessing or using our service, you agree to be bound by these terms.",
+    introduction: "Please read these Terms of Service carefully before using the InfiniteTalk AI service. By accessing or using our service, you agree to be bound by these terms.",
     sections: [
       {
         title: "Acceptance of Terms",
@@ -20,7 +20,7 @@ export default function TermsOfServicePage() {
       },
       {
         title: "Use of Service",
-        content: "Infinite Talk AI provides an AI-powered video generation service. You may use our service only as permitted by law and these Terms. You agree not to misuse our service or help anyone else to do so."
+        content: "InfiniteTalk AI provides an AI-powered video generation service. You may use our service only as permitted by law and these Terms. You agree not to misuse our service or help anyone else to do so."
       },
       {
         title: "User Content",
@@ -32,11 +32,11 @@ export default function TermsOfServicePage() {
       },
       {
         title: "Limitation of Liability",
-        content: "In no event shall Infinite Talk AI, its directors, employees, or agents be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service."
+        content: "In no event shall InfiniteTalk AI, its directors, employees, or agents be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service."
       },
       {
         title: "General",
-        content: "These Terms constitute the entire agreement between you and Infinite Talk AI regarding our service and supersede any prior agreements. Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights."
+        content: "These Terms constitute the entire agreement between you and InfiniteTalk AI regarding our service and supersede any prior agreements. Our failure to enforce any right or provision of these Terms will not be considered a waiver of those rights."
       }
     ]
   };

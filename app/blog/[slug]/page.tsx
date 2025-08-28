@@ -87,21 +87,21 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
   return {
     title: post.seo_name || post.title,
-    description: post.seo_desc || post.abstract || `Read about ${post.title} on Infinite Talk AI blog.`,
+    description: post.seo_desc || post.abstract || `Read about ${post.title} on InfiniteTalk AI blog.`,
     openGraph: {
       title: post.seo_name || post.title,
-      description: post.seo_desc || post.abstract || `Read about ${post.title} on Infinite Talk AI blog.`,
+      description: post.seo_desc || post.abstract || `Read about ${post.title} on InfiniteTalk AI blog.`,
       type: 'article',
       publishedTime: new Date(post.created_time * 1000).toISOString(),
-      authors: ['Infinite Talk AI Team'],
+      authors: ['InfiniteTalk AI Team'],
     },
     twitter: {
       card: 'summary_large_image',
       title: post.seo_name || post.title,
-      description: post.seo_desc || post.abstract || `Read about ${post.title} on Infinite Talk AI blog.`,
+      description: post.seo_desc || post.abstract || `Read about ${post.title} on InfiniteTalk AI blog.`,
     },
-    keywords: ['Infinite Talk AI', 'blog', 'AI video', 'Wan 2.2', post.title],
-    authors: [{ name: 'Infinite Talk AI Team' }],
+    keywords: ['InfiniteTalk AI', 'blog', 'AI video', 'Wan 2.2', post.title],
+    authors: [{ name: 'InfiniteTalk AI Team' }],
     category: 'Technology',
   };
 }
@@ -123,20 +123,20 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
           <div className="mb-12">
             <nav className="flex items-center space-x-2 text-sm">
               <Link
-                title="Infinite Talk AI"
+                title="InfiniteTalk AI"
                 href="https://www.infinitetalk.net/"
                 className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 <Home className="w-4 h-4" />
-                Infinite Talk AI
+                InfiniteTalk AI
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
               <Link
-                title="Infinite Talk AI Blog"
+                title="InfiniteTalk AI Blog"
                 href="/blog"
                 className="text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
-                Infinite Talk AI Blog
+                InfiniteTalk AI Blog
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
               <span className="text-foreground font-medium">
@@ -148,7 +148,7 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
             {post.title}
           </h1>
           <div className="flex items-center gap-4 text-muted-foreground mb-6">
-            <span>Infinite Talk AI Team</span>
+            <span>InfiniteTalk AI Team</span>
             <span>•</span>
             <span>{formatDate(post.created_time)}</span>
             <span>•</span>

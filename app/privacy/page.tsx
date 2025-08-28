@@ -7,7 +7,7 @@ export default function PrivacyPolicyPage() {
   const privacyContent = {
     title: "Privacy Policy",
     effectiveDate: "Effective Date: August 18, 2025",
-    introduction: "At Infinite Talk AI, we take your privacy seriously. This Privacy Policy outlines how we collect, use, and protect your information when you use our services.",
+    introduction: "At InfiniteTalk AI, we take your privacy seriously. This Privacy Policy outlines how we collect, use, and protect your information when you use our services.",
     sections: [
       {
         title: "Information We Collect",

@@ -4,8 +4,8 @@
 # -------------------------------------
 # ✅ Website Information
 Website: https://www.infinitetalk.net
-Name: Infinite Talk AI
-Description: Infinite Talk AI is an advanced audio-driven video generation platform that creates infinite-length talking videos from any video or image. Features accurate lip synchronization, natural full-body motion, and consistent identity preservation powered by sparse-frame video dubbing technology.
+Name: InfiniteTalk AI
+Description: InfiniteTalk AI is an advanced audio-driven video generation platform that creates infinite-length talking videos from any video or image. Features accurate lip synchronization, natural full-body motion, and consistent identity preservation powered by sparse-frame video dubbing technology.
 
 # -------------------------------------
 # ✅ Core Content Sections (based on actual page structure)

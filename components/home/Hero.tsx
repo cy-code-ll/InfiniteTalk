@@ -49,7 +49,7 @@ export default function Hero() {
           {/* Title */}
           <h1 id="hero-title" className="mb-8 md:mb-10">
             <span className="block text-5xl md:text-7xl lg:text-8xl font-black tracking-tight leading-[0.9] bg-gradient-to-r from-foreground via-primary to-foreground bg-clip-text text-transparent">
-              Infinite Talk AI
+              InfiniteTalk AI
             </span>
             <span className="mt-4 block text-2xl md:text-4xl font-semibold text-muted-foreground/90">
               Audio‑Driven Video Generation
@@ -61,19 +61,19 @@ export default function Hero() {
 
           {/* Subhead */}
           <p className="text-base md:text-xl lg:text-2xl text-muted-foreground/80 max-w-3xl mx-auto leading-relaxed mb-10 md:mb-14 font-light">
-            Create infinite‑length talking videos from any video or image. <span className="text-primary font-semibold">Infinite Talk AI </span>
+            Create infinite‑length talking videos from any video or image. <span className="text-primary font-semibold">InfiniteTalk AI </span>
             delivers razor‑accurate lip sync, expressive full‑body motion, and rock‑solid identity preservation—powered by next‑gen sparse‑frame technology.
           </p>
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-8 md:mb-10">
-            <Link href="/" aria-label="Try Infinite Talk AI now">
+            <Link href="/" aria-label="Try InfiniteTalk AI now">
               <Button className="group relative min-w-[220px] h-14 md:h-16 text-base md:text-xl font-bold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-2xl shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 will-change-transform">
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="mr-3 transition-transform group-hover:translate-x-1">
                   <RocketIcon />
                 </span>
-                <span>Try Infinite Talk AI</span>
+                <span>Try InfiniteTalk AI</span>
               </Button>
             </Link>
 

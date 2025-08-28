@@ -52,7 +52,7 @@ export function Navbar() {
           <div className="w-[180px] 2xl:w-[200px] flex-shrink-0">
             <Link href="/" className="flex items-center space-x-2" onClick={() => setIsMobileMenuOpen(false)}>
               <span className="font-poppins text-xl font-bold text-primary">
-                Infinite Talk AI
+                InfiniteTalk AI
               </span>
             </Link>
           </div>

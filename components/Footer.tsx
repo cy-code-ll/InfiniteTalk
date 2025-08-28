@@ -38,11 +38,11 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
               <span className="font-poppins text-xl font-bold text-primary">
-                Infinite Talk AI
+                InfiniteTalk AI
               </span>
             </Link>
                           <p className="mt-4 text-sm text-muted-foreground">
-                © 2025 Infinite Talk AI. All rights reserved.
+                © 2025 InfiniteTalk AI. All rights reserved.
               </p>
             <div className="mt-4">
               <a 

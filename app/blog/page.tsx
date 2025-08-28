@@ -6,21 +6,21 @@ import { Home, ChevronRight } from "lucide-react";
 
 // 页面metadata配置
 export const metadata: Metadata = {
-  title: "Infinite Talk AI Video Generator Blog",
+  title: "InfiniteTalk AI Video Generator Blog",
   description:
-    "Read the latest posts on Infinite Talk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
-  keywords: "Infinite Talk AI blog, AI video tips, AI video ideas, AI video updates",
+    "Read the latest posts on InfiniteTalk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
+  keywords: "InfiniteTalk AI blog, AI video tips, AI video ideas, AI video updates",
   openGraph: {
-    title: "Infinite Talk AI Video Generator Blog",
+    title: "InfiniteTalk AI Video Generator Blog",
     description:
-      "Read the latest posts on Infinite Talk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
+      "Read the latest posts on InfiniteTalk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
     type: "website",
   },
   twitter: {
     card: "summary_large_image",
-    title: "Infinite Talk AI Video Generator Blog",
+    title: "InfiniteTalk AI Video Generator Blog",
     description:
-      "Read the latest posts on Infinite Talk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
+      "Read the latest posts on InfiniteTalk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
   },
 };
 
@@ -90,30 +90,30 @@ export default async function Blog() {
           <div className="mb-12">
             <nav className="flex items-center space-x-2 text-sm">
               <Link 
-                title="Infinite Talk AI"
+                title="InfiniteTalk AI"
                 href="https://www.infinitetalk.net/" 
                 className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors duration-200"
               >
                 <Home className="w-4 h-4" />
-                Infinite Talk AI
+                InfiniteTalk AI
               </Link>
               <ChevronRight className="w-4 h-4 text-muted-foreground/50" />
               <span className="text-foreground font-medium">
-                Infinite Talk AI Blog
+                InfiniteTalk AI Blog
               </span>
             </nav>
           </div>
           
           <div className="text-center">
             <h1 className="text-5xl md:text-6xl font-bold mb-6 font-nunito bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent">
-              Infinite Talk AI Blog
+              InfiniteTalk AI Blog
             </h1>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
               Discover insights, tutorials, and updates about AI video generation
               and creative technology
             </p>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto leading-relaxed">
-              Infinite Talk AI 1.0 exploring the boundaries of video generation models
+              InfiniteTalk AI 1.0 exploring the boundaries of video generation models
             </p>
           </div>
         </div>
@@ -153,7 +153,7 @@ export default async function Blog() {
                         </div>
                         <div>
                                                   <div className="text-sm font-medium text-foreground">
-                          Infinite Talk AI Team
+                          InfiniteTalk AI Team
                         </div>
                           <div className="text-xs text-muted-foreground">
                             {formatDate(post.created_time)}

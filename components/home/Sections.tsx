@@ -161,7 +161,7 @@ export function WhatIsIt() {
         <GlowCard>
           <SectionHeading title="What is it?" icon={<VideoIcon />} />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
-            Infinite Talk AI is a sparse-frame video dubbing and image-to-video system. Give it a source video and target audio, and Infinite Talk AI generates a new take with accurate lips, expressive faces, and coordinated body motion. Provide a single image instead of a full video and Infinite Talk AI will extend it into minute-long human animation, maintaining identity and scene context.
+            InfiniteTalk AI is a sparse-frame video dubbing and image-to-video system. Give it a source video and target audio, and InfiniteTalk AI generates a new take with accurate lips, expressive faces, and coordinated body motion. Provide a single image instead of a full video and InfiniteTalk AI will extend it into minute-long human animation, maintaining identity and scene context.
           </p>
           {/* floating chips */}
           <div className="mt-6 flex flex-wrap gap-2">
@@ -184,7 +184,7 @@ export function WhySparseFrame() {
       <GlowCard>
         <SectionHeading title="Why sparse-frame?" icon={<SparklesIcon />} />
         <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
-          Traditional dubbing edits only the mouth, which often breaks immersion. Infinite Talk AI preserves keyframes across the sequence so identity, signature gestures, and camera movement remain intact. By softly conditioning on reference frames, Infinite Talk AI blends control with creativity—keeping the look you love while adapting motion to the audio.
+          Traditional dubbing edits only the mouth, which often breaks immersion. InfiniteTalk AI preserves keyframes across the sequence so identity, signature gestures, and camera movement remain intact. By softly conditioning on reference frames, InfiniteTalk AI blends control with creativity—keeping the look you love while adapting motion to the audio.
         </p>
       </GlowCard>
     </SectionShell>
@@ -204,7 +204,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Sparse-Frame Video Dubbing</h3>
-                <p>Infinite Talk AI animates not just lips, but also head, body, and expressions for natural results.</p>
+                <p>InfiniteTalk AI animates not just lips, but also head, body, and expressions for natural results.</p>
               </div>
             </div>
           </GlowCard>
@@ -217,7 +217,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Infinite-Length Generation</h3>
-                <p>Infinite Talk AI supports long, continuous talking videos with smooth motion across segments.</p>
+                <p>InfiniteTalk AI supports long, continuous talking videos with smooth motion across segments.</p>
               </div>
             </div>
           </GlowCard>
@@ -230,7 +230,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Flexible Inputs</h3>
-                <p>Infinite Talk AI supports both video‑to‑video dubbing and image‑to‑video generation from a single image.</p>
+                <p>InfiniteTalk AI supports both video‑to‑video dubbing and image‑to‑video generation from a single image.</p>
               </div>
             </div>
           </GlowCard>
@@ -243,7 +243,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Identity & Scene Preservation</h3>
-                <p>Infinite Talk AI keeps face, posture, lighting, and background consistent throughout the video.</p>
+                <p>InfiniteTalk AI keeps face, posture, lighting, and background consistent throughout the video.</p>
               </div>
             </div>
           </GlowCard>
@@ -256,7 +256,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Stability & Realism</h3>
-                <p>Infinite Talk AI minimizes distortions and jitter, delivering smooth, realistic movement.</p>
+                <p>InfiniteTalk AI minimizes distortions and jitter, delivering smooth, realistic movement.</p>
               </div>
             </div>
           </GlowCard>
@@ -269,7 +269,7 @@ export function KeyFeatures() {
               </div>
               <div>
                 <h3 className="text-foreground block mb-2 font-semibold">Resolution Options</h3>
-                <p>Infinite Talk AI exports at 480p and 720p today, with higher resolutions planned.</p>
+                <p>InfiniteTalk AI exports at 480p and 720p today, with higher resolutions planned.</p>
               </div>
             </div>
           </GlowCard>
@@ -287,7 +287,7 @@ export function HowItWorks() {
         <div className="relative pl-6">
           <div className="absolute left-0 top-1 bottom-1 w-[3px] bg-gradient-to-b from-primary to-primary/30 rounded-full" />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
-            Infinite Talk AI uses a streaming generator that ingests audio and context frames, then writes video in chunks with seamless transitions. Keyframes act as soft anchors; Infinite Talk AI adapts control strength based on similarity between incoming context and your reference frames. A simple sampling strategy adjusts positioning so Infinite Talk AI balances motion freedom with identity fidelity, yielding smooth, coherent sequences.
+            InfiniteTalk AI uses a streaming generator that ingests audio and context frames, then writes video in chunks with seamless transitions. Keyframes act as soft anchors; InfiniteTalk AI adapts control strength based on similarity between incoming context and your reference frames. A simple sampling strategy adjusts positioning so InfiniteTalk AI balances motion freedom with identity fidelity, yielding smooth, coherent sequences.
           </p>
         </div>
       </GlowCard>
@@ -303,23 +303,23 @@ export function QuickInferenceTips() {
         {[
           [
             'Lip accuracy:',
-            'In Infinite Talk AI, Audio-CFG ~3–5 increases sync strength without over-driving visuals.',
+            'In InfiniteTalk AI, Audio-CFG ~3–5 increases sync strength without over-driving visuals.',
           ],
           [
             'FusionX LoRA:',
-            'Faster and sharper, yet can cause color shifting over long runs; use judiciously in Infinite Talk AI.',
+            'Faster and sharper, yet can cause color shifting over long runs; use judiciously in InfiniteTalk AI.',
           ],
           [
             'Video-to-video (V2V):',
-            'Infinite Talk AI mirrors original camera motion; SDEdit helps for short clips but may shift color.',
+            'InfiniteTalk AI mirrors original camera motion; SDEdit helps for short clips but may shift color.',
           ],
           [
             'Image-to-video (I2V):',
-            'For > 1 minute, translate or slowly zoom your still to help Infinite Talk AI maintain color consistency.',
+            'For > 1 minute, translate or slowly zoom your still to help InfiniteTalk AI maintain color consistency.',
           ],
           [
             'Quantized models:',
-            'When memory is tight, use the quantized build of Infinite Talk AI to keep jobs alive.',
+            'When memory is tight, use the quantized build of InfiniteTalk AI to keep jobs alive.',
           ],
         ].map(([strong, rest]) => (
           <li key={String(strong)}>
@@ -342,19 +342,19 @@ export function UseCases() {
         {[
           [
             'Global dubbing/localization.',
-            'Redub lectures, ads, explainers, and training at scale with Infinite Talk AI while keeping the on-screen persona consistent.',
+            'Redub lectures, ads, explainers, and training at scale with InfiniteTalk AI while keeping the on-screen persona consistent.',
           ],
           [
             'Creator workflows.',
-            'Turn podcasts into talking-head videos, animate thumbnails, or add motion to stills using Infinite Talk AI.',
+            'Turn podcasts into talking-head videos, animate thumbnails, or add motion to stills using InfiniteTalk AI.',
           ],
           [
             'Studio pipelines.',
-            'Previz long dialogue scenes, iterate performances, and test alt reads in Infinite Talk AI before final shoots.',
+            'Previz long dialogue scenes, iterate performances, and test alt reads in InfiniteTalk AI before final shoots.',
           ],
           [
             'Product & avatar videos.',
-            'Create spokesperson clips and virtual hosts that stay on-brand with Infinite Talk AI.',
+            'Create spokesperson clips and virtual hosts that stay on-brand with InfiniteTalk AI.',
           ],
         ].map(([strong, rest]) => (
           <li key={String(strong)}>
@@ -375,7 +375,7 @@ export function Comparisons() {
       <GlowCard>
         <SectionHeading title="Comparisons" kicker="Versus baselines" icon={<ZapIcon />} />
         <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
-          Unlike mouth-only editors, Infinite Talk AI edits the whole frame, aligning body language to audio for believable performances. In evaluations on public datasets, Infinite Talk AI delivered strong realism and emotional coherence, minimizing artifacts that distract viewers. Results remain stable over long sequences, where baseline models often drift; Infinite Talk AI sustains identity and rhythm.
+          Unlike mouth-only editors, InfiniteTalk AI edits the whole frame, aligning body language to audio for believable performances. In evaluations on public datasets, InfiniteTalk AI delivered strong realism and emotional coherence, minimizing artifacts that distract viewers. Results remain stable over long sequences, where baseline models often drift; InfiniteTalk AI sustains identity and rhythm.
         </p>
       </GlowCard>
     </SectionShell>
@@ -386,19 +386,19 @@ export function TechHighlights() {
   const items: [string, string][] = [
     [
       'Temporal context frames:',
-      'Infinite Talk AI carries momentum signals forward to prevent flicker and chunk seams.',
+      'InfiniteTalk AI carries momentum signals forward to prevent flicker and chunk seams.',
     ],
     [
       'Soft reference control:',
-      'Infinite Talk AI scales control by context-to-reference similarity, preserving identity without stiffness.',
+      'InfiniteTalk AI scales control by context-to-reference similarity, preserving identity without stiffness.',
     ],
     [
       'Sampling strategy:',
-      'Fine-grained keyframe placement helps Infinite Talk AI balance control strength and motion alignment.',
+      'Fine-grained keyframe placement helps InfiniteTalk AI balance control strength and motion alignment.',
     ],
     [
       'End-to-end consistency:',
-      'From lips to limbs, Infinite Talk AI ties facial nuance and body kinetics to the input audio.',
+      'From lips to limbs, InfiniteTalk AI ties facial nuance and body kinetics to the input audio.',
     ],
   ]
   return (
@@ -420,13 +420,13 @@ export function TechHighlights() {
 
 export function GettingStarted() {
   const steps: [number, string, string, React.ReactNode][] = [
-    [1, 'Upload Source & Audio', 'Choose a video or image and upload your speech, podcast, or dialogue to dub with Infinite Talk AI.', <VideoIcon />],
-    [2, 'Generate with Infinite Talk AI', 'Instantly produce a lip‑synced, full‑body animated video using Infinite Talk AI.', <ZapIcon />],
-    [3, 'Export & Share', 'Download in 480p/720p and share anywhere. Created with Infinite Talk AI.', <DownloadIcon />],
+    [1, 'Upload Source & Audio', 'Choose a video or image and upload your speech, podcast, or dialogue to dub with InfiniteTalk AI.', <VideoIcon />],
+    [2, 'Generate with InfiniteTalk AI', 'Instantly produce a lip‑synced, full‑body animated video using InfiniteTalk AI.', <ZapIcon />],
+    [3, 'Export & Share', 'Download in 480p/720p and share anywhere. Created with InfiniteTalk AI.', <DownloadIcon />],
   ]
   return (
     <SectionShell>
-      <SectionHeading title="How to use Infinite Talk AI" kicker="Onboarding" icon={<PlayIcon />} />
+      <SectionHeading title="How to use InfiniteTalk AI" kicker="Onboarding" icon={<PlayIcon />} />
       <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 text-muted-foreground text-base">
         {steps.map(([n, strong, rest, icon]) => (
           <li key={n} className="flex">
@@ -456,28 +456,28 @@ export function GettingStarted() {
 export function FAQs() {
   const faqs: [string, string][] = [
     [
-      'What is Infinite Talk AI?',
-      'Infinite Talk AI is an advanced model for audio‑driven video generation, enabling lip‑synced and body‑synced animations that go beyond traditional dubbing. Infinite Talk AI creates coherent motion and consistent identity from your inputs.',
+      'What is InfiniteTalk AI?',
+      'InfiniteTalk AI is an advanced model for audio‑driven video generation, enabling lip‑synced and body‑synced animations that go beyond traditional dubbing. InfiniteTalk AI creates coherent motion and consistent identity from your inputs.',
     ],
     [
-      'How does Infinite Talk AI differ from traditional dubbing?',
-      'Conventional dubbing edits only the mouth. Infinite Talk AI edits the whole frame, synchronizing lip movement, facial expressions, head motion, and gestures for natural‑looking results.',
+      'How does InfiniteTalk AI differ from traditional dubbing?',
+      'Conventional dubbing edits only the mouth. InfiniteTalk AI edits the whole frame, synchronizing lip movement, facial expressions, head motion, and gestures for natural‑looking results.',
     ],
     [
-      'What inputs does Infinite Talk AI support?',
-      'Provide either a video + audio (video‑to‑video) or a single image + audio (image‑to‑video). Infinite Talk AI supports both workflows.',
+      'What inputs does InfiniteTalk AI support?',
+      'Provide either a video + audio (video‑to‑video) or a single image + audio (image‑to‑video). InfiniteTalk AI supports both workflows.',
     ],
     [
-      'How long can videos generated with Infinite Talk AI be?',
-      'Infinite Talk AI supports unlimited‑length generation, suitable for lectures, podcasts, storytelling, and other long‑form content.',
+      'How long can videos generated with InfiniteTalk AI be?',
+      'InfiniteTalk AI supports unlimited‑length generation, suitable for lectures, podcasts, storytelling, and other long‑form content.',
     ],
     [
-      'What resolutions are available in Infinite Talk AI?',
-      'Infinite Talk AI currently exports 480p and 720p, with higher resolutions planned.',
+      'What resolutions are available in InfiniteTalk AI?',
+      'InfiniteTalk AI currently exports 480p and 720p, with higher resolutions planned.',
     ],
     [
-      'Is Infinite Talk AI free to use?',
-      'Infinite Talk AI offers free research access and premium SaaS options. Free users can try short clips; paid tiers unlock longer, higher‑quality exports.',
+      'Is InfiniteTalk AI free to use?',
+      'InfiniteTalk AI offers free research access and premium SaaS options. Free users can try short clips; paid tiers unlock longer, higher‑quality exports.',
     ],
   ]
   return (
@@ -594,7 +594,7 @@ export function CallToAction() {
             <div className="rounded-[21px] bg-white/5 backdrop-blur border border-white/10 px-10 py-12">
               <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 font-poppins">Call to action</h2>
               <p className="text-muted-foreground text-lg max-w-3xl mx-auto">
-                Ship believable, localized, long-form performances without reshoots. Start dubbing today with Infinite Talk AI.
+                Ship believable, localized, long-form performances without reshoots. Start dubbing today with InfiniteTalk AI.
               </p>
               <div className="mt-8 flex items-center justify-center gap-3">
                 <a className="group relative px-5 py-3 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-black/20 hover:shadow-xl transition-shadow">
