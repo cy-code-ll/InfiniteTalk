@@ -133,7 +133,7 @@ export const userApi = {
 export const paymentApi = {
   // 创建PayPal支付会话
   createPaypalSession: async (priceId: string) => {
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/paypal`, {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/stripe`, {
       method: 'POST',
       headers: getHeaders(),
       body: JSON.stringify({

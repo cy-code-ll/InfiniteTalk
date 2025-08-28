@@ -26,7 +26,7 @@ export default function PricingSection() {
   // 定义固定的价格计划数据
   const pricingPlans: PricingPlan[] = [
     {
-      key: 'free',
+      key: 'Starter',
       priceId: 'price_1S0bzJ2LCxiz8WFQshNuYpsJ',
       popular: false,
       title: 'Starter',
