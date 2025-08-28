@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from './ui/button';
+import { Button } from '../ui/button';
 import { Check, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
@@ -27,44 +27,50 @@ export default function PricingSection() {
   const pricingPlans: PricingPlan[] = [
     {
       key: 'free',
-      priceId: '', // Free 计划不可购买，Price ID 为空
+      priceId: 'price_1S0bzJ2LCxiz8WFQshNuYpsJ',
       popular: false,
-      title: 'Free',
-      price: '$0',
-      buttonText: 'Try for Free',
+      title: 'Starter',
+      price: '$9.90',
+      buttonText: 'Get 100 Credits',
       features: [
-        'Generate 2 AI total',
-        'Standard generation speed',
-        'Download enabled'
+        '100 Credits included',
+        'HD video generation (480p/720p)',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Email support'
       ]
     },
     {
       key: 'premium',
-      priceId: 'price_1RRSlvBTlYgHUE88w1CCLNmM', 
+      priceId: 'price_1S0bze2LCxiz8WFQJBMjVxi0', 
       popular: true,
-      title: 'Premium',
-      price: '$1',
-      buttonText: 'Upgrade Plan',
+      title: 'Pro',
+      price: '$29.90',
+      buttonText: 'Get 330 Credits',
       features: [
-        'Generate 5 AI total',
-        'Medical Certificate Download enabled',
-        'Faster AI generation',
-        'Commercial use',
-        'Remove watermark'
+        '330 Credits included',
+        'HD video generation (480p/720p)',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
+        'Priority support'
       ]
     },
     {
       key: 'ultimate',
-      priceId: 'price_1RRSmiBTlYgHUE88ptTMrxKj', 
+      priceId: 'price_1S0bzt2LCxiz8WFQXQ5Foe8K', 
       popular: false,
       title: 'Ultimate',
-      price: '$10',
-      buttonText: 'Upgrade Plan',
+      price: '$49.90',
+      buttonText: 'Get 550 Credits',
       features: [
-        'Generate 500 images per month',
-        'Everything in Premium',
+        '550 Credits included',
+        'HD video generation (480p/720p)',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
         'Priority support',
-        'Early access to new features'
+        'Best value per credit'
       ]
     }
   ];
@@ -114,16 +120,16 @@ export default function PricingSection() {
   };
 
   return (
-    <section id="pricing" className="pricing-section">
-      <div className="pricing-container">
-        <h2 className="pricing-title">
+    <section id="pricing" className="py-20 px-4 bg-gradient-to-b from-slate-950/50 to-slate-900/30">
+      <div className="max-w-7xl mx-auto">
+        <h2 className="text-4xl md:text-5xl font-bold text-center text-white mb-4">
           Choose Your Perfect Plan
         </h2>
-        <p className="pricing-subtitle">
+        <p className="text-xl text-center text-slate-300 mb-12 max-w-2xl mx-auto">
           All plans include HD image download and fast AI generation.
         </p>
 
-        <div className="pricing-grid">
+        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
             {pricingPlans.map((plan) => {
               const isFree = plan.key === 'free';
 
@@ -131,54 +137,61 @@ export default function PricingSection() {
                 <div
                   key={plan.key}
                   className={cn(
-                    'pricing-card',
-                    plan.popular ? 'pricing-card-popular' : 'pricing-card-regular'
+                    'relative p-8 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:scale-105',
+                    plan.popular 
+                      ? 'bg-gradient-to-b from-slate-800/90 to-slate-900/90 border-primary/50 shadow-2xl shadow-primary/20' 
+                      : 'bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-slate-700/50 hover:border-slate-600/50'
                   )}
                 >
                   {plan.popular && (
-                    <div className="pricing-badge">
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-2 rounded-full text-sm font-semibold">
                       Most Popular
                     </div>
                   )}
 
-                  <h3 className="pricing-card-title">
+                  <h3 className="text-2xl font-bold text-white mb-4 text-center">
                     {plan.title}
                   </h3>
       
-                  <div className="pricing-card-price">
-                    <span className="pricing-price-value">
+                  <div className="text-center mb-8">
+                    <span className="text-4xl font-bold text-white">
                       {plan.price}
                     </span>
-                    {!isFree && (<span className="pricing-price-period">/month</span>)}
+                
                   </div>
 
                   <Button 
                     className={cn(
-                      'w-full mb-6',
+                      'w-full mb-8 py-3 font-semibold transition-all duration-200',
                       plan.popular
-                        ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                        ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl'
                         : isFree
-                          ? 'bg-muted text-muted-foreground hover:bg-muted/90'
-                          : 'bg-secondary text-secondary-foreground hover:bg-secondary/90'
+                          ? 'bg-slate-700 hover:bg-slate-600 text-slate-200 border border-slate-600'
+                          : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 hover:border-slate-500'
                     )}
                     onClick={() => !isFree && handleUpgradeClick(plan.priceId, plan.key)}
                     disabled={loadingPlan === plan.key}
                   >
                     {loadingPlan === plan.key 
-                      ? 'Processing...'
+                      ? (
+                          <span className="flex items-center justify-center">
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </span>
+                        )
                       : plan.buttonText
                     }
                   </Button>
 
-                  <div className="pricing-features">
+                  <div className="space-y-4">
                     <ul className="space-y-3">
                       {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="pricing-feature-item">
+                        <li key={featureIndex} className="flex items-start space-x-3">
                           <Check className={cn(
-                            'pricing-feature-icon',
-                            plan.popular ? 'text-primary' : 'text-muted-foreground'
+                            'w-5 h-5 mt-0.5 flex-shrink-0',
+                            plan.popular ? 'text-primary' : 'text-slate-400'
                           )} />
-                          <span className="pricing-feature-text">
+                          <span className="text-slate-300 leading-relaxed">
                             {feature}
                           </span>
                         </li>

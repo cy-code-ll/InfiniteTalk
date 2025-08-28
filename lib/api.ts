@@ -1,7 +1,7 @@
 // API 基础配置
 const API_CONFIG = {
-  VIDOR_AI_BASE: 'https://svc.seedancepro.com',
-  APP_ID: 'seedance',
+  VIDOR_AI_BASE: 'https://svc.infinitetalk.net',
+  APP_ID: 'infinitetalk',
 };
 
 // 通用请求头
@@ -287,6 +287,97 @@ export const videoApi = {
   },
 };
 
+// InfiniteTalk相关接口
+export const infiniteTalkApi = {
+  // 创建InfiniteTalk任务
+  createTask: async (params: {
+    image: File;
+    audio: File;
+    prompt: string;
+    duration: number;
+  }) => {
+    const formData = new FormData();
+    formData.append('image', params.image);
+    formData.append('audio', params.audio);
+    formData.append('prompt', params.prompt);
+    formData.append('duration', params.duration.toString());
+
+    // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
+    const token = localStorage.getItem('access_token');
+    const headers: Record<string, string> = {
+      'x-appid': API_CONFIG.APP_ID,
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+
+    return handleApiError(response);
+  },
+
+  // 检查InfiniteTalk任务状态
+  checkTaskStatus: async (taskId: string) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/check?task_id=${taskId}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 轮询检查InfiniteTalk任务状态
+  pollTaskStatus: async (
+    taskId: string,
+    onProgress?: (progress: number, statusMsg: string) => void
+  ): Promise<{ image_url: string; status: number; status_msg: string }> => {
+    return new Promise((resolve, reject) => {
+      const poll = async () => {
+        try {
+          const result = await infiniteTalkApi.checkTaskStatus(taskId);
+          
+          if (result.code !== 200) {
+            reject(new Error(result.msg || 'Task check failed'));
+            return;
+          }
+
+          const { status, status_msg, image_url, progress } = result.data;
+          
+          // 更新进度
+          if (onProgress) {
+            const progressNum = parseFloat(progress) * 100;
+            onProgress(progressNum, status_msg);
+          }
+
+          if (status === 1) {
+            // 任务完成
+            resolve({
+              image_url: image_url,
+              status,
+              status_msg
+            });
+          } else if (status === -1) {
+            // 任务失败
+            reject(new Error(status_msg || 'Task failed'));
+          } else {
+            // 任务进行中，2秒后继续轮询
+            setTimeout(poll, 2000);
+          }
+        } catch (error) {
+          reject(error);
+        }
+      };
+
+      poll();
+    });
+  },
+};
+
 // CMS相关接口
 export const cmsApi = {
   // 获取友情链接列表（客户端版本）
@@ -339,6 +430,7 @@ export const api = {
   user: userApi,
   payment: paymentApi,
   video: videoApi,
+  infiniteTalk: infiniteTalkApi,
   cms: cmsApi,
   withRetry: apiWithRetry,
 }; 

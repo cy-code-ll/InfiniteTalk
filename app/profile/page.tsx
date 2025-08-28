@@ -823,7 +823,8 @@ export default function ProfilePage() {
                   </DialogContent>
                 </Dialog>
 
-                <Dialog open={isSubscriptionDialogOpen} onOpenChange={setIsSubscriptionDialogOpen}>
+                    
+                {/* <Dialog open={isSubscriptionDialogOpen} onOpenChange={setIsSubscriptionDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
                       variant="outline" 
@@ -858,10 +859,10 @@ export default function ProfilePage() {
                         <div className="grid gap-6">
                           {subscriptionList.map((subscription) => (
                             <div key={subscription.id} className="group relative p-6 rounded-3xl bg-gradient-to-br from-card to-secondary/50 border border-border shadow-lg hover:shadow-xl transition-all duration-300">
-                              {/* 顶部彩条 */}
+                            
                               <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/60 rounded-t-3xl"></div>
                               
-                              {/* 简化的头部区域：名称、状态、价格、按钮 */}
+                      
                               <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-4">
                                   <h3 className="text-2xl font-bold text-card-foreground tracking-tight">
@@ -900,7 +901,7 @@ export default function ProfilePage() {
                                 </div>
                               </div>
                               
-                              {/* 底部信息 */}
+             
                               <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground bg-secondary/80 rounded-2xl p-4 mt-4">
                                 <div className="flex items-center gap-2">
                                   <span className="font-medium text-card-foreground">ID:</span>
@@ -929,7 +930,9 @@ export default function ProfilePage() {
                       )}
                     </div>
                   </DialogContent>
-                </Dialog>
+                </Dialog> */}
+
+               
               </div>
             </div>
           </div>
@@ -984,7 +987,7 @@ export default function ProfilePage() {
                       controls
                       muted
                       preload="metadata"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
                       playsInline
                     >
                       Your browser does not support the video tag.

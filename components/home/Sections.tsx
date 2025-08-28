@@ -126,7 +126,7 @@ function GlowCard({ children, className = '' }: React.PropsWithChildren<{ classN
   return (
     <div className={`group relative ${className}`}>
       {/* Transparent glass card */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-4 shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
+      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
         {children}
       </div>
     </div>
@@ -560,6 +560,7 @@ export function VideoCases() {
                   src={video.src}
                   className="w-full h-full object-cover cursor-pointer"
                   loop
+                  controls
                   playsInline
                   preload="metadata"
                   onClick={() => handleVideoClick(index)}

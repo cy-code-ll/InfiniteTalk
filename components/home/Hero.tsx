@@ -67,7 +67,7 @@ export default function Hero() {
 
           {/* CTA */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-6 mb-8 md:mb-10">
-            <Link href="/" aria-label="Try InfiniteTalk AI now">
+            <Link href="/infinitetalk" aria-label="Try InfiniteTalk AI now">
               <Button className="group relative min-w-[220px] h-14 md:h-16 text-base md:text-xl font-bold bg-gradient-to-r from-primary to-primary/85 hover:from-primary/90 hover:to-primary shadow-2xl shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 will-change-transform">
                 <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 <span className="mr-3 transition-transform group-hover:translate-x-1">

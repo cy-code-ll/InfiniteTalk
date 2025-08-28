@@ -1,7 +1,8 @@
 // import { Navbar } from '../components/Navbar'; // Navbar is now in root layout
 
-import PricingSection from '../components/PricingSection';
+import PricingSection from '../components/home/PricingSection';
 import { Footer } from '../components/Footer';
+import CTA from '../components/CTA';
 import { serverCmsApi, FriendLink } from '../lib/server-api';
 import { GoogleOneTapAuth } from '../components/auth';
 import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction, VideoCases } from '../components/home';
@@ -138,11 +139,11 @@ export default async function Home() {
         }) }}
       />
       {/* Google One Tap 组件 - 只在用户未登录时显示 */}
-      {/* <GoogleOneTapAuth
+      <GoogleOneTapAuth
         cancelOnTapOutside={true}
         signInForceRedirectUrl="/"
         signUpForceRedirectUrl="/"
-      /> */}
+      />
       <main className="flex-grow relative">
         {/* Fixed background gradient with project's primary color */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-background via-primary/10 via-primary/20 via-primary/15 to-slate-950 -z-10" />
@@ -156,10 +157,11 @@ export default async function Home() {
         <UseCases />
         <Comparisons />
         <TechHighlights />
-        
+        <PricingSection />
         <FAQs />
+        <CTA />
+        
         {/* <CallToAction /> */}
-        {/* <PricingSection /> */}
       </main>
       <Footer />
     </div>

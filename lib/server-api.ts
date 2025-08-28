@@ -1,7 +1,7 @@
 // 服务端专用API配置 - 不依赖localStorage
 const SERVER_API_CONFIG = {
-  VIDOR_AI_BASE: 'https://svc.seedancepro.com',
-  APP_ID: 'seedance',
+  VIDOR_AI_BASE: 'https://svc.infinitetalk.net',
+  APP_ID: 'infinitetalk',
 };
 
 // 服务端专用请求头

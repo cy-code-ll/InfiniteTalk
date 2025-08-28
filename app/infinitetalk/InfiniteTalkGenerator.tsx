@@ -1,0 +1,442 @@
+'use client';
+
+import { useState, useRef, useCallback, useEffect } from 'react';
+import { Button } from '../../components/ui/button';
+import { Textarea } from '../../components/ui/textarea';
+import { Progress } from '../../components/ui/progress';
+import { useToast } from '../../components/ui/toast-provider';
+import { useUser, useClerk } from '@clerk/nextjs';
+import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
+import { api } from '@/lib/api';
+import { cn } from '@/lib/utils';
+import Image from 'next/image';
+
+type ViewState = 'videodemo' | 'loading' | 'result';
+
+// 下载媒体文件的函数（从profile页面复制）
+async function downloadMediaWithCors(
+  mediaUrl: string, 
+  filename: string,
+  showToast?: (message: string, type: 'success' | 'error' | 'info') => void
+) {
+  try {
+    // 1. 发起 fetch 请求
+    const response = await fetch(mediaUrl, { mode: 'cors' });
+
+    // 检查响应是否成功并且是 CORS 允许的
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}. Failed to fetch media. Check CORS headers on the server.`);
+    }
+
+    // 2. 将响应体转换为 Blob 对象
+    const blob = await response.blob();
+
+    // 3. 创建一个指向 Blob 的 Object URL
+    const objectUrl = URL.createObjectURL(blob);
+
+    // 4. 创建 <a> 标签并触发下载
+    const link = document.createElement('a');
+    link.href = objectUrl;
+    link.download = filename || `infinitetalk-video.mp4`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    // 5. 释放 Object URL 资源
+    URL.revokeObjectURL(objectUrl);
+
+    console.log('Media download initiated!');
+    if (showToast) showToast('Video downloaded successfully!', 'success');
+
+  } catch (error: any) {
+    console.error('Download failed:', error);
+    const errorMessage = 'Download failed!';
+    if (showToast) {
+      if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
+        showToast(`${errorMessage} - CORS error. Check server configuration.`, 'error');
+      } else {
+        showToast(`${errorMessage} ${error.message}`, 'error');
+      }
+    }
+  }
+}
+
+export default function InfiniteTalkGenerator() {
+  const { isSignedIn } = useUser();
+  const { openSignIn } = useClerk();
+  const toast = useToast();
+
+  // Form state
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
+  const [prompt, setPrompt] = useState('');
+  const [audioDuration, setAudioDuration] = useState<number>(0);
+
+  // UI state
+  const [viewState, setViewState] = useState<ViewState>('videodemo');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [resultVideoUrl, setResultVideoUrl] = useState<string>('');
+  const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // 启动虚假进度条 (约1分钟到达95%)
+  const startFakeProgress = () => {
+    setProgress(0);
+    const interval = setInterval(() => {
+      setProgress(prev => {
+        // 进度条增长逻辑：总共约60秒到达95%
+        if (prev < 25) {
+          return prev + Math.random() * 2 + 1; // 1-3% 增长
+        } else if (prev < 50) {
+          return prev + Math.random() * 1.5 + 0.8; // 0.8-2.3% 增长
+        } else if (prev < 75) {
+          return prev + Math.random() * 1.2 + 0.6; // 0.6-1.8% 增长
+        } else if (prev < 90) {
+          return prev + Math.random() * 0.8 + 0.4; // 0.4-1.2% 增长
+        } else if (prev < 95) {
+          return Math.min(prev + Math.random() * 0.3 + 0.1, 95); // 0.1-0.4% 增长，但不超过95%
+        } else {
+          return 95; // 停在95%，不再增长
+        }
+      });
+    }, 1000); // 每1秒更新一次
+    
+    setProgressInterval(interval);
+  };
+
+  // 停止虚假进度条
+  const stopFakeProgress = () => {
+    if (progressInterval) {
+      clearInterval(progressInterval);
+      setProgressInterval(null);
+    }
+  };
+
+  // 完成进度条
+  const completeProgress = () => {
+    stopFakeProgress();
+    setProgress(100);
+  };
+
+  // Refs
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const audioInputRef = useRef<HTMLInputElement>(null);
+  const demoVideoRef = useRef<HTMLVideoElement>(null);
+  const resultVideoRef = useRef<HTMLVideoElement>(null);
+
+
+  // 组件卸载时清理定时器
+  useEffect(() => {
+    return () => {
+      if (progressInterval) {
+        clearInterval(progressInterval);
+      }
+    };
+  }, [progressInterval]);
+
+  // 处理图片上传
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+    }
+  };
+
+  // 处理音频上传
+  const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('audio/')) {
+      setSelectedAudio(file);
+      
+      // 获取音频时长
+      const audio = new Audio();
+      audio.src = URL.createObjectURL(file);
+      audio.addEventListener('loadedmetadata', () => {
+        setAudioDuration(Math.ceil(audio.duration));
+        URL.revokeObjectURL(audio.src);
+      });
+    }
+  };
+
+  // 删除选中的图片
+  const removeSelectedImage = () => {
+    setSelectedImage(null);
+    if (imageInputRef.current) {
+      imageInputRef.current.value = '';
+    }
+  };
+
+  // 删除选中的音频
+  const removeSelectedAudio = () => {
+    setSelectedAudio(null);
+    setAudioDuration(0);
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
+    }
+  };
+
+  // 验证表单
+  const validateForm = (): string | null => {
+    if (!selectedImage) return 'Please upload an image';
+    if (!selectedAudio) return 'Please upload an audio file';
+    if (!prompt.trim()) return 'Please enter a prompt';
+    if (audioDuration === 0) return 'Audio duration could not be determined';
+    return null;
+  };
+
+  // 生成视频
+  const handleGenerate = async () => {
+    // 检查登录状态
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+
+    // 验证表单
+    const validationError = validateForm();
+    if (validationError) {
+      toast.error(validationError);
+      return;
+    }
+
+    setIsGenerating(true);
+    setViewState('loading');
+    setProgress(0);
+    
+    // 启动虚假进度条
+    startFakeProgress();
+
+    try {
+      // 创建任务
+      const createResult = await api.infiniteTalk.createTask({
+        image: selectedImage!,
+        audio: selectedAudio!,
+        prompt: prompt.trim(),
+        duration: audioDuration,
+      });
+
+      if (createResult.code !== 200 || !createResult.data?.task_id) {
+        const errorMsg = createResult.msg || 'Failed to create task';
+        toast.error(errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      const taskId = createResult.data.task_id;
+
+      // 轮询任务状态（不使用API进度，只检查状态）
+      const result = await api.infiniteTalk.pollTaskStatus(
+        taskId,
+        () => {} // 空函数，不使用API返回的进度
+      );
+
+      // 任务完成时，完成进度条
+      completeProgress();
+      
+      // 稍等一下让用户看到100%，然后切换到结果
+      setTimeout(() => {
+        setResultVideoUrl(result.image_url);
+        setViewState('result');
+        toast.success('Video generated successfully!');
+      }, 800);
+
+    } catch (error) {
+      console.error('Generation failed:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Generation failed';
+      toast.error(errorMessage);
+      stopFakeProgress();
+      setViewState('videodemo');
+    } finally {
+      setIsGenerating(false);
+      // 不在这里重置progress，让结果状态保持
+    }
+  };
+
+  return (
+    <div className="container mx-auto px-4 pb-16">
+      <div className="grid lg:grid-cols-5 gap-12 max-w-7xl mx-auto">
+        {/* Left Side - Form */}
+        <div className="lg:col-span-2 space-y-8">
+          <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Create Your Video</h2>
+            
+            {/* Image Upload */}
+            <div className="mb-6">
+              <label className="block text-white font-medium mb-3">Upload Image</label>
+              <div className="relative">
+                {selectedImage ? (
+                  <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
+                    <Image
+                      src={URL.createObjectURL(selectedImage)}
+                      alt="Selected image"
+                      width={400}
+                      height={300}
+                      className="w-full h-48 object-contain"
+                      unoptimized
+                    />
+                    <button
+                      onClick={removeSelectedImage}
+                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => imageInputRef.current?.click()}
+                    className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
+                  >
+                    <Upload className="w-8 h-8 mb-2" />
+                    <span>Click to upload image</span>
+                    <span className="text-sm">PNG, JPG up to 10MB</span>
+                  </button>
+                )}
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Audio Upload */}
+            <div className="mb-6">
+              <label className="block text-white font-medium mb-3">Upload Audio</label>
+              <div className="relative">
+                <button
+                  onClick={() => audioInputRef.current?.click()}
+                  className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50"
+                >
+                  {selectedAudio ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center">
+                        <FileAudio className="w-4 h-4 text-primary mr-2" />
+                        <span className="text-white">{selectedAudio.name}</span>
+                        {audioDuration > 0 && (
+                          <span className="text-slate-400 ml-2">({audioDuration}s)</span>
+                        )}
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          removeSelectedAudio();
+                        }}
+                        className="text-red-400 hover:text-red-300"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <span className="text-slate-400">Click to select audio file</span>
+                      <FileAudio className="w-5 h-5 text-slate-500" />
+                    </div>
+                  )}
+                </button>
+                <input
+                  ref={audioInputRef}
+                  type="file"
+                  accept="audio/*"
+                  onChange={handleAudioUpload}
+                  className="hidden"
+                />
+              </div>
+            </div>
+
+            {/* Prompt Input */}
+            <div className="mb-6">
+              <label className="block text-white font-medium mb-3">Prompt</label>
+              <Textarea
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                placeholder="Describe what you want the character to express or do..."
+                className="w-full h-24 bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 resize-none"
+              />
+            </div>
+
+            {/* Generate Button */}
+            <div className="relative">
+              <Button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white py-3 font-semibold disabled:opacity-50"
+              >
+                {isGenerating ? 'Generating...' : 'Generate Video'}
+              </Button>
+              {/* Credit cost label */}
+              <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+                {audioDuration > 0 ? `${audioDuration * 2} Credits` : '2 Credits/second'}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right Side - Preview/Result */}
+        <div className="lg:col-span-3 lg:sticky lg:top-24 lg:h-fit">
+          <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
+            <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
+            
+            <div className="relative">
+              {/* Video Demo State */}
+              {viewState === 'videodemo' && (
+                <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+                  <video
+                    ref={demoVideoRef}
+                    src="/hero/demo.mp4"
+                    controls
+                    muted
+                    preload="metadata"
+                    className="w-full h-full object-cover"
+                    playsInline
+                  >
+                    Your browser does not support the video tag.
+                  </video>
+                </div>
+              )}
+
+              {/* Loading State */}
+              {viewState === 'loading' && (
+                <div className="aspect-video bg-slate-800 rounded-lg flex flex-col items-center justify-center p-8">
+                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
+                  <h3 className="text-white text-xl font-semibold mb-4">Generating Video...</h3>
+                  <div className="w-full max-w-md">
+                    <Progress value={progress} className="w-full mb-2" />
+                    <p className="text-slate-400 text-sm text-center">{Math.round(progress)}% complete</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Result State */}
+              {viewState === 'result' && resultVideoUrl && (
+                <div className="relative">
+                  <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+                    <video
+                      ref={resultVideoRef}
+                      src={resultVideoUrl}
+                      controls
+                      muted
+                      preload="metadata"
+                      className="w-full h-full"
+                      playsInline
+                    >
+                      Your browser does not support the video tag.
+                    </video>
+                  </div>
+                  <button
+                    onClick={() => downloadMediaWithCors(resultVideoUrl, `infinitetalk-${Date.now()}.mp4`, toast.showToast)}
+                    className="absolute top-2 right-2 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
+                  >
+                    <Download className="w-5 h-5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
