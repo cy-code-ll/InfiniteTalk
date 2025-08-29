@@ -51,6 +51,15 @@ export function Navbar() {
         Generator
       </Link>
       <Link
+        href="/infinitetalk-comfyui"
+        className={cn(
+          'nav-link-item px-4 py-2 rounded-md transition-colors',
+          pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+        )}
+      >
+        ComfyUI Guide
+      </Link>
+      <Link
         href="/pricing"
         className={cn(
           'nav-link-item px-4 py-2 rounded-md transition-colors',
