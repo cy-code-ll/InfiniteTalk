@@ -3,6 +3,8 @@
 import Link from 'next/link';
 import { Button } from '../ui/button';
 import { motion } from 'framer-motion';
+import Prism from '../ui/Prism';
+import '../ui/Prism.css';
 
 // Icon component matching Sections.tsx style
 const RocketIcon = () => (
@@ -14,21 +16,28 @@ const RocketIcon = () => (
 export default function Hero() {
   return (
     <section
-      className="relative overflow-hidden min-h-[100vh] flex items-center bg-gradient-to-b from-background via-background/70 to-background"
+      className="relative overflow-hidden min-h-[100vh] flex items-center"
       aria-labelledby="hero-title"
     >
-      {/* Background: soft grid + aurora glow */}
+      {/* Background gradient overlay */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/70 to-background" />
+      {/* Background: Prism component */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        {/* Subtle grid (masked to center) */}
-        <div
-          className="absolute inset-0 opacity-[0.12] [background-image:linear-gradient(to_right,theme(colors.border/40)_1px,transparent_1px),linear-gradient(to_bottom,theme(colors.border/40)_1px,transparent_1px)] bg-[size:24px_24px] [mask-image:radial-gradient(ellipse_at_center,black,transparent_65%)]"
+        <Prism
+          animationType="rotate"
+          timeScale={0.5}
+          height={3.5}
+          baseWidth={5.5}
+          scale={2.5}
+          hueShift={0}
+          colorFrequency={1}
+          noise={0}
+          glow={1}
+          transparent={true}
         />
-
-        {/* Aurora beams */}
-        <div className="absolute -top-24 -left-24 h-[38rem] w-[38rem] rounded-full blur-3xl opacity-60 bg-gradient-to-tr from-primary/25 via-primary/10 to-transparent" />
-        <div className="absolute top-1/3 -right-24 h-[34rem] w-[34rem] rounded-full blur-3xl opacity-60 bg-gradient-to-bl from-primary/20 via-primary/10 to-transparent" />
-        <div className="absolute bottom-[-10rem] left-1/2 -translate-x-1/2 h-[28rem] w-[28rem] rounded-full blur-3xl opacity-50 bg-gradient-to-t from-primary/15 via-primary/5 to-transparent" />
       </div>
+
+
 
       <div className="container mx-auto px-6 md:px-8 max-w-7xl relative">
         <motion.div
@@ -79,7 +88,7 @@ export default function Hero() {
               </Button>
             </Link>
 
-    
+
           </div>
 
 
