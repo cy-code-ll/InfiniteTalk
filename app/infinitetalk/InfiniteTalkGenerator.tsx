@@ -71,6 +71,7 @@ export default function InfiniteTalkGenerator() {
   const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [resolution, setResolution] = useState<'480p' | '720p'>('480p');
 
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
@@ -175,6 +176,13 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
+  // 计算积分消耗
+  const calculateCredits = (): number => {
+    if (audioDuration === 0) return 0;
+    const creditsPerSecond = resolution === '480p' ? 1 : 2;
+    return audioDuration * creditsPerSecond;
+  };
+
   // 验证表单
   const validateForm = (): string | null => {
     if (!selectedImage) return 'Please upload an image';
@@ -213,6 +221,7 @@ export default function InfiniteTalkGenerator() {
         audio: selectedAudio!,
         prompt: prompt.trim(),
         duration: audioDuration,
+        resolution: resolution,
       });
 
       if (createResult.code !== 200 || !createResult.data?.task_id) {
@@ -304,9 +313,9 @@ export default function InfiniteTalkGenerator() {
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">Upload Audio</label>
               <div className="relative">
-                <button
+                <div
                   onClick={() => audioInputRef.current?.click()}
-                  className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50"
+                  className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50 cursor-pointer"
                 >
                   {selectedAudio ? (
                     <div className="flex items-center justify-between">
@@ -333,7 +342,7 @@ export default function InfiniteTalkGenerator() {
                       <FileAudio className="w-5 h-5 text-slate-500" />
                     </div>
                   )}
-                </button>
+                </div>
                 <input
                   ref={audioInputRef}
                   type="file"
@@ -341,6 +350,43 @@ export default function InfiniteTalkGenerator() {
                   onChange={handleAudioUpload}
                   className="hidden"
                 />
+              </div>
+            </div>
+
+            {/* Resolution Selection */}
+            <div className="mb-6">
+              <label className="block text-white font-medium mb-3">Resolution</label>
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => setResolution('480p')}
+                  className={cn(
+                    "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                    resolution === '480p'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-bold">480P</div>
+                    <div className="text-sm opacity-80">1 Credit/sec</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setResolution('720p')}
+                  className={cn(
+                    "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                    resolution === '720p'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  <div className="text-center">
+                    <div className="text-lg font-bold">720P</div>
+                    <div className="text-sm opacity-80">2 Credits/sec</div>
+                  </div>
+                </button>
               </div>
             </div>
 
@@ -366,7 +412,7 @@ export default function InfiniteTalkGenerator() {
               </Button>
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
-                {audioDuration > 0 ? `${audioDuration * 2} Credits` : '2 Credits/second'}
+                {audioDuration > 0 ? `${calculateCredits()} Credits` : `${resolution === '480p' ? '1' : '2'} Credits/sec`}
               </div>
             </div>
           </div>
