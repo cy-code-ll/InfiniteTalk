@@ -1,8 +1,11 @@
 'use client';
 
-import { GoogleOneTap } from '@clerk/nextjs';
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
+import { lazy, Suspense } from 'react';
+
+// 懒加载 GoogleOneTap 组件
+const GoogleOneTap = lazy(() => import('@clerk/nextjs').then(mod => ({ default: mod.GoogleOneTap })));
 
 interface GoogleOneTapAuthProps {
   /** 如果为true，当用户点击提示框外部时会自动关闭One Tap提示框。默认: true */
@@ -55,5 +58,9 @@ export default function GoogleOneTapAuth({
     googleOneTapProps.signUpForceRedirectUrl = signUpForceRedirectUrl;
   }
 
-  return <GoogleOneTap {...googleOneTapProps} />;
+  return (
+    <Suspense fallback={null}>
+      <GoogleOneTap {...googleOneTapProps} />
+    </Suspense>
+  );
 } 

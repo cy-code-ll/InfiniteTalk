@@ -1,22 +1,28 @@
 'use client';
 
-import { 
-  SignInButton, 
-  UserButton, 
-  useUser, 
-  useClerk
-} from '@clerk/nextjs';
+import { useUser, useClerk } from '@clerk/nextjs';
 import { Button } from '../../components/ui/button';
-import UserProfileMenu from './user-profile-menu';
+import { Suspense, lazy } from 'react';
+
+// 懒加载用户菜单组件
+const UserProfileMenu = lazy(() => import('./user-profile-menu'));
 
 export default function AuthButton() {
-
-  const { isSignedIn, user } = useUser();
+  const { isSignedIn, user, isLoaded } = useUser();
   const { openSignIn } = useClerk();
+
+  // 加载状态
+  if (!isLoaded) {
+    return (
+      <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse" />
+    );
+  }
 
   if (isSignedIn && user) {
     return (
-      <UserProfileMenu user={user} />
+      <Suspense fallback={<div className="w-10 h-10 bg-gray-200 rounded-full animate-pulse" />}>
+        <UserProfileMenu user={user} />
+      </Suspense>
     );
   }
 

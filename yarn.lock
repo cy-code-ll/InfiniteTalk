@@ -27,13 +27,6 @@
     "@clerk/types" "^4.55.0"
     tslib "2.8.1"
 
-"@clerk/localizations@^3.13.13":
-  version "3.13.13"
-  resolved "https://registry.npmmirror.com/@clerk/localizations/-/localizations-3.13.13.tgz"
-  integrity sha512-SuPuxFBx8G2oq/LFTyq4jdQA96Ryh7quHlW6CXBkyEhl/cXwVbKZDvfg9VwvxunU6nwe5aVtWVSdj4SW5topyw==
-  dependencies:
-    "@clerk/types" "^4.55.0"
-
 "@clerk/nextjs@^6.17.0":
   version "6.17.0"
   resolved "https://registry.npmmirror.com/@clerk/nextjs/-/nextjs-6.17.0.tgz"

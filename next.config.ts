@@ -4,7 +4,20 @@ const nextConfig: NextConfig = {
   reactStrictMode: true,
   // 性能优化
   experimental: {
-    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizePackageImports: ['lucide-react', '@radix-ui/react-icons', '@clerk/nextjs'],
+  },
+  // Webpack 配置优化
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // 客户端包优化
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      };
+    }
+    return config;
   },
   // 压缩优化
   compress: true,

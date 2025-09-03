@@ -1,7 +1,6 @@
 'use client';
 
 import { ClerkProvider } from '@clerk/nextjs';
-import { enUS } from '@clerk/localizations';
 
 export default function ClerkProviderWithLocale({
   children,
@@ -10,13 +9,14 @@ export default function ClerkProviderWithLocale({
 }) {
   return (
     <ClerkProvider 
-      localization={enUS}
+      // 移除本地化以减少包大小
+      // localization={enUS}
       appearance={{
         layout: {
           socialButtonsVariant: "iconButton",
           socialButtonsPlacement: "top",
           showOptionalFields: false,
-          shimmer: true
+          shimmer: false // 禁用 shimmer 效果以减少 JS
         },
         variables: {
           colorPrimary: "#000000",
@@ -24,7 +24,7 @@ export default function ClerkProviderWithLocale({
           colorText: "#000000",
           colorTextSecondary: "#666666",
           borderRadius: "0.5rem",
-          fontFamily: "system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei'"
+          fontFamily: "system-ui, -apple-system, sans-serif"
         },
         elements: {
           formButtonPrimary: "bg-black hover:bg-gray-800 text-sm normal-case",
@@ -36,6 +36,7 @@ export default function ClerkProviderWithLocale({
           identityPreview: "shadow-sm border-gray-200"
         }
       }}
+      // 性能优化选项
     >
       {children}
     </ClerkProvider>
