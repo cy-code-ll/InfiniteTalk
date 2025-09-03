@@ -11,22 +11,22 @@ import { Wans2vCTA } from '@/components/wans2v/Wans2vCTA';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
-  title: 'Wan-S2V - AI Video Generation from Audio & Images',
-  description: 'Create cinematic AI videos with natural motion using Wan-S2V. Transform images and audio into professional videos instantly.',
+  title: 'Wan-S2V-Audio-Driven Cinematic Al Video Generation',
+  description: 'Wan-S2V transforms images and audio into cinematic Al videos with natural expressions, body motion,and professional camera effects. Perfect for creators and filmmakers.',
   keywords: 'Wan-S2V, AI video, cinematic generation, motion control, digital human',
   alternates: {
     canonical: 'https://www.infinitetalk.net/wan2.2-s2v',
   },
   openGraph: {
-    title: 'Wan-S2V - AI Video Generation from Audio & Images',
-    description: 'Create cinematic AI videos with natural motion using Wan-S2V. Transform images and audio into professional videos instantly.',
+    title: 'Wan-S2V-Audio-Driven Cinematic Al Video Generation',
+    description: 'Wan-S2V transforms images and audio into cinematic Al videos with natural expressions, body motion,and professional camera effects. Perfect for creators and filmmakers.',
     type: 'website',
     url: 'https://www.infinitetalk.net/wan2.2-s2v',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Wan-S2V - AI Video Generation from Audio & Images',
-    description: 'Create cinematic AI videos with natural motion using Wan-S2V. Transform images and audio into professional videos instantly.',
+    title: 'Wan-S2V-Audio-Driven Cinematic Al Video Generation',
+    description: 'Wan-S2V transforms images and audio into cinematic Al videos with natural expressions, body motion,and professional camera effects. Perfect for creators and filmmakers.',
   },
 };
 

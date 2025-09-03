@@ -2,9 +2,6 @@
 
 import Link from 'next/link';
 import { Button } from '../ui/button';
-import { motion } from 'framer-motion';
-import Prism from '../ui/Prism';
-import '../ui/Prism.css';
 
 // Icon component matching Sections.tsx style
 const RocketIcon = () => (
@@ -20,32 +17,10 @@ export default function Hero() {
       aria-labelledby="hero-title"
     >
       {/* Background gradient overlay */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/70 to-background" />
-      {/* Background: Prism component */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
-        <Prism
-          animationType="rotate"
-          timeScale={0.5}
-          height={3.5}
-          baseWidth={5.5}
-          scale={2.5}
-          hueShift={0}
-          colorFrequency={1}
-          noise={0}
-          glow={1}
-          transparent={true}
-        />
-      </div>
-
-
+      {/* <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-b from-background via-background/70 to-background" /> */}
 
       <div className="container mx-auto px-6 md:px-8 max-w-7xl relative">
-        <motion.div
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="mx-auto max-w-4xl text-center"
-        >
+        <div className="mx-auto max-w-4xl text-center">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 md:gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs md:text-sm font-medium backdrop-blur">
             <span className="relative flex h-2 w-2">
@@ -87,12 +62,8 @@ export default function Hero() {
                 <span>Try InfiniteTalk AI</span>
               </Button>
             </Link>
-
-
           </div>
-
-
-        </motion.div>
+        </div>
       </div>
 
       {/* Scroll indicator */}
