@@ -1,11 +1,23 @@
 // import { Navbar } from '../components/Navbar'; // Navbar is now in root layout
 
-import PricingSection from '../components/home/PricingSection';
-import { Footer } from '../components/Footer';
-import CTA from '../components/CTA';
 import { serverCmsApi, FriendLink } from '../lib/server-api';
 import { GoogleOneTapAuth } from '../components/auth';
-import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction, VideoCases } from '../components/home';
+import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction } from '../components/home';
+import dynamic from 'next/dynamic';
+
+// 动态导入非关键组件
+const PricingSection = dynamic(() => import('../components/home/PricingSection'), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+});
+const Footer = dynamic(() => import('../components/Footer').then(mod => ({ default: mod.Footer })), {
+  loading: () => <div className="h-32 animate-pulse bg-gray-100" />,
+});
+const CTA = dynamic(() => import('../components/CTA'), {
+  loading: () => <div className="h-48 animate-pulse bg-gray-100 rounded-lg" />,
+});
+const VideoCases = dynamic(() => import('../components/home').then(mod => ({ default: mod.VideoCases })), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
+});
 import Script from 'next/script';
 import { schemaData } from '../lib/seo-config';
 // 启用ISR，每小时重新验证数据

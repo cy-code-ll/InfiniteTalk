@@ -42,7 +42,7 @@ export default function RootLayout({
         </ClerkProviderWithLocale>
         <Script
           id="analytics"
-          strategy="afterInteractive"
+          strategy="lazyOnload"
           src="/js/cy1.js"
         />
 
