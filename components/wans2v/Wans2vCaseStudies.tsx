@@ -9,26 +9,26 @@ export function Wans2vCaseStudies() {
   const caseStudies = [
     {
       id: 1,
-      videoSrc: '/video/s2vdemo/a1.mp4',
-      poster: '/video/s2vdemo/a1.png',
+      videoSrc: 'https://source.seedancepro.com/source/wan/s2vdemo/a1.mp4',
+      poster: 'https://source.seedancepro.com/source/wan/s2vdemo/a1.png',
       isWide: true,
     },
     {
       id: 2,
-      videoSrc: '/video/s2vdemo/a2.mp4',
-      poster: '/video/s2vdemo/a2.png',
+      videoSrc: 'https://source.seedancepro.com/source/wan/s2vdemo/a2.mp4',
+      poster: 'https://source.seedancepro.com/source/wan/s2vdemo/a2.png',
       isWide: true,
     },
     {
       id: 3,
-      videoSrc: '/video/s2vdemo/132.mp4',
-      poster: '/video/s2vdemo/132.png',
+      videoSrc: 'https://source.seedancepro.com/source/wan/s2vdemo/132.mp4',
+      poster: 'https://source.seedancepro.com/source/wan/s2vdemo/132.png',
       isWide: false,
     },
     {
       id: 4,
-      videoSrc: '/video/s2vdemo/asd.mp4',
-      poster: '/video/s2vdemo/asd.png',
+      videoSrc: 'https://source.seedancepro.com/source/wan/s2vdemo/asd.mp4',
+      poster: 'https://source.seedancepro.com/source/wan/s2vdemo/asd.png',
       isWide: false,
     },
   ];
