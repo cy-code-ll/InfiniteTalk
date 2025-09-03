@@ -502,12 +502,12 @@ export function VideoCases() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const videos = [
-    { id: 3, src: '/cases/3.mp4', poster: '/cases/3.png', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.png', title: 'InfiniteTalk AI Video - Long sequence video dubbingn - video case' },
-    { id: 8, src: '/cases/8.mp4', poster: '/cases/8.png', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 9, src: '/cases/9.mp4', poster: '/cases/9.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-    { id: 10, src: '/cases/10.mp4', poster: '/cases/10.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-    { id: 13, src: '/cases/13.mp4', poster: '/cases/13.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 3, src: '/cases/3.mp4', poster: '/cases/3.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbingn - video case' },
+    { id: 8, src: '/cases/8.mp4', poster: '/cases/8.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 9, src: '/cases/9.mp4', poster: '/cases/9.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 10, src: '/cases/10.mp4', poster: '/cases/10.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 13, src: '/cases/13.mp4', poster: '/cases/13.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
   ];
 
   const handleVideoClick = (index: number) => {
