@@ -1,0 +1,9 @@
+export { Wans2vHero } from './Wans2vHero';
+export { Wans2vFeatures } from './Wans2vFeatures';
+export { Wans2vHowToUse } from './Wans2vHowToUse';
+export { Wans2vTestimonials } from './Wans2vTestimonials';
+export { Wans2vCaseStudies } from './Wans2vCaseStudies';
+export { Wans2vUseCases } from './Wans2vUseCases';
+export { Wans2vTips } from './Wans2vTips';
+export { Wans2vFAQ } from './Wans2vFAQ';
+export { Wans2vCTA } from './Wans2vCTA';

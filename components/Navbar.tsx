@@ -30,46 +30,119 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   };
 
-  const renderNavLinks = (isMobile = false) => (
-    <>
-      <Link
-        href="/"
-        className={cn(
-          'nav-link-item px-4 py-2 rounded-md transition-colors',
-          pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-        )}
-      >
-        Home
-      </Link>
-      <Link
-        href="/infinitetalk"
-        className={cn(
-          'nav-link-item px-4 py-2 rounded-md transition-colors',
-          pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-        )}
-      >
-        Infinitetalk
-      </Link>
-      <Link
-        href="/infinitetalk-comfyui"
-        className={cn(
-          'nav-link-item px-4 py-2 rounded-md transition-colors',
-          pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-        )}
-      >
-        ComfyUI Guide
-      </Link>
-      <Link
-        href="/pricing"
-        className={cn(
-          'nav-link-item px-4 py-2 rounded-md transition-colors',
-          pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-        )}
-      >
-        Price
-      </Link>
-    </>
-  );
+  const renderNavLinks = (isMobile = false) => {
+    if (isMobile) {
+      return (
+        <>
+          <SheetClose asChild>
+            <Link
+              href="/"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              Home
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link
+              href="/infinitetalk"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              Infinitetalk
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link
+              href="/wan2.2-s2v"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/wan2.2-s2v' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              WAN2.2 S2V
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link
+              href="/infinitetalk-comfyui"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              ComfyUI Guide
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link
+              href="/pricing"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              Price
+            </Link>
+          </SheetClose>
+        </>
+      );
+    }
+    
+    return (
+      <>
+        <Link
+          href="/"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          Home
+        </Link>
+        <Link
+          href="/infinitetalk"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          Infinitetalk
+        </Link>
+        <Link
+          href="/wan2.2-s2v"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/wan2.2-s2v' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          WAN2.2 S2V
+        </Link>
+        <Link
+          href="/infinitetalk-comfyui"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          ComfyUI Guide
+        </Link>
+        <Link
+          href="/pricing"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          Price
+        </Link>
+      </>
+    );
+  };
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-lg border-b border-primary/20 shadow-xl">
@@ -131,9 +204,7 @@ export function Navbar() {
                     <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
                   </SheetHeader>
                   <nav className="flex flex-col space-y-4">
-                    <SheetClose asChild>
-                      {renderNavLinks(true)}
-                    </SheetClose>
+                    {renderNavLinks(true)}
                   </nav>
                 </SheetContent>
               </Sheet>

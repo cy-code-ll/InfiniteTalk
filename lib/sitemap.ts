@@ -30,7 +30,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/terms',
     '/privacy',
     '/infinitetalk-comfyui',
-    '/infinitetalk'
+    '/infinitetalk',
+    '/wan2.2-s2v'
   ];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
