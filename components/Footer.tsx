@@ -107,6 +107,17 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
             </ul>
           </div>
         </div>
+        
+        {/* Hidden transparent link */}
+        <div className="opacity-0 pointer-events-none absolute bottom-0 left-0">
+          <a href=" " target="_blank">
+            <img 
+              src="https://findly.tools/badges/findly-tools-badge-dark.svg" 
+              alt="Featured on findly.tools" 
+              width="150" 
+            />
+          </a>
+        </div>
       </div>
     </footer>
   );

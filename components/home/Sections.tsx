@@ -159,7 +159,7 @@ export function WhatIsIt() {
     <SectionShell>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-stretch">
         <GlowCard>
-          <SectionHeading title="What is it?" icon={<VideoIcon />} />
+          <SectionHeading title="InfiniteTalk: What is it?" icon={<VideoIcon />} />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-2xl">
             InfiniteTalk AI is a sparse-frame video dubbing and image-to-video system. Give it a source video and target audio, and InfiniteTalk AI generates a new take with accurate lips, expressive faces, and coordinated body motion. Provide a single image instead of a full video and InfiniteTalk AI will extend it into minute-long human animation, maintaining identity and scene context.
           </p>
@@ -182,7 +182,7 @@ export function WhySparseFrame() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="Why sparse-frame?" icon={<SparklesIcon />} />
+        <SectionHeading title="InfiniteTalk: Why sparse-frame?" icon={<SparklesIcon />} />
         <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
           Traditional dubbing edits only the mouth, which often breaks immersion. InfiniteTalk AI preserves keyframes across the sequence so identity, signature gestures, and camera movement remain intact. By softly conditioning on reference frames, InfiniteTalk AI blends control with creativity—keeping the look you love while adapting motion to the audio.
         </p>
@@ -194,7 +194,7 @@ export function WhySparseFrame() {
 export function KeyFeatures() {
   return (
     <SectionShell>
-      <SectionHeading title="Key features" kicker="Highlights" icon={<StarIcon />} />
+      <SectionHeading title="InfiniteTalk Key Features" kicker="Highlights" icon={<StarIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 text-muted-foreground text-base">
         <li>
           <GlowCard>
@@ -283,7 +283,7 @@ export function HowItWorks() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="How it works (high level)" kicker="Pipeline" icon={<CpuIcon />} />
+        <SectionHeading title="InfiniteTalk: How it works (high level)" kicker="Pipeline" icon={<CpuIcon />} />
         <div className="relative pl-6">
           <div className="absolute left-0 top-1 bottom-1 w-[3px] bg-gradient-to-b from-primary to-primary/30 rounded-full" />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
@@ -298,7 +298,7 @@ export function HowItWorks() {
 export function QuickInferenceTips() {
   return (
     <SectionShell>
-      <SectionHeading title="Quick inference tips" kicker="Pro tips" icon={<LightbulbIcon />} />
+      <SectionHeading title="InfiniteTalk Quick Inference Tips" kicker="Pro tips" icon={<LightbulbIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
         {[
           [
@@ -337,7 +337,7 @@ export function QuickInferenceTips() {
 export function UseCases() {
   return (
     <SectionShell>
-      <SectionHeading title="Use cases" kicker="Where it shines" icon={<GlobeIcon />} />
+      <SectionHeading title="InfiniteTalk Use Cases" kicker="Where it shines" icon={<GlobeIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
         {[
           [
@@ -373,7 +373,7 @@ export function Comparisons() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="Comparisons" kicker="Versus baselines" icon={<ZapIcon />} />
+        <SectionHeading title="InfiniteTalk Comparisons" kicker="Versus baselines" icon={<ZapIcon />} />
         <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
           Unlike mouth-only editors, InfiniteTalk AI edits the whole frame, aligning body language to audio for believable performances. In evaluations on public datasets, InfiniteTalk AI delivered strong realism and emotional coherence, minimizing artifacts that distract viewers. Results remain stable over long sequences, where baseline models often drift; InfiniteTalk AI sustains identity and rhythm.
         </p>
@@ -403,7 +403,7 @@ export function TechHighlights() {
   ]
   return (
     <SectionShell>
-      <SectionHeading title="Tech highlights" kicker="Under the hood" icon={<RocketIcon />} />
+      <SectionHeading title="InfiniteTalk Tech Highlights" kicker="Under the hood" icon={<RocketIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
         {items.map(([strong, rest]) => (
           <li key={strong}>
@@ -426,7 +426,7 @@ export function GettingStarted() {
   ]
   return (
     <SectionShell>
-      <SectionHeading title="How to use InfiniteTalk AI" kicker="Onboarding" icon={<PlayIcon />} />
+      <SectionHeading title="InfiniteTalk: Choose Your Perfect Plan" kicker="Onboarding" icon={<PlayIcon />} />
       <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 text-muted-foreground text-base">
         {steps.map(([n, strong, rest, icon]) => (
           <li key={n} className="flex">
@@ -440,7 +440,7 @@ export function GettingStarted() {
                     {icon}
                   </div>
                   <div className="flex-1">
-                    <h4 className="text-foreground text-lg font-bold mb-3">{strong}</h4>
+                    <h3 className="text-foreground text-lg font-bold mb-3">{strong}</h3>
                     <p className="text-sm leading-relaxed">{rest}</p>
                   </div>
                 </div>
@@ -482,7 +482,7 @@ export function FAQs() {
   ]
   return (
     <SectionShell>
-      <SectionHeading title="FAQs" kicker="Answers" icon={<QuestionIcon />} />
+      <SectionHeading title="InfiniteTalk FAQs" kicker="Answers" icon={<QuestionIcon />} />
       <ul className="text-muted-foreground text-base space-y-6">
         {faqs.map(([q, a]) => (
           <li key={q}>
@@ -502,12 +502,12 @@ export function VideoCases() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const videos = [
-    { id: 3, src: '/cases/3.mp4', title: 'Case 3' },
-    { id: 7, src: '/cases/7.mp4', title: 'Case 7' },
-    { id: 8, src: '/cases/8.mp4', title: 'Case 8' },
-    { id: 9, src: '/cases/9.mp4', title: 'Case 9' },
-    { id: 10, src: '/cases/10.mp4', title: 'Case 10' },
-    { id: 13, src: '/cases/13.mp4', title: 'Case 13' },
+    { id: 3, src: '/cases/3.mp4', poster: '/cases/3.png', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.png', title: 'InfiniteTalk AI Video - Long sequence video dubbingn - video case' },
+    { id: 8, src: '/cases/8.mp4', poster: '/cases/8.png', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 9, src: '/cases/9.mp4', poster: '/cases/9.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 10, src: '/cases/10.mp4', poster: '/cases/10.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 13, src: '/cases/13.mp4', poster: '/cases/13.png', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
   ];
 
   const handleVideoClick = (index: number) => {
@@ -549,22 +549,25 @@ export function VideoCases() {
 
   return (
     <SectionShell>
-      <SectionHeading title="Video Cases" kicker="Examples" icon={<VideoIcon />} />
+      <SectionHeading title="InfiniteTalk Video Cases" kicker="Examples" icon={<VideoIcon />} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {videos.map((video, index) => (
           <div key={video.id} className="relative group">
             <GlowCard className="overflow-hidden">
               <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                <video
-                  ref={(el) => { videoRefs.current[index] = el; }}
-                  src={video.src}
-                  className="w-full h-full object-cover cursor-pointer"
-                  loop
-                  controls
-                  playsInline
-                  preload="none"
-                  onClick={() => handleVideoClick(index)}
-                />
+                                 <video
+                   ref={(el) => { videoRefs.current[index] = el; }}
+                   src={video.src}
+                   poster={video.poster}
+                   className="w-full h-full object-cover cursor-pointer"
+                   loop
+                   controls
+                   playsInline
+                   preload="none"
+                   onClick={() => handleVideoClick(index)}
+                   title={video.title}
+                   aria-label={video.title}
+                 />
                 {/* Play overlay */}
                 {currentPlaying !== index && (
                   <div 

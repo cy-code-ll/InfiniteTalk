@@ -48,7 +48,7 @@ export function Navbar() {
           pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
         )}
       >
-        Generator
+        Infinitetalk
       </Link>
       <Link
         href="/infinitetalk-comfyui"
