@@ -12,6 +12,7 @@ import { cn } from '@/lib/utils';
 import Image from 'next/image';
 
 type ViewState = 'videodemo' | 'loading' | 'result';
+type TabMode = 'image-to-video' | 'video-to-video';
 
 // 下载媒体文件的函数（从profile页面复制）
 async function downloadMediaWithCors(
@@ -68,10 +69,13 @@ export default function InfiniteTalkGenerator() {
 
   // Form state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<File | null>(null);
   const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [resolution, setResolution] = useState<'480p' | '720p'>('480p');
+  const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
+  const [isClient, setIsClient] = useState(false);
 
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
@@ -121,10 +125,16 @@ export default function InfiniteTalkGenerator() {
 
   // Refs
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const videoInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const demoVideoRef = useRef<HTMLVideoElement>(null);
   const resultVideoRef = useRef<HTMLVideoElement>(null);
 
+
+  // 设置客户端状态，避免 hydration 错误
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // 组件卸载时清理定时器
   useEffect(() => {
@@ -140,6 +150,14 @@ export default function InfiniteTalkGenerator() {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setSelectedImage(file);
+    }
+  };
+
+  // 处理视频上传
+  const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type.startsWith('video/')) {
+      setSelectedVideo(file);
     }
   };
 
@@ -167,6 +185,14 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
+  // 删除选中的视频
+  const removeSelectedVideo = () => {
+    setSelectedVideo(null);
+    if (videoInputRef.current) {
+      videoInputRef.current.value = '';
+    }
+  };
+
   // 删除选中的音频
   const removeSelectedAudio = () => {
     setSelectedAudio(null);
@@ -179,13 +205,23 @@ export default function InfiniteTalkGenerator() {
   // 计算积分消耗
   const calculateCredits = (): number => {
     if (audioDuration === 0) return 0;
-    const creditsPerSecond = resolution === '480p' ? 1 : 2;
-    return audioDuration * creditsPerSecond;
+    if (tabMode === 'video-to-video') {
+      // Video to Video 模式使用固定积分
+      return audioDuration * 1; // 1 credit per second
+    } else {
+      // Image to Video 模式根据分辨率计算
+      const creditsPerSecond = resolution === '480p' ? 1 : 2;
+      return audioDuration * creditsPerSecond;
+    }
   };
 
   // 验证表单
   const validateForm = (): string | null => {
-    if (!selectedImage) return 'Please upload an image';
+    if (tabMode === 'image-to-video') {
+      if (!selectedImage) return 'Please upload an image';
+    } else {
+      if (!selectedVideo) return 'Please upload a video';
+    }
     if (!selectedAudio) return 'Please upload an audio file';
     if (!prompt.trim()) return 'Please enter a prompt';
     if (audioDuration === 0) return 'Audio duration could not be determined';
@@ -215,14 +251,26 @@ export default function InfiniteTalkGenerator() {
     startFakeProgress();
 
     try {
-      // 创建任务
-      const createResult = await api.infiniteTalk.createTask({
-        image: selectedImage!,
-        audio: selectedAudio!,
-        prompt: prompt.trim(),
-        duration: audioDuration,
-        resolution: resolution,
-      });
+      let createResult;
+      
+      if (tabMode === 'image-to-video') {
+        // Image to Video 模式
+        createResult = await api.infiniteTalk.createTask({
+          image: selectedImage!,
+          audio: selectedAudio!,
+          prompt: prompt.trim(),
+          duration: audioDuration,
+          resolution: resolution,
+        });
+      } else {
+        // Video to Video 模式
+        createResult = await api.infiniteTalk.createVideoToVideoTask({
+          video: selectedVideo!,
+          audio: selectedAudio!,
+          prompt: prompt.trim(),
+          duration: audioDuration,
+        });
+      }
 
       if (createResult.code !== 200 || !createResult.data?.task_id) {
         const errorMsg = createResult.msg || 'Failed to create task';
@@ -266,44 +314,109 @@ export default function InfiniteTalkGenerator() {
         {/* Left Side - Form */}
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Create Your Video</h2>
+            {/* Tab Navigation */}
+            {isClient && (
+              <div className="flex mb-6">
+                <button
+                  onClick={() => setTabMode('image-to-video')}
+                  className={cn(
+                    "flex-1 py-3 px-4 rounded-l-lg border-2 transition-all duration-200 font-medium",
+                    tabMode === 'image-to-video'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  Image To Video
+                </button>
+                <button
+                  onClick={() => setTabMode('video-to-video')}
+                  className={cn(
+                    "flex-1 py-3 px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium",
+                    tabMode === 'video-to-video'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  Video To Video
+                </button>
+              </div>
+            )}
             
-            {/* Image Upload */}
+            {/* Image/Video Upload */}
             <div className="mb-6">
-              <label className="block text-white font-medium mb-3">Upload Image</label>
+              <label className="block text-white font-medium mb-3">
+                {(!isClient || tabMode === 'image-to-video') ? 'Upload Image' : 'Upload Video'}
+              </label>
               <div className="relative">
-                {selectedImage ? (
-                  <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
-                    <Image
-                      src={URL.createObjectURL(selectedImage)}
-                      alt="Selected image"
-                      width={400}
-                      height={300}
-                      className="w-full h-48 object-contain"
-                      unoptimized
-                    />
+                {(!isClient || tabMode === 'image-to-video') ? (
+                  // Image Upload
+                  selectedImage ? (
+                    <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
+                      <Image
+                        src={URL.createObjectURL(selectedImage)}
+                        alt="Selected image"
+                        width={400}
+                        height={300}
+                        className="w-full h-48 object-contain"
+                        unoptimized
+                      />
+                      <button
+                        onClick={removeSelectedImage}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
                     <button
-                      onClick={removeSelectedImage}
-                      className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                      onClick={() => imageInputRef.current?.click()}
+                      className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
                     >
-                      <X className="w-4 h-4" />
+                      <Upload className="w-8 h-8 mb-2" />
+                      <span>Click to upload image</span>
+                      <span className="text-sm">PNG, JPG up to 10MB</span>
                     </button>
-                  </div>
+                  )
                 ) : (
-                  <button
-                    onClick={() => imageInputRef.current?.click()}
-                    className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
-                  >
-                    <Upload className="w-8 h-8 mb-2" />
-                    <span>Click to upload image</span>
-                    <span className="text-sm">PNG, JPG up to 10MB</span>
-                  </button>
+                  // Video Upload
+                  selectedVideo ? (
+                    <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
+                      <video
+                        src={URL.createObjectURL(selectedVideo)}
+                        className="w-full h-48 object-contain"
+                        controls
+                        muted
+                      />
+                      <button
+                        onClick={removeSelectedVideo}
+                        className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => videoInputRef.current?.click()}
+                      className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
+                    >
+                      <Upload className="w-8 h-8 mb-2" />
+                      <span>Click to upload video</span>
+                      <span className="text-sm">MP4, MOV up to 100MB</span>
+                    </button>
+                  )
                 )}
                 <input
                   ref={imageInputRef}
                   type="file"
                   accept="image/*"
                   onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <input
+                  ref={videoInputRef}
+                  type="file"
+                  accept="video/*"
+                  onChange={handleVideoUpload}
                   className="hidden"
                 />
               </div>
@@ -353,42 +466,44 @@ export default function InfiniteTalkGenerator() {
               </div>
             </div>
 
-            {/* Resolution Selection */}
-            <div className="mb-6">
-              <label className="block text-white font-medium mb-3">Resolution</label>
-              <div className="flex gap-3">
-                <button
-                  type="button"
-                  onClick={() => setResolution('480p')}
-                  className={cn(
-                    "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
-                    resolution === '480p'
-                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                  )}
-                >
-                  <div className="text-center">
-                    <div className="text-lg font-bold">480P</div>
-                    <div className="text-sm opacity-80">1 Credit/sec</div>
-                  </div>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setResolution('720p')}
-                  className={cn(
-                    "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
-                    resolution === '720p'
-                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                  )}
-                >
-                  <div className="text-center">
-                    <div className="text-lg font-bold">720P</div>
-                    <div className="text-sm opacity-80">2 Credits/sec</div>
-                  </div>
-                </button>
+            {/* Resolution Selection - Only for Image To Video */}
+            {(!isClient || tabMode === 'image-to-video') && (
+              <div className="mb-6">
+                <label className="block text-white font-medium mb-3">Resolution</label>
+                <div className="flex gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setResolution('480p')}
+                    className={cn(
+                      "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                      resolution === '480p'
+                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                    )}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold">480P</div>
+                      <div className="text-sm opacity-80">1 Credit/sec</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResolution('720p')}
+                    className={cn(
+                      "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                      resolution === '720p'
+                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                    )}
+                  >
+                    <div className="text-center">
+                      <div className="text-lg font-bold">720P</div>
+                      <div className="text-sm opacity-80">2 Credits/sec</div>
+                    </div>
+                  </button>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Prompt Input */}
             <div className="mb-6">
@@ -412,7 +527,9 @@ export default function InfiniteTalkGenerator() {
               </Button>
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
-                {audioDuration > 0 ? `${calculateCredits()} Credits` : `${resolution === '480p' ? '1' : '2'} Credits/sec`}
+                {audioDuration > 0 ? `${calculateCredits()} Credits` : 
+                  (isClient && tabMode === 'video-to-video') ? '1 Credit/sec' : 
+                  `${resolution === '480p' ? '1' : '2'} Credits/sec`}
               </div>
             </div>
           </div>

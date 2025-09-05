@@ -341,6 +341,38 @@ export const infiniteTalkApi = {
       poll();
     });
   },
+
+  // 创建Video To Video任务
+  createVideoToVideoTask: async (params: {
+    video: File;
+    audio: File;
+    prompt: string;
+    duration: number;
+  }) => {
+    const formData = new FormData();
+    formData.append('video', params.video);
+    formData.append('audio', params.audio);
+    formData.append('prompt', params.prompt);
+    formData.append('duration', params.duration.toString());
+
+    // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
+    const token = localStorage.getItem('access_token');
+    const headers: Record<string, string> = {
+      'x-appid': API_CONFIG.APP_ID,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/video-to-video`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+
+    return handleApiError(response);
+  },
 };
 
 
