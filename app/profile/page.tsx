@@ -611,6 +611,7 @@ export default function ProfilePage() {
       case 1: return 'Starter';
       case 2: return 'Pro';
       case 3: return 'Ultimate';
+      case 4: return 'Enterprise';
       default: return 'Free';
     }
   };
