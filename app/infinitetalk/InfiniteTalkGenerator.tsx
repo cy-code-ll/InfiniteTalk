@@ -320,24 +320,26 @@ export default function InfiniteTalkGenerator() {
                 <button
                   onClick={() => setTabMode('image-to-video')}
                   className={cn(
-                    "flex-1 py-3 px-4 rounded-l-lg border-2 transition-all duration-200 font-medium",
+                    "flex-1 py-3 px-2 sm:px-4 rounded-l-lg border-2 transition-all duration-200 font-medium text-xs sm:text-sm",
                     tabMode === 'image-to-video'
                       ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                       : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                   )}
                 >
-                  Image To Video
+                  <span className="hidden sm:inline">Image To Video</span>
+                  <span className="sm:hidden">Image</span>
                 </button>
                 <button
                   onClick={() => setTabMode('video-to-video')}
                   className={cn(
-                    "flex-1 py-3 px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium",
+                    "flex-1 py-3 px-2 sm:px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium text-xs sm:text-sm",
                     tabMode === 'video-to-video'
                       ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                       : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                   )}
                 >
-                  Video To Video
+                  <span className="hidden sm:inline">Video To Video</span>
+                  <span className="sm:hidden">Video</span>
                 </button>
               </div>
             )}
