@@ -77,7 +77,7 @@ export default function PricingSection() {
     },
     {
       key: 'enterprise',
-      priceId: 'price_1S0bzE2LCxiz8WFQEnterprise', 
+      priceId: 'price_1S3sev2LCxiz8WFQana9TXxD', 
       popular: false,
       title: 'Enterprise',
       price: '$99.90',
