@@ -34,7 +34,7 @@ export default function PricingSection() {
       buttonText: 'Get 100 Credits',
       features: [
         '100 Credits included',
-        'HD video generation (480p/720p)',
+        'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
         'Email support'
@@ -43,14 +43,14 @@ export default function PricingSection() {
     {
       key: 'premium',
       priceId: 'price_1S0bze2LCxiz8WFQJBMjVxi0', 
-      popular: true,
+      popular: false,
       title: 'Pro',
       price: '$29.90',
       buttonText: 'Get 480 Credits',
       features: [
         '480 Credits included',
         '$0.0622 per second',
-        'HD video generation (480p/720p)',
+        'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
         'Commercial use license',
@@ -60,19 +60,38 @@ export default function PricingSection() {
     {
       key: 'ultimate',
       priceId: 'price_1S0bzt2LCxiz8WFQXQ5Foe8K', 
-      popular: false,
+      popular: true,
       title: 'Ultimate',
       price: '$49.90',
       buttonText: 'Get 990 Credits',
       features: [
         '990 Credits included',
         '$0.0500 per second',
-        'HD video generation (480p/720p)',
+        'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
         'Commercial use license',
         'Priority support',
         'Best value per credit'
+      ]
+    },
+    {
+      key: 'enterprise',
+      priceId: 'price_1S0bzE2LCxiz8WFQEnterprise', 
+      popular: false,
+      title: 'Enterprise',
+      price: '$99.90',
+      buttonText: 'Get 2406 Credits',
+      features: [
+        '2406 Credits included',
+        '$0.0415 per second',
+        'HD video generation ',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
+        'Priority support',
+        'Best value per credit',
+        'Bulk processing'
       ]
     }
   ];
@@ -131,7 +150,7 @@ export default function PricingSection() {
           All plans include HD image download and fast AI generation.
         </p>
 
-        <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto">
             {pricingPlans.map((plan) => {
               const isFree = plan.key === 'free';
 

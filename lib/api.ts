@@ -348,12 +348,14 @@ export const infiniteTalkApi = {
     audio: File;
     prompt: string;
     duration: number;
+    resolution: string;
   }) => {
     const formData = new FormData();
     formData.append('video', params.video);
     formData.append('audio', params.audio);
     formData.append('prompt', params.prompt);
     formData.append('duration', params.duration.toString());
+    formData.append('resolution', params.resolution);
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
     const token = localStorage.getItem('access_token');

@@ -122,11 +122,11 @@ function SectionHeading({ title, kicker, icon }: { title: string; kicker?: strin
     </div>
   )}
 
-function GlowCard({ children, className = '' }: React.PropsWithChildren<{ className?: string }>) {
+function GlowCard({ children, className = '', padding = 'p-6' }: React.PropsWithChildren<{ className?: string; padding?: string }>) {
   return (
     <div className={`group relative ${className}`}>
       {/* Transparent glass card */}
-      <div className="relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl p-6 shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]">
+      <div className={`relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl ${padding} shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]`}>
         {children}
       </div>
     </div>
@@ -426,7 +426,7 @@ export function GettingStarted() {
   ]
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk: Choose Your Perfect Plan" kicker="Onboarding" icon={<PlayIcon />} />
+      <SectionHeading title="InfiniteTalk: How to use" kicker="Onboarding" icon={<PlayIcon />} />
       <ol className="grid grid-cols-1 md:grid-cols-3 gap-8 text-muted-foreground text-base">
         {steps.map(([n, strong, rest, icon]) => (
           <li key={n} className="flex">
@@ -503,11 +503,11 @@ export function VideoCases() {
 
   const videos = [
     { id: 3, src: '/cases/3.mp4', poster: '/cases/3.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbingn - video case' },
-    { id: 8, src: '/cases/8.mp4', poster: '/cases/8.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 9, src: '/cases/9.mp4', poster: '/cases/9.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 4, src: '/cases/4.mp4', poster: '/cases/4.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 5, src: '/cases/5.mp4', poster: '/cases/5.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case' },
     { id: 10, src: '/cases/10.mp4', poster: '/cases/10.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-    { id: 13, src: '/cases/13.mp4', poster: '/cases/13.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 11, src: '/cases/11.mp4', poster: '/cases/11.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
   ];
 
   const handleVideoClick = (index: number) => {
@@ -550,10 +550,10 @@ export function VideoCases() {
   return (
     <SectionShell>
       <SectionHeading title="InfiniteTalk Video Cases" kicker="Examples" icon={<VideoIcon />} />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {videos.map((video, index) => (
           <div key={video.id} className="relative group">
-            <GlowCard className="overflow-hidden">
+            <GlowCard className="overflow-hidden" padding="p-1">
               <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
                                  <video
                    ref={(el) => { videoRefs.current[index] = el; }}
@@ -569,16 +569,7 @@ export function VideoCases() {
                    aria-label={video.title}
                  />
                 {/* Play overlay */}
-                {currentPlaying !== index && (
-                  <div 
-                    className="absolute inset-0 bg-black/20 flex items-center justify-center cursor-pointer group-hover:bg-black/30 transition-colors"
-                    onClick={() => handleVideoClick(index)}
-                  >
-                    <div className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center text-white hover:bg-white/30 transition-colors">
-                      <PlayButtonIcon />
-                    </div>
-                  </div>
-                )}
+         
          
               </div>
             </GlowCard>

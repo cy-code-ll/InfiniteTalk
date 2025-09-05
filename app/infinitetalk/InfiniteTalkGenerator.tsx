@@ -205,14 +205,9 @@ export default function InfiniteTalkGenerator() {
   // 计算积分消耗
   const calculateCredits = (): number => {
     if (audioDuration === 0) return 0;
-    if (tabMode === 'video-to-video') {
-      // Video to Video 模式使用固定积分
-      return audioDuration * 1; // 1 credit per second
-    } else {
-      // Image to Video 模式根据分辨率计算
-      const creditsPerSecond = resolution === '480p' ? 1 : 2;
-      return audioDuration * creditsPerSecond;
-    }
+    // 两种模式都根据分辨率计算积分
+    const creditsPerSecond = resolution === '480p' ? 1 : 2;
+    return audioDuration * creditsPerSecond;
   };
 
   // 验证表单
@@ -269,6 +264,7 @@ export default function InfiniteTalkGenerator() {
           audio: selectedAudio!,
           prompt: prompt.trim(),
           duration: audioDuration,
+          resolution: resolution,
         });
       }
 
@@ -468,8 +464,8 @@ export default function InfiniteTalkGenerator() {
               </div>
             </div>
 
-            {/* Resolution Selection - Only for Image To Video */}
-            {(!isClient || tabMode === 'image-to-video') && (
+            {/* Resolution Selection */}
+            {isClient && (
               <div className="mb-6">
                 <label className="block text-white font-medium mb-3">Resolution</label>
                 <div className="flex gap-3">
@@ -530,7 +526,6 @@ export default function InfiniteTalkGenerator() {
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
                 {audioDuration > 0 ? `${calculateCredits()} Credits` : 
-                  (isClient && tabMode === 'video-to-video') ? '1 Credit/sec' : 
                   `${resolution === '480p' ? '1' : '2'} Credits/sec`}
               </div>
             </div>
