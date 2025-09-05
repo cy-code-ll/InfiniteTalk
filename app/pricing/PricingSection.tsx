@@ -66,10 +66,10 @@ export default function PricingSection() {
       popular: false,
       title: 'Ultimate',
       price: '$49.90',
-      buttonText: 'Get 1200 Credits',
+      buttonText: 'Get 990 Credits',
       features: [
-        '1200 Credits included',
-        '$0.0415 per second',
+        '990 Credits included',
+        '$0.0500 per second',
         'HD video generation (480p/720p)',
         'Lip-sync & body animation',
         'Download enabled',
