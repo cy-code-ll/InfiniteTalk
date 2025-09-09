@@ -62,6 +62,15 @@ export default function Hero() {
                 <span>Try InfiniteTalk AI</span>
               </Button>
             </Link>
+            <Link href="/infinitetalk-multi" aria-label="Try InfiniteTalk Multi AI now">
+              <Button variant="outline" className="group relative min-w-[220px] h-14 md:h-16 text-base md:text-xl font-bold border-2 border-primary/30 bg-transparent hover:bg-primary/10 text-primary hover:text-primary shadow-lg hover:shadow-primary/20 transition-all duration-300 will-change-transform">
+                <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                <span className="mr-3 transition-transform group-hover:translate-x-1">
+                  <RocketIcon />
+                </span>
+                <span>InfiniteTalk Multi AI</span>
+              </Button>
+            </Link>
           </div>
         </div>
       </div>

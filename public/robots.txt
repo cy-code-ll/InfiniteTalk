@@ -1,5 +1,6 @@
 # =====================================
 # 🤖 Robots.txt for https://www.infinitetalk.net
+# Updated: Added InfiniteTalk Multi page support
 # =====================================
 
 # -------------------------------------

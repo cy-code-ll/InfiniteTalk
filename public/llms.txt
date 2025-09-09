@@ -1,5 +1,6 @@
 # llms.txt for https://www.infinitetalk.net
 # This file provides guidance to LLM crawlers on allowed content
+# Updated: Added InfiniteTalk Multi page support
 
 # -------------------------------------
 # ✅ Website Information
@@ -19,6 +20,7 @@ Allow: /#tech-highlights
 Allow: /#faqs
 Allow: /blog
 Allow: /blog/*
+Allow: /infinitetalk-multi
 
 # -------------------------------------
 # ✅ Important Legal Pages
@@ -50,3 +52,7 @@ Sitemap: https://www.infinitetalk.net/sitemap.xml
 # - Natural motion generation
 # - Global dubbing/localization use cases
 # - Creator workflows and studio pipelines
+# - Multi-character lip-sync technology (InfiniteTalk Multi)
+# - Two-speaker support for conversations and duets
+# - Podcast and interview video generation
+# - Educational content creation

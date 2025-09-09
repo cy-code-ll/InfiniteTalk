@@ -10,6 +10,7 @@ import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import Link from 'next/link';
 
 type ViewState = 'videodemo' | 'loading' | 'result';
 type TabMode = 'image-to-video' | 'video-to-video';
@@ -75,7 +76,6 @@ export default function InfiniteTalkGenerator() {
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [resolution, setResolution] = useState<'480p' | '720p'>('480p');
   const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
-  const [isClient, setIsClient] = useState(false);
 
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
@@ -131,10 +131,6 @@ export default function InfiniteTalkGenerator() {
   const resultVideoRef = useRef<HTMLVideoElement>(null);
 
 
-  // 设置客户端状态，避免 hydration 错误
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
 
   // 组件卸载时清理定时器
   useEffect(() => {
@@ -218,7 +214,6 @@ export default function InfiniteTalkGenerator() {
       if (!selectedVideo) return 'Please upload a video';
     }
     if (!selectedAudio) return 'Please upload an audio file';
-    if (!prompt.trim()) return 'Please enter a prompt';
     if (audioDuration === 0) return 'Audio duration could not be determined';
     return null;
   };
@@ -311,8 +306,7 @@ export default function InfiniteTalkGenerator() {
         <div className="lg:col-span-2 space-y-8">
           <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
             {/* Tab Navigation */}
-            {isClient && (
-              <div className="flex mb-6">
+            <div className="flex mb-6">
                 <button
                   onClick={() => setTabMode('image-to-video')}
                   className={cn(
@@ -338,15 +332,14 @@ export default function InfiniteTalkGenerator() {
                   <span className="sm:hidden">Video</span>
                 </button>
               </div>
-            )}
             
             {/* Image/Video Upload */}
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">
-                {(!isClient || tabMode === 'image-to-video') ? 'Upload Image' : 'Upload Video'}
+                {tabMode === 'image-to-video' ? 'Upload Image' : 'Upload Video'} <span className="text-red-500">*</span>
               </label>
               <div className="relative">
-                {(!isClient || tabMode === 'image-to-video') ? (
+                {tabMode === 'image-to-video' ? (
                   // Image Upload
                   selectedImage ? (
                     <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
@@ -422,7 +415,7 @@ export default function InfiniteTalkGenerator() {
 
             {/* Audio Upload */}
             <div className="mb-6">
-              <label className="block text-white font-medium mb-3">Upload Audio</label>
+              <label className="block text-white font-medium mb-3">Upload Audio <span className="text-red-500">*</span></label>
               <div className="relative">
                 <div
                   onClick={() => audioInputRef.current?.click()}
@@ -465,9 +458,8 @@ export default function InfiniteTalkGenerator() {
             </div>
 
             {/* Resolution Selection */}
-            {isClient && (
-              <div className="mb-6">
-                <label className="block text-white font-medium mb-3">Resolution</label>
+            <div className="mb-6">
+                <label className="block text-white font-medium mb-3">Resolution <span className="text-red-500">*</span></label>
                 <div className="flex gap-3">
                   <button
                     type="button"
@@ -501,7 +493,6 @@ export default function InfiniteTalkGenerator() {
                   </button>
                 </div>
               </div>
-            )}
 
             {/* Prompt Input */}
             <div className="mb-6">
@@ -509,7 +500,7 @@ export default function InfiniteTalkGenerator() {
               <Textarea
                 value={prompt}
                 onChange={(e) => setPrompt(e.target.value)}
-                placeholder="Describe what you want the character to express or do..."
+                placeholder="Describe what you want the character to express or do... (Optional)"
                 className="w-full h-24 bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 resize-none"
               />
             </div>
@@ -527,6 +518,21 @@ export default function InfiniteTalkGenerator() {
               <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
                 {audioDuration > 0 ? `${calculateCredits()} Credits` : 
                   `${resolution === '480p' ? '1' : '2'} Credits/sec`}
+              </div>
+            </div>
+
+            {/* InfiniteTalk Multi CTA */}
+            <div className="mt-8 p-6 bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 rounded-xl">
+              <div className="text-center">
+                <h3 className="text-lg font-bold text-white mb-2">Want Multi-Character Conversations?</h3>
+                <p className="text-slate-300 text-sm mb-4">
+                  Create realistic dialogues with multiple speakers using InfiniteTalk Multi AI
+                </p>
+                <Link href="/infinitetalk-multi">
+                  <Button variant="outline" className="w-full border-primary/30 bg-transparent hover:bg-primary/10 text-primary hover:text-primary font-semibold">
+                    Try InfiniteTalk Multi AI
+                  </Button>
+                </Link>
               </div>
             </div>
           </div>

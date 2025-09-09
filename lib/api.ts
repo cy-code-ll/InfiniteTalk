@@ -375,6 +375,47 @@ export const infiniteTalkApi = {
 
     return handleApiError(response);
   },
+
+  // 创建InfiniteTalk Multi任务
+  createMultiTask: async (params: {
+    image: File;
+    prompt: string;
+    left_audio: File;
+    left_duration: number;
+    right_audio: File;
+    right_duration: number;
+    order: 'meanwhile' | 'left_right' | 'right_left';
+    resolution: '480p' | '720p';
+  }) => {
+    const formData = new FormData();
+    formData.append('image', params.image);
+    formData.append('prompt', params.prompt);
+    formData.append('left_audio', params.left_audio);
+    formData.append('left_duration', params.left_duration.toString());
+    formData.append('right_audio', params.right_audio);
+    formData.append('right_duration', params.right_duration.toString());
+    formData.append('order', params.order);
+    formData.append('resolution', params.resolution);
+
+    // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
+    const token = localStorage.getItem('access_token');
+    const headers: Record<string, string> = {
+      'x-appid': API_CONFIG.APP_ID,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/multi`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+
+    return handleApiError(response);
+  },
+
 };
 
 

@@ -58,6 +58,17 @@ export function Navbar() {
           </SheetClose>
           <SheetClose asChild>
             <Link
+              href="/infinitetalk-multi"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/infinitetalk-multi' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              InfiniteTalk Multi
+            </Link>
+          </SheetClose>
+          <SheetClose asChild>
+            <Link
               href="/wan2.2-s2v"
               className={cn(
                 'nav-link-item px-4 py-2 rounded-md transition-colors',
@@ -78,6 +89,7 @@ export function Navbar() {
               ComfyUI Guide
             </Link>
           </SheetClose>
+
           <SheetClose asChild>
             <Link
               href="/pricing"
@@ -114,6 +126,15 @@ export function Navbar() {
           Infinitetalk
         </Link>
         <Link
+          href="/infinitetalk-multi"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/infinitetalk-multi' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          InfiniteTalk Multi
+        </Link>
+        <Link
           href="/wan2.2-s2v"
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
@@ -131,6 +152,7 @@ export function Navbar() {
         >
           ComfyUI Guide
         </Link>
+ 
         <Link
           href="/pricing"
           className={cn(
@@ -158,7 +180,7 @@ export function Navbar() {
           </div>
 
           {/* Middle: Desktop Nav Links */}
-          <div className="hidden md:flex items-center justify-center flex-1 ">
+          <div className="hidden lg:flex items-center justify-center flex-1 ">
             <div className="flex items-center space-x-1">
               {renderNavLinks(false)}
             </div>
@@ -167,7 +189,7 @@ export function Navbar() {
           {/* Right Section */}
           <div className="w-[180px] 2xl:w-[200px] flex items-center justify-end gap-2">
             {/* Desktop: Auth Button */}
-            <div className="hidden md:flex items-center gap-4">
+            <div className="hidden lg:flex items-center gap-4">
               {/* 用户积分显示 */}
               {isSignedIn && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
@@ -181,7 +203,7 @@ export function Navbar() {
             </div>
 
             {/* Mobile: Auth Button + Menu */}
-            <div className="flex md:hidden items-center gap-2">
+            <div className="flex lg:hidden items-center gap-2">
               {/* 移动端用户积分显示 */}
               {isSignedIn && (
                 <div className="flex items-center gap-1 text-sm text-muted-foreground">
