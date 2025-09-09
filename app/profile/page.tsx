@@ -970,13 +970,13 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {historyList.length > 0 ? (
               historyList
-                .filter(item => item.status !== -1 && item.quality_image) // 过滤掉状态为-1的作品和没有quality_image的记录
+                .filter(item => item.status !== -1 && item.generate_image) // 过滤掉状态为-1的作品和没有quality_image的记录
                 .map((item) => (
                 <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
                   {/* 下载按钮 - 只在有quality_image时才显示 */}
                   <button 
                     className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
-                                         onClick={() => downloadMediaWithCors(item.quality_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
+                                         onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
                   >
                     <DownloadIcon className="h-4 w-4" />
                   </button>
@@ -984,7 +984,7 @@ export default function ProfilePage() {
                   {/* 视频内容 - 16:9比例 */}
                   <div className="relative w-full aspect-video overflow-hidden">
                     <video
-                      src={item.quality_image}
+                      src={item.generate_image}
                       controls
                       muted
                       preload="metadata"
