@@ -970,37 +970,72 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {historyList.length > 0 ? (
               historyList
-                .filter(item => item.status !== -1 && item.generate_image) // 过滤掉状态为-1的作品和没有quality_image的记录
-                .map((item) => (
-                <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
-                  {/* 下载按钮 - 只在有quality_image时才显示 */}
-                  <button 
-                    className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
-                                         onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
-                  >
-                    <DownloadIcon className="h-4 w-4" />
-                  </button>
+                .filter(item => item.status !== -1 || (item.status === -1 && item.generate_image === '')) // 显示成功作品和失败作品
+                .map((item) => {
+                  const isFailed = item.status === -1 && item.generate_image === '';
                   
-                  {/* 视频内容 - 16:9比例 */}
-                  <div className="relative w-full aspect-video overflow-hidden">
-                    <video
-                      src={item.generate_image}
-                      controls
-                      muted
-                      preload="metadata"
-                      className="w-full h-full"
-                      playsInline
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
+                  // 从 size_image 中提取模型名称
+                  const getModelName = (sizeImage: string) => {
+                    const modelMatch = sizeImage.match(/Model:\s*([^;]+)/);
+                    return modelMatch ? modelMatch[1].trim() : null;
+                  };
                   
-                  {/* 日期 - 减少内边距使其更紧凑 */}
-                  <div className="px-3 py-1.5 text-xs text-muted-foreground bg-muted">
-                    {formatTimestamp(item.created_at)}
-                  </div>
-                </div>
-              ))
+                  const modelName = item.size_image ? getModelName(item.size_image) : null;
+                  
+                  return (
+                    <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
+                      {/* 模型标识 - 左上角悬浮 */}
+                      {modelName && (
+                        <div className="absolute top-2 left-2 z-10 bg-primary/90 hover:bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
+                          Model: {modelName}
+                        </div>
+                      )}
+                      
+                      {/* 下载按钮 - 只在成功作品时显示 */}
+                      {!isFailed && ( 
+                        <button 
+                          className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
+                          onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
+                        >
+                          <DownloadIcon className="h-4 w-4" />
+                        </button>
+                      )}
+                      
+                      {/* 视频内容或失败占位 - 16:9比例 */}
+                      <div className="relative w-full aspect-video overflow-hidden">
+                        {isFailed ? (
+                          // 生成失败占位符
+                          <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-red-600/20 flex flex-col items-center justify-center border-2 border-dashed border-red-300/50">
+                            <div className="text-center p-4">
+                              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <span className="text-red-400 text-2xl">⚠️</span>
+                              </div>
+                              <p className="text-red-400 font-semibold text-sm mb-1">Generation Failed</p>
+                              <p className="text-red-300/70 text-xs">Please try again</p>
+                            </div>
+                          </div>
+                        ) : (
+                          // 成功作品的视频
+                          <video
+                            src={item.generate_image}
+                            controls
+                            muted
+                            preload="metadata"
+                            className="w-full h-full"
+                            playsInline
+                          >
+                            Your browser does not support the video tag.
+                          </video>
+                        )}
+                      </div>
+                      
+                      {/* 日期 - 减少内边距使其更紧凑 */}
+                      <div className="px-3 py-1.5 text-xs text-muted-foreground bg-muted">
+                        {formatTimestamp(item.created_at)}
+                      </div>
+                    </div>
+                  );
+                })
             ) : (
               <div className="col-span-full text-center text-muted-foreground py-12">No videos yet.</div>
             )}
