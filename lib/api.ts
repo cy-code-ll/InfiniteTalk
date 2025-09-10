@@ -34,7 +34,7 @@ const handleApiError = async (response: Response) => {
 
   // 检查业务错误码
   if (result.code && result.code !== 200) {
-    throw new Error(`API Business Error ${result.code}: ${result.message || result.msg || 'Unknown error'}`);
+    throw new Error(`${result.message || result.msg || 'Unknown error'}`);
   }
 
   return result;

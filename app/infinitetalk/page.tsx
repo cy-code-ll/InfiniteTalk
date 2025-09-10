@@ -5,12 +5,12 @@ import InfiniteTalkGenerator from './InfiniteTalkGenerator';
 
 // SEO metadata
 export const metadata: Metadata = {
-  title: 'Meigen InfiniteTalk AI - Create Infinite Talking Videos',
-  description: 'Generate unlimited talking videos with Meigen InfiniteTalk AI. Upload image and audio to create professional lip-sync videos instantly.',
-  keywords: 'Meigen InfiniteTalk AI, talking video generator, lip sync AI, infinite video, AI dubbing',
+  title: 'Meigen Infinite Talk AI - Create Infinite Talking Videos',
+  description: 'Generate unlimited talking videos with Meigen Infinite Talk AI. Upload image and audio to create professional lip-sync videos instantly.',
+  keywords: 'Meigen Infinite Talk AI, talking video generator, lip sync AI, infinite video, AI dubbing',
   openGraph: {
-    title: 'Meigen AI InfiniteTalk - Create Infinite Talking Videos',
-    description: 'Generate unlimited talking videos with Meigen AI InfiniteTalk. Upload image and audio to create professional lip-sync videos instantly.',
+    title: 'Meigen AI Infinite Talk - Create Infinite Talking Videos',
+    description: 'Generate unlimited talking videos with Meigen AI Infinite Talk. Upload image and audio to create professional lip-sync videos instantly.',
     url: 'https://www.infinitetalk.net/infinitetalk',
     siteName: 'InfiniteTalk AI',
     images: [
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
         url: 'https://www.infinitetalk.net/og-infinitetalk.jpg',
         width: 1200,
         height: 630,
-        alt: 'Meigen AI InfiniteTalk Generator',
+        alt: 'Meigen AI Infinite Talk Generator',
       },
     ],
     locale: 'en_US',
@@ -26,8 +26,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Meigen AI InfiniteTalk - Create Infinite Talking Videos',
-    description: 'Generate unlimited talking videos with Meigen AI InfiniteTalk. Upload image and audio to create professional lip-sync videos.',
+    title: 'Meigen AI Infinite Talk - Create Infinite Talking Videos',
+    description: 'Generate unlimited talking videos with Meigen AI Infinite Talk. Upload image and audio to create professional lip-sync videos.',
     images: ['https://www.infinitetalk.net/og-infinitetalk.jpg'],
   },
   alternates: {
@@ -39,7 +39,7 @@ export const metadata: Metadata = {
 const infiniteTalkSchemaData = {
   '@context': 'https://schema.org',
   '@type': 'SoftwareApplication',
-  name: 'Meigen AI InfiniteTalk',
+  name: 'Meigen AI Infinite Talk',
   description: 'Advanced AI tool for generating infinite-length talking videos with lip-sync technology',
   url: 'https://www.infinitetalk.net/infinitetalk',
   applicationCategory: 'MultimediaApplication',
@@ -63,8 +63,8 @@ const infiniteTalkSchemaData = {
   ],
   video: {
     '@type': 'VideoObject',
-    name: 'Meigen InfiniteTalk AI Demo',
-    description: 'Demonstration of how Meigen InfiniteTalk AI creates talking videos from images and audio',
+    name: 'Meigen Infinite Talk AI Demo',
+    description: 'Demonstration of how Meigen Infinite Talk AI creates talking videos from images and audio',
     contentUrl: 'https://www.infinitetalk.net/hero/demo.mp4',
     embedUrl: 'https://www.infinitetalk.net/hero/demo.mp4',
     uploadDate: '2025-01-01',
@@ -76,8 +76,8 @@ const infiniteTalkSchemaData = {
 const howToSchemaData = {
   '@context': 'https://schema.org',
   '@type': 'HowTo',
-  name: 'How to Use Meigen InfiniteTalk AI',
-  description: 'Step-by-step guide to create talking videos with Meigen InfiniteTalk AI',
+  name: 'How to Use Meigen Infinite Talk AI',
+  description: 'Step-by-step guide to create talking videos with Meigen Infinite Talk AI',
   totalTime: 'PT5M',
   estimatedCost: {
     '@type': 'MonetaryAmount',
@@ -97,7 +97,7 @@ const howToSchemaData = {
   tool: [
     {
       '@type': 'SoftwareApplication',
-      name: 'Meigen InfiniteTalk AI',
+      name: 'Meigen Infinite Talk AI',
       url: 'https://www.infinitetalk.net/infinitetalk'
     }
   ],
@@ -105,7 +105,7 @@ const howToSchemaData = {
     {
       '@type': 'HowToStep',
       name: 'Upload Image',
-      text: 'Upload a clear image of a person\'s face to the Meigen InfiniteTalk AI platform.',
+      text: 'Upload a clear image of a person\'s face to the Meigen Infinite Talk AI platform.',
       url: 'https://www.infinitetalk.net/infinitetalk#step1'
     },
     {
@@ -123,7 +123,7 @@ const howToSchemaData = {
     {
       '@type': 'HowToStep',
       name: 'Generate Video',
-      text: 'Click the Generate button and wait for Meigen InfiniteTalk AI to create your talking video.',
+      text: 'Click the Generate button and wait for Meigen Infinite Talk AI to create your talking video.',
       url: 'https://www.infinitetalk.net/infinitetalk#step4'
     }
   ]
@@ -148,7 +148,7 @@ export default function InfiniteTalkPage() {
         {/* Header Section */}
         <div className="container mx-auto px-4 py-12 text-center">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            Meigen InfiniteTalk AI  Generator
+            Meigen Infinite Talk AI  Generator
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 max-w-3xl mx-auto">
             Transform any image into a talking video with our advanced AI technology. Upload your image and audio to create professional lip-synced content.
@@ -164,7 +164,7 @@ export default function InfiniteTalkPage() {
             <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8 md:p-12">
               <div className="text-center mb-8">
                 <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
-                  How to Use Meigen InfiniteTalk AI
+                  How to Use Meigen Infinite Talk AI
                 </h2>
                 <p className="text-slate-300 text-lg">
                   Follow these simple steps to create your talking video

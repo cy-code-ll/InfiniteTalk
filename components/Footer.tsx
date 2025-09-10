@@ -71,14 +71,14 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
                   Home
                 </Link>
               </li>
-              {/* <li>
+              <li>
                 <Link 
                   href="/blog"
                   className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
                 >
                   Blog
                 </Link>
-              </li> */}
+              </li>
             </ul>
           </div>
           

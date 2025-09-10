@@ -229,7 +229,7 @@ export default function InfiniteTalkGenerator() {
     // 验证表单
     const validationError = validateForm();
     if (validationError) {
-      toast.error(validationError);
+      toast.info(validationError);
       return;
     }
 
@@ -416,6 +416,7 @@ export default function InfiniteTalkGenerator() {
             {/* Audio Upload */}
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">Upload Audio <span className="text-red-500">*</span></label>
+              <p className="text-slate-400 text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
               <div className="relative">
                 <div
                   onClick={() => audioInputRef.current?.click()}
@@ -526,11 +527,11 @@ export default function InfiniteTalkGenerator() {
               <div className="text-center">
                 <h3 className="text-lg font-bold text-white mb-2">Want Multi-Character Conversations?</h3>
                 <p className="text-slate-300 text-sm mb-4">
-                  Create realistic dialogues with multiple speakers using InfiniteTalk Multi AI
+                  Create realistic dialogues with multiple speakers using Infinite Talk Multi AI
                 </p>
                 <Link href="/infinitetalk-multi">
                   <Button variant="outline" className="w-full border-primary/30 bg-transparent hover:bg-primary/10 text-primary hover:text-primary font-semibold">
-                    Try InfiniteTalk Multi AI
+                    Try Infinite Talk Multi AI
                   </Button>
                 </Link>
               </div>

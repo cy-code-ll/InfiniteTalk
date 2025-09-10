@@ -224,5 +224,5 @@ export async function generateStaticParams() {
   }
 }
 
-// App Router的ISR配置
-export const revalidate = 3600; // 每小时重新验证一次 
+// App Router的ISR配置 - 禁用缓存，每次都获取最新数据
+export const revalidate = 0; 

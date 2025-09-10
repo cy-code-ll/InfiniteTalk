@@ -246,7 +246,7 @@ export default function MultiHero() {
             <div className="space-y-6">
               {/* Left Audio Upload */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-2">
                   <Label htmlFor="left-audio-upload" className="text-base font-semibold text-foreground">
                     Left Audio <span className="text-red-500">*</span>
                   </Label>
@@ -254,6 +254,7 @@ export default function MultiHero() {
                     <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                   </Tooltip>
                 </div>
+                <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
                   <input
                     ref={leftAudioInputRef}
@@ -283,7 +284,7 @@ export default function MultiHero() {
 
               {/* Right Audio Upload */}
               <div>
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-2">
                   <Label htmlFor="right-audio-upload" className="text-base font-semibold text-foreground">
                     Right Audio <span className="text-red-500">*</span>
                   </Label>
@@ -291,6 +292,7 @@ export default function MultiHero() {
                     <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                   </Tooltip>
                 </div>
+                <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
                   <input
                     ref={rightAudioInputRef}

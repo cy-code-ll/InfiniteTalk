@@ -69,8 +69,8 @@ export const serverCmsApi = {
       const response = await fetch(`${SERVER_API_CONFIG.VIDOR_AI_BASE}/api/cms/friendLinkList`, {
         method: 'GET',
         headers: getServerHeaders(),
-        // 使用缓存并设置重新验证时间（1小时）
-        next: { revalidate: 3600 },
+        // 不使用缓存，每次都获取最新数据
+        cache: 'no-store',
       });
 
       const result = await handleServerApiError(response);
@@ -96,8 +96,8 @@ export const serverCmsApi = {
         {
           method: 'GET',
           headers: getServerHeaders(),
-          // 使用缓存并设置重新验证时间（1小时）
-          next: { revalidate: 3600 },
+          // 不使用缓存，每次都获取最新数据
+          cache: 'no-store',
         }
       );
 
