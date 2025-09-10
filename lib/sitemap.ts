@@ -48,24 +48,24 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   });
 
   // Get blog posts from API and add dynamic blog post URLs
-  // try {
-  //   const blogResponse = await serverCmsApi.getBlogList(1, 100, 0);
+  try {
+    const blogResponse = await serverCmsApi.getBlogList(1, 100, 0);
     
-  //   blogResponse.list.forEach(post => {
-  //     const slug = generateSlug(post.title, post.url);
-  //     sitemapEntries.push({
-  //       url: `${BASE_URL}/blog/${slug}`, // Correct path structure
-  //       lastModified: new Date(post.updated_time * 1000), // Convert timestamp to Date
-  //       changeFrequency: 'monthly', 
-  //       priority: 0.7,
-  //     });
-  //   });
+    blogResponse.list.forEach(post => {
+      const slug = generateSlug(post.title, post.url);
+      sitemapEntries.push({
+        url: `${BASE_URL}/blog/${slug}`, // Correct path structure
+        lastModified: new Date(post.updated_time * 1000), // Convert timestamp to Date
+        changeFrequency: 'monthly', 
+        priority: 0.7,
+      });
+    });
     
-  //   console.log(`Sitemap: Generated ${blogResponse.list.length} blog post URLs`);
-  // } catch (error) {
-  //   console.error('Sitemap: Failed to fetch blog posts for sitemap:', error);
-  //   // 继续生成没有博客文章的sitemap
-  // }
+    console.log(`Sitemap: Generated ${blogResponse.list.length} blog post URLs`);
+  } catch (error) {
+    console.error('Sitemap: Failed to fetch blog posts for sitemap:', error);
+    // 继续生成没有博客文章的sitemap
+  }
 
   // Note: This sitemap lists canonical URLs. Search engines will rely on the
   // <html lang="..."> attribute (set dynamically in app/layout.tsx)
