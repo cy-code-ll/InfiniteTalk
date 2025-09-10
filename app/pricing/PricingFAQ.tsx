@@ -26,6 +26,10 @@ export default function PricingFAQ() {
       answer: 'Credits are used to generate videos and images. Different features consume different amounts of credits based on complexity.'
     },
     {
+      question: 'How are video generation credits calculated?',
+      answer: 'Our endpoint starts at 5 credits per 5 seconds (480p) or 10 credits per 5 seconds (720p) of video generation, with a maximum generation length of 10 minutes. For videos 5 seconds or less: 480P costs 5 credits, 720P costs 10 credits. For videos longer than 5 seconds: 480P costs 1 credit per second, 720P costs 2 credits per second. Audio duration is rounded up to the nearest second.'
+    },
+    {
       question: 'What payment methods do you accept?',
       answer: 'Currently, we accept Visa, Mastercard, American Express, Discover, Japan Credit Bureau (JCB) and other credit cards.'
     }

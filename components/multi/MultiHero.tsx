@@ -9,6 +9,7 @@ import { Upload, Play, Download, Loader2, X, HelpCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '../ui/toast-provider';
 import { useAuth, useClerk } from '@clerk/nextjs';
+import { useUserInfo } from '@/lib/providers';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 
 interface GenerationState {
@@ -40,6 +41,7 @@ export default function MultiHero() {
   const toast = useToast();
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
+  const { userInfo } = useUserInfo();
 
   // 检查登录状态
   const checkAuthAndProceed = (callback: () => void) => {
@@ -50,12 +52,12 @@ export default function MultiHero() {
     callback();
   };
 
-  // 获取音频时长
+  // 获取音频时长 - 向上取整
   const getAudioDuration = (file: File): Promise<number> => {
     return new Promise((resolve) => {
       const audio = new Audio();
       audio.onloadedmetadata = () => {
-        resolve(audio.duration);
+        resolve(Math.ceil(audio.duration)); // 向上取整
       };
       audio.onerror = () => {
         resolve(0); // 如果出错，返回0
@@ -101,10 +103,31 @@ export default function MultiHero() {
     });
   };
 
+  // 计算积分消耗
+  const calculateCredits = (): number => {
+    if (leftAudioDuration === 0 || rightAudioDuration === 0) return 0;
+    
+    const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
+    
+    // 新规则：5秒以下固定积分，5秒以上按秒计算
+    if (maxDuration <= 5) {
+      return resolution === '480p' ? 5 : 10;
+    } else {
+      const creditsPerSecond = resolution === '480p' ? 1 : 2;
+      return maxDuration * creditsPerSecond;
+    }
+  };
+
   const handleGenerate = async () => {
     // 检查用户是否登录
     if (!isSignedIn) {
       openSignIn();
+      return;
+    }
+
+    // 检查用户积分
+    if (!userInfo) {
+      toast.error('User information not available, please try again');
       return;
     }
 
@@ -113,9 +136,14 @@ export default function MultiHero() {
       return;
     }
 
-
     if (leftAudioDuration === 0 || rightAudioDuration === 0) {
       toast.info('Could not get audio duration');
+      return;
+    }
+
+    const requiredCredits = calculateCredits();
+    if (userInfo.total_credits < requiredCredits) {
+      toast.error(`Insufficient credits. You need ${requiredCredits} credits but only have ${userInfo.total_credits} credits. Please purchase more credits.`);
       return;
     }
 
@@ -437,10 +465,7 @@ export default function MultiHero() {
 
               {/* Generate Button */}
               <div className="space-y-3 relative">
-                {/* Credits Label */}
-                <div className="absolute -top-8 right-0 text-xs text-muted-foreground">
-                  {resolution === '480p' ? '1 Credits/sec' : '2 Credits/sec'}
-                </div>
+            
                 <Button
                   onClick={handleGenerate}
                   className="w-full h-12 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -457,19 +482,29 @@ export default function MultiHero() {
                 
                 {/* Credits Info */}
                 <div className="text-center space-y-2">
-                  <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            
+                  <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground/70">
                     <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-primary rounded-full"></span>
-                      <span>480P: 1 credits/sec</span>
+                      <span className="w-1.5 h-1.5 bg-primary/50 rounded-full"></span>
+                      <span>480P:  1 credit/sec</span>
                     </div>
                     <div className="flex items-center gap-1">
-                      <span className="w-2 h-2 bg-primary/70 rounded-full"></span>
-                      <span>720P: 2 credits/sec</span>
+                      <span className="w-1.5 h-1.5 bg-primary/30 rounded-full"></span>
+                      <span>720P:  2 credits/sec</span>
                     </div>
                   </div>
                   {leftAudioFile && rightAudioFile && (leftAudioDuration > 0 || rightAudioDuration > 0) && (
                     <div className="text-xs text-muted-foreground/70">
-                      Estimated cost: {resolution === '480p' ? Math.ceil(Math.max(leftAudioDuration, rightAudioDuration) * 1) : Math.ceil(Math.max(leftAudioDuration, rightAudioDuration) * 2)} credits
+                      Estimated cost: {(() => {
+                        const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
+                        // 新规则：5秒以下固定积分，5秒以上按秒计算
+                        if (maxDuration <= 5) {
+                          return resolution === '480p' ? 5 : 10;
+                        } else {
+                          const creditsPerSecond = resolution === '480p' ? 1 : 2;
+                          return maxDuration * creditsPerSecond;
+                        }
+                      })()} credits
                     </div>
                   )}
                 </div>

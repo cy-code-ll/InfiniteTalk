@@ -6,6 +6,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Progress } from '../../components/ui/progress';
 import { useToast } from '../../components/ui/toast-provider';
 import { useUser, useClerk } from '@clerk/nextjs';
+import { useUserInfo } from '@/lib/providers';
 import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
@@ -67,6 +68,7 @@ export default function InfiniteTalkGenerator() {
   const { isSignedIn } = useUser();
   const { openSignIn } = useClerk();
   const toast = useToast();
+  const { userInfo } = useUserInfo();
 
   // Form state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -198,12 +200,22 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
-  // 计算积分消耗
+  // 计算积分消耗 - 新规则：5s以下固定积分，5s以上按秒计算
   const calculateCredits = (): number => {
     if (audioDuration === 0) return 0;
-    // 两种模式都根据分辨率计算积分
-    const creditsPerSecond = resolution === '480p' ? 1 : 2;
-    return audioDuration * creditsPerSecond;
+    
+    // 音乐时长向上取整
+    const roundedDuration = Math.ceil(audioDuration);
+    
+    // 新规则：5秒以下固定积分，5秒以上按秒计算
+    if (roundedDuration <= 5) {
+      // 5秒以下：480P=5积分，720P=10积分
+      return resolution === '480p' ? 5 : 10;
+    } else {
+      // 5秒以上：480P=1积分/秒，720P=2积分/秒
+      const creditsPerSecond = resolution === '480p' ? 1 : 2;
+      return roundedDuration * creditsPerSecond;
+    }
   };
 
   // 验证表单
@@ -223,6 +235,18 @@ export default function InfiniteTalkGenerator() {
     // 检查登录状态
     if (!isSignedIn) {
       openSignIn();
+      return;
+    }
+
+    // 检查用户积分
+    if (!userInfo) {
+      toast.error('User information not available, please try again');
+      return;
+    }
+
+    const requiredCredits = calculateCredits();
+    if (userInfo.total_credits < requiredCredits) {
+      toast.error(`Insufficient credits. You need ${requiredCredits} credits but only have ${userInfo.total_credits} credits. Please purchase more credits.`);
       return;
     }
 
@@ -474,7 +498,8 @@ export default function InfiniteTalkGenerator() {
                   >
                     <div className="text-center">
                       <div className="text-lg font-bold">480P</div>
-                      <div className="text-sm opacity-80">1 Credit/sec</div>
+                 
+                      <div className="text-xs opacity-60"> 1 Credit/sec</div>
                     </div>
                   </button>
                   <button
@@ -489,7 +514,8 @@ export default function InfiniteTalkGenerator() {
                   >
                     <div className="text-center">
                       <div className="text-lg font-bold">720P</div>
-                      <div className="text-sm opacity-80">2 Credits/sec</div>
+                
+                      <div className="text-xs opacity-60"> 2 Credits/sec</div>
                     </div>
                   </button>
                 </div>
@@ -518,7 +544,7 @@ export default function InfiniteTalkGenerator() {
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
                 {audioDuration > 0 ? `${calculateCredits()} Credits` : 
-                  `${resolution === '480p' ? '1' : '2'} Credits/sec`}
+                  `${resolution === '480p' ? '5' : '10'} Credits`}
               </div>
             </div>
 
