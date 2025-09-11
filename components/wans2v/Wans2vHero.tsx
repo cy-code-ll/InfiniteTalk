@@ -60,9 +60,9 @@ export function Wans2vHero() {
     if (file && file.type.startsWith('audio/')) {
       const duration = await getAudioDuration(file);
       
-      // 检查音频时长是否超过20秒
-      if (duration > 20) {
-        toast.showToast('Audio file must be 20 seconds or less', 'error');
+      // 检查音频时长是否超过600秒
+      if (duration > 600) {
+        toast.showToast('Audio file must be 600 seconds or less', 'error');
         return;
       }
       
@@ -257,7 +257,7 @@ export function Wans2vHero() {
                        <Upload className="h-4 w-4 text-muted-foreground" />
                      </div>
                    </div>
-                   <p className="text-xs text-muted-foreground/70 mt-2">Maximum duration: 20 seconds</p>
+                   <p className="text-xs text-muted-foreground/70 mt-2">Maximum duration: 600 seconds</p>
                 </div>
               </div>
 
