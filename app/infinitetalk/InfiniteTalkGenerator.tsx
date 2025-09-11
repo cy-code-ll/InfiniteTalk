@@ -576,7 +576,7 @@ export default function InfiniteTalkGenerator() {
                 <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
                   <video
                     ref={demoVideoRef}
-                    src="/hero/demo.mp4"
+                    src="https://cfsource.infinitetalk.net/infinitetalk/mp4/demo.mp4"
                     controls
                     muted
                     preload="metadata"
