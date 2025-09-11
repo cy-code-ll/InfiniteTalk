@@ -502,12 +502,12 @@ export function VideoCases() {
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
   const videos = [
-    { id: 3, src: '/cases/3.mp4', poster: '/cases/3.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 4, src: '/cases/4.mp4', poster: '/cases/4.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 5, src: '/cases/5.mp4', poster: '/cases/5.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 7, src: '/cases/7.mp4', poster: '/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case' },
-    { id: 10, src: '/cases/10.mp4', poster: '/cases/10.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-    { id: 11, src: '/cases/11.mp4', poster: '/cases/11.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 3, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/3.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/3.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 4, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/4.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/4.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 5, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/5.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/5.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
+    { id: 7, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/7.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case' },
+    { id: 10, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/10.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/10.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
+    { id: 11, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/11.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/11.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
   ];
 
   const handleVideoClick = (index: number) => {

@@ -518,7 +518,7 @@ export default function MultiHero() {
               {generationState.status === 'demo' && (
                 <div className="w-full h-full flex items-center justify-center p-4">
                   <video
-                    src="/multi/mutil-hero.mp4"
+                    src="https://cfsource.infinitetalk.net/infinitetalk/multi/mutil-hero.mp4"
                     controls
                     preload="metadata"
                     className="w-full h-full object-cover rounded"

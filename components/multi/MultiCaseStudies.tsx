@@ -12,29 +12,29 @@ export default function MultiCaseStudies() {
       id: 'case1',
       title: 'Podcast Conversation',
       description: 'Two hosts discussing AI technology with natural dialogue flow',
-      video: '/multi/cases/case1.mp4',
-      poster: '/multi/cases/case1.webp'
+      video: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case1.mp4',
+      poster: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case1.webp'
     },
     {
       id: 'case2', 
       title: 'Educational Duet',
       description: 'Teacher and student engaging in interactive learning session',
-      video: '/multi/cases/case2.mp4',
-      poster: '/multi/cases/case2.webp'
+      video: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case2.mp4',
+      poster: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case2.webp'
     },
     {
       id: 'case3',
       title: 'Music Collaboration',
       description: 'Two singers performing a beautiful duet with perfect sync',
-      video: '/multi/cases/case3.mp4',
-      poster: '/multi/cases/case3.webp'
+      video: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case3.mp4',
+      poster: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case3.webp'
     },
     {
       id: 'case4',
       title: 'Interview Style',
       description: 'Professional interviewer and guest in engaging conversation',
-      video: '/multi/cases/case4.mp4',
-      poster: '/multi/cases/case4.webp'
+      video: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case4.mp4',
+      poster: 'https://cfsource.infinitetalk.net/infinitetalk/multi/cases/case4.webp'
     }
   ];
 

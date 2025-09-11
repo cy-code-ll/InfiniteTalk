@@ -333,7 +333,7 @@ export function Wans2vHero() {
               {generationState.status === 'demo' && (
                 <div className="w-full h-full flex items-center justify-center p-4">
                   <video
-                    src="/video/demo.mp4"
+                    src="https://cfsource.infinitetalk.net/infinitetalk/video/demo.mp4"
                     controls
                     muted
                     autoPlay
