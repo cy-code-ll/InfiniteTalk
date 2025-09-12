@@ -19,7 +19,7 @@ export default function PricingFAQ() {
     },
     {
       question: 'Do credits expire monthly?',
-      answer: 'One-time purchase credits never expire. Subscription credits are refreshed monthly and do not carry over to the next month.'
+      answer: 'One-time purchase credits and subscription credits never expire. They will be automatically accumulated to the next month.'
     },
     {
       question: 'What are credits?',
