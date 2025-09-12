@@ -30,10 +30,11 @@ export default function PricingSection() {
       priceId: 'price_1S0bzJ2LCxiz8WFQshNuYpsJ',
       popular: false,
       title: 'Starter',
-      price: '$9.90',
-      buttonText: 'Get 100 Credits',
+      price: '$9.9',
+      buttonText: 'Get 90 Credits',
       features: [
-        '100 Credits included',
+        '90 Credits included',
+        '$0.11 per credit',
         'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
@@ -45,11 +46,11 @@ export default function PricingSection() {
       priceId: 'price_1S0bze2LCxiz8WFQJBMjVxi0', 
       popular: false,
       title: 'Pro',
-      price: '$29.90',
-      buttonText: 'Get 480 Credits',
+      price: '$29.9',
+      buttonText: 'Get 400 Credits',
       features: [
-        '480 Credits included',
-        '$0.0622 per second',
+        '400 Credits included',
+        '$0.074 per credit',
         'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
@@ -62,11 +63,11 @@ export default function PricingSection() {
       priceId: 'price_1S0bzt2LCxiz8WFQXQ5Foe8K', 
       popular: true,
       title: 'Ultimate',
-      price: '$49.90',
-      buttonText: 'Get 990 Credits',
+      price: '$49.9',
+      buttonText: 'Get 800 Credits',
       features: [
-        '990 Credits included',
-        '$0.0500 per second',
+        '800 Credits included',
+        '$0.062 per credit',
         'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
@@ -80,11 +81,85 @@ export default function PricingSection() {
       priceId: 'price_1S3sev2LCxiz8WFQana9TXxD', 
       popular: false,
       title: 'Enterprise',
-      price: '$99.90',
-      buttonText: 'Get 2406 Credits',
+      price: '$99.9',
+      buttonText: 'Get 1800 Credits',
       features: [
-        '2406 Credits included',
-        '$0.0415 per second',
+        '1800 Credits included',
+        '$0.055 per credit',
+        'HD video generation ',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
+        'Priority support',
+        'Best value per credit',
+        'Bulk processing'
+      ]
+    }
+  ];
+
+  // 订阅计划（Subscription）
+  const subscriptionPlans: PricingPlan[] = [
+    {
+      key: 'sub-starter',
+      priceId: 'price_1S6QPW2LCxiz8WFQit6OMKPr',
+      popular: false,
+      title: 'Starter',
+      price: '$9.9',
+      buttonText: 'Subscribe 100 Credits',
+      features: [
+        '100 Credits included',
+        '$0.099 per credit',
+        'HD video generation',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Email support'
+      ]
+    },
+    {
+      key: 'sub-pro',
+      priceId: 'price_1S6QPh2LCxiz8WFQZ3HexZwV',
+      popular: false,
+      title: 'Pro',
+      price: '$29.9',
+      buttonText: 'Subscribe 480 Credits',
+      features: [
+        '480 Credits included',
+        '$0.062 per credit',
+        'HD video generation',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
+        'Priority support'
+      ]
+    },
+    {
+      key: 'sub-ultimate',
+      priceId: 'price_1S6QQX2LCxiz8WFQIegCJKHt',
+      popular: true,
+      title: 'Ultimate',
+      price: '$49.9',
+      buttonText: 'Subscribe 990 Credits',
+      features: [
+        '990 Credits included',
+        '$0.050 per credit',
+        'HD video generation',
+        'Lip-sync & body animation',
+        'Download enabled',
+        'Commercial use license',
+        'Priority support',
+        'Best value per credit'
+      ]
+    },
+    {
+      key: 'sub-enterprise',
+      priceId: 'price_1S6QQq2LCxiz8WFQD3mpyy0O',
+      popular: false,
+      title: 'Enterprise',
+      price: '$99.9',
+      buttonText: 'Subscribe 2200 Credits',
+      features: [
+        '2200 Credits included',
+        '$0.045 per credit',
         'HD video generation ',
         'Lip-sync & body animation',
         'Download enabled',
@@ -150,7 +225,9 @@ export default function PricingSection() {
           All plans include HD image download and fast AI generation.
         </p>
 
-        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto">
+        {/* One-time purchase plans */}
+        <div className="text-white text-xl font-semibold mb-6">One-time Credits</div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto mb-16">
             {pricingPlans.map((plan) => {
               const isFree = plan.key === 'free';
 
@@ -191,6 +268,77 @@ export default function PricingSection() {
                           : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 hover:border-slate-500'
                     )}
                     onClick={() => !isFree && handleUpgradeClick(plan.priceId, plan.key)}
+                    disabled={loadingPlan === plan.key}
+                  >
+                    {loadingPlan === plan.key 
+                      ? (
+                          <span className="flex items-center justify-center">
+                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                            Processing...
+                          </span>
+                        )
+                      : plan.buttonText
+                    }
+                  </Button>
+
+                  <div className="space-y-4">
+                    <ul className="space-y-3">
+                      {plan.features.map((feature, featureIndex) => (
+                        <li key={featureIndex} className="flex items-start space-x-3">
+                          <Check className={cn(
+                            'w-5 h-5 mt-0.5 flex-shrink-0',
+                            plan.popular ? 'text-primary' : 'text-slate-400'
+                          )} />
+                          <span className="text-slate-300 leading-relaxed">
+                            {feature}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Subscription plans */}
+          <div className="text-white text-xl font-semibold mb-6">Subscription Plans</div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto">
+            {subscriptionPlans.map((plan) => {
+              return (
+                <div
+                  key={plan.key}
+                  className={cn(
+                    'relative p-8 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:scale-105',
+                    plan.popular 
+                      ? 'bg-gradient-to-b from-slate-800/90 to-slate-900/90 border-primary/50 shadow-2xl shadow-primary/20' 
+                      : 'bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-slate-700/50 hover:border-slate-600/50'
+                  )}
+                >
+                  {plan.popular && (
+                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-2 rounded-full text-sm font-semibold">
+                      Most Popular
+                    </div>
+                  )}
+
+                  <h3 className="text-2xl font-bold text-white mb-4 text-center">
+                    {plan.title}
+                  </h3>
+
+                  <div className="text-center mb-8">
+                    <span className="text-4xl font-bold text-white">
+                      {plan.price}
+                    </span>
+                  </div>
+
+                  <Button 
+                    className={cn(
+                      'w-full mb-8 py-3 font-semibold transition-all duration-200',
+                      plan.popular
+                        ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl'
+                        : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 hover:border-slate-500'
+                    )}
+                    onClick={() => handleUpgradeClick(plan.priceId, plan.key)}
                     disabled={loadingPlan === plan.key}
                   >
                     {loadingPlan === plan.key 
