@@ -862,7 +862,7 @@ export default function ProfilePage() {
                 </Dialog>
 
                     
-                {/* <Dialog open={isSubscriptionDialogOpen} onOpenChange={setIsSubscriptionDialogOpen}>
+                <Dialog open={isSubscriptionDialogOpen} onOpenChange={setIsSubscriptionDialogOpen}>
                   <DialogTrigger asChild>
                     <Button 
                       variant="outline" 
@@ -968,7 +968,7 @@ export default function ProfilePage() {
                       )}
                     </div>
                   </DialogContent>
-                </Dialog> */}
+                </Dialog>
 
                
               </div>
