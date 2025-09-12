@@ -8,6 +8,14 @@ import { Upload, Play, Download, Loader2, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/toast-provider';
 import { useAuth } from '@clerk/nextjs';
+import { useUserInfo } from '@/lib/providers';
+import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 interface GenerationState {
   status: 'demo' | 'loading' | 'result';
@@ -26,11 +34,15 @@ export function Wans2vHero() {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [audioDuration, setAudioDuration] = useState<number>(0);
+  const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
+  const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const { isSignedIn } = useAuth();
+  const { userInfo } = useUserInfo();
 
   // 获取音频时长
   const getAudioDuration = (file: File): Promise<number> => {
@@ -46,6 +58,14 @@ export function Wans2vHero() {
     });
   };
 
+  // 计算积分消耗
+  const calculateCredits = (): number => {
+    if (audioDuration === 0) return 0;
+    
+    const creditsPerSecond = resolution === '480P' ? 3 : 5;
+    return Math.ceil(audioDuration * creditsPerSecond);
+  };
+
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
@@ -57,7 +77,14 @@ export function Wans2vHero() {
 
   const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (file) {
+      // 检查音频格式
+      const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
+      if (!validFormats.includes(file.type)) {
+        setIsInvalidAudioModalOpen(true);
+        return;
+      }
+      
       const duration = await getAudioDuration(file);
       
       // 检查音频时长是否超过600秒
@@ -68,8 +95,6 @@ export function Wans2vHero() {
       
       setAudioFile(file);
       setAudioDuration(duration);
-    } else {
-      toast.showToast('Please select a valid audio file', 'error');
     }
   };
 
@@ -91,8 +116,21 @@ export function Wans2vHero() {
       return;
     }
 
+    // 检查用户积分
+    if (!userInfo) {
+      toast.showToast('User information not available, please try again', 'error');
+      return;
+    }
+
+    const requiredCredits = calculateCredits();
+    if (userInfo.total_credits < requiredCredits) {
+      setIsInsufficientCreditsModalOpen(true);
+      return;
+    }
+
     setIsGenerating(true);
     setGenerationState({ status: 'loading', progress: 0 });
+    setTaskCreated(false); // 重置任务创建状态
 
     // 模拟进度增长到90%
     const progressInterval = setInterval(() => {
@@ -116,6 +154,7 @@ export function Wans2vHero() {
       if (createResult.code === 200 && createResult.data?.task_id) {
         const taskId = createResult.data.task_id;
         setGenerationState(prev => ({ ...prev, taskId }));
+        setTaskCreated(true); // 任务创建成功，显示提示信息
 
         // 轮询检查任务状态
         const pollResult = await api.video.pollTaskStatus(taskId);
@@ -136,6 +175,7 @@ export function Wans2vHero() {
       console.error('Generation failed:', error);
       clearInterval(progressInterval);
       setGenerationState({ status: 'demo', progress: 0 });
+      setTaskCreated(false); // 重置任务创建状态
       toast.showToast(
         error instanceof Error ? error.message : 'Generation failed',
         'error'
@@ -233,6 +273,7 @@ export function Wans2vHero() {
                 <Label htmlFor="audio-upload" className="text-base font-semibold text-foreground mb-3 block">
                   Upload Audio
                 </Label>
+                <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
                   <input
                     ref={audioInputRef}
@@ -252,6 +293,7 @@ export function Wans2vHero() {
                        value={audioFile ? `${audioFile.name} (${audioDuration.toFixed(1)}s)` : ''}
                        readOnly
                        className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
+                       title={audioFile ? `${audioFile.name} (${audioDuration.toFixed(1)}s)` : ''}
                      />
                      <div className="ml-2 h-8 w-8 flex items-center justify-center">
                        <Upload className="h-4 w-4 text-muted-foreground" />
@@ -319,7 +361,7 @@ export function Wans2vHero() {
                    </div>
                    {audioFile && audioDuration > 0 && (
                      <div className="text-xs text-muted-foreground/70">
-                       Estimated cost: {resolution === '480P' ? Math.ceil(audioDuration * 3) : Math.ceil(audioDuration * 5)} credits
+                       Estimated cost: {calculateCredits()} credits
                      </div>
                    )}
                  </div>
@@ -354,6 +396,17 @@ export function Wans2vHero() {
                     <Progress value={generationState.progress} className="h-2" />
                   </div>
                   <p className="text-sm text-muted-foreground">{Math.round(generationState.progress)}% Complete</p>
+                  {taskCreated && (
+                    <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
+                      <p className="text-white text-sm text-center">
+                        You don't need to wait here. Check your work in the{' '}
+                        <Link href="/profile" className="text-primary hover:text-primary/80 underline">
+                          Profile Center
+                        </Link>{' '}
+                        after 5 minutes.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -382,6 +435,70 @@ export function Wans2vHero() {
           </div>
         </div>
       </div>
+
+      {/* Insufficient Credits Modal */}
+      <Dialog open={isInsufficientCreditsModalOpen} onOpenChange={setIsInsufficientCreditsModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Insufficient Credits</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Not enough credits
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              You need at least {calculateCredits()} credits to generate video. Please purchase more credits to continue.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsInsufficientCreditsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsInsufficientCreditsModalOpen(false);
+                  window.open('/pricing', '_blank');
+                }}
+              >
+                Buy Credits
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invalid Audio Format Modal */}
+      <Dialog open={isInvalidAudioModalOpen} onOpenChange={setIsInvalidAudioModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Invalid Audio Format</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Unsupported audio format
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Please upload audio files in supported formats: mp3, wav, m4a, ogg, flac
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setIsInvalidAudioModalOpen(false)}
+                className="w-full"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

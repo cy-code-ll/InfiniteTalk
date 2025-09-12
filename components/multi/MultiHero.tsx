@@ -11,6 +11,13 @@ import { useToast } from '../ui/toast-provider';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
+import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
 
 interface GenerationState {
   status: 'demo' | 'loading' | 'result';
@@ -34,6 +41,9 @@ export default function MultiHero() {
   const [leftAudioDuration, setLeftAudioDuration] = useState<number>(0);
   const [rightAudioDuration, setRightAudioDuration] = useState<number>(0);
   const [showTooltip, setShowTooltip] = useState<string | null>(null);
+  const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
+  const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const leftAudioInputRef = useRef<HTMLInputElement>(null);
@@ -80,12 +90,17 @@ export default function MultiHero() {
   const handleLeftAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
-      if (file && file.type.startsWith('audio/')) {
+      if (file) {
+        // 检查音频格式
+        const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
+        if (!validFormats.includes(file.type)) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
         const duration = await getAudioDuration(file);
         setLeftAudioFile(file);
         setLeftAudioDuration(duration);
-      } else {
-        toast.showToast('Please select a valid audio file', 'error');
       }
     });
   };
@@ -93,12 +108,17 @@ export default function MultiHero() {
   const handleRightAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
-      if (file && file.type.startsWith('audio/')) {
+      if (file) {
+        // 检查音频格式
+        const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
+        if (!validFormats.includes(file.type)) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
         const duration = await getAudioDuration(file);
         setRightAudioFile(file);
         setRightAudioDuration(duration);
-      } else {
-        toast.showToast('Please select a valid audio file', 'error');
       }
     });
   };
@@ -143,12 +163,13 @@ export default function MultiHero() {
 
     const requiredCredits = calculateCredits();
     if (userInfo.total_credits < requiredCredits) {
-      toast.error(`Insufficient credits. You need ${requiredCredits} credits but only have ${userInfo.total_credits} credits. Please purchase more credits.`);
+      setIsInsufficientCreditsModalOpen(true);
       return;
     }
 
     setIsGenerating(true);
     setGenerationState({ status: 'loading', progress: 0 });
+    setTaskCreated(false); // 重置任务创建状态
 
     // 启动虚假进度条 (约2-3分钟到达95%)
     const progressInterval = setInterval(() => {
@@ -189,6 +210,7 @@ export default function MultiHero() {
       if (createResult.code === 200 && createResult.data?.task_id) {
         const taskId = createResult.data.task_id;
         setGenerationState(prev => ({ ...prev, taskId }));
+        setTaskCreated(true); // 任务创建成功，显示提示信息
 
         // 轮询检查任务状态
         const pollResult = await api.infiniteTalk.pollTaskStatus(
@@ -212,6 +234,7 @@ export default function MultiHero() {
       console.error('Generation failed:', error);
       clearInterval(progressInterval);
       setGenerationState({ status: 'demo', progress: 0 });
+      setTaskCreated(false); // 重置任务创建状态
       toast.showToast(
         error instanceof Error ? error.message : 'Generation failed',
         'error'
@@ -253,9 +276,7 @@ export default function MultiHero() {
         <div className="text-center mb-16">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-foreground mb-6 font-poppins flex items-center justify-center gap-3">
             InfiniteTalk Multi – Multi-Character AI Lip-Sync Video
-            <Tooltip content="Multi-character AI lip-sync video generation tool">
-              <HelpCircle className="h-6 w-6 text-muted-foreground cursor-help" />
-            </Tooltip>
+       
           </h1>
           <h2 className="text-xl sm:text-2xl text-muted-foreground max-w-4xl mx-auto leading-relaxed">
             With <span className="text-primary font-semibold">InfiniteTalk Multi</span>, create realistic conversational videos where multiple characters talk or sing in perfect sync. Multi-character lip-sync makes interactions natural and engaging.
@@ -302,6 +323,7 @@ export default function MultiHero() {
                       value={leftAudioFile ? `${leftAudioFile.name} (${leftAudioDuration.toFixed(1)}s)` : ''}
                       readOnly
                       className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
+                      title={leftAudioFile ? `${leftAudioFile.name} (${leftAudioDuration.toFixed(1)}s)` : ''}
                     />
                     <div className="ml-2 h-8 w-8 flex items-center justify-center">
                       <Upload className="h-4 w-4 text-muted-foreground" />
@@ -340,6 +362,7 @@ export default function MultiHero() {
                       value={rightAudioFile ? `${rightAudioFile.name} (${rightAudioDuration.toFixed(1)}s)` : ''}
                       readOnly
                       className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
+                      title={rightAudioFile ? `${rightAudioFile.name} (${rightAudioDuration.toFixed(1)}s)` : ''}
                     />
                     <div className="ml-2 h-8 w-8 flex items-center justify-center">
                       <Upload className="h-4 w-4 text-muted-foreground" />
@@ -465,6 +488,24 @@ export default function MultiHero() {
 
               {/* Generate Button */}
               <div className="space-y-3 relative">
+                {/* Estimated Credits Label */}
+                <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                  {(() => {
+                    if (leftAudioFile && rightAudioFile && (leftAudioDuration > 0 || rightAudioDuration > 0)) {
+                      const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
+                      // 新规则：5秒以下固定积分，5秒以上按秒计算
+                      if (maxDuration <= 5) {
+                        return resolution === '480p' ? '5 Credits' : '10 Credits';
+                      } else {
+                        const creditsPerSecond = resolution === '480p' ? 1 : 2;
+                        return `${maxDuration * creditsPerSecond} Credits`;
+                      }
+                    } else {
+                      // 没有音频文件时显示最低积分消耗
+                      return resolution === '480p' ? '5 Credits' : '10 Credits';
+                    }
+                  })()}
+                </div>
             
                 <Button
                   onClick={handleGenerate}
@@ -483,15 +524,9 @@ export default function MultiHero() {
                 {/* Credits Info */}
                 <div className="text-center space-y-2">
             
-                  <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground/70">
-                    <div className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-primary/50 rounded-full"></span>
-                      <span>480P:  1 credit/sec</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 bg-primary/30 rounded-full"></span>
-                      <span>720P:  2 credits/sec</span>
-                    </div>
+    
+                  <div className="text-xs text-muted-foreground/70 text-center">
+                    Every 5 seconds: 480P requires 5 credits, 720P requires 10 credits
                   </div>
                   {leftAudioFile && rightAudioFile && (leftAudioDuration > 0 || rightAudioDuration > 0) && (
                     <div className="text-xs text-muted-foreground/70">
@@ -541,6 +576,17 @@ export default function MultiHero() {
                     <Progress value={generationState.progress} className="h-2" />
                   </div>
                   <p className="text-sm text-muted-foreground">{Math.round(generationState.progress)}% Complete</p>
+                  {taskCreated && (
+                    <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
+                      <p className="text-white text-sm text-center">
+                        You don't need to wait here. Check your work in the{' '}
+                        <Link href="/profile" className="text-primary hover:text-primary/80 underline">
+                          Profile Center
+                        </Link>{' '}
+                        after 5 minutes.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -569,6 +615,70 @@ export default function MultiHero() {
           </div>
         </div>
       </div>
+
+      {/* Insufficient Credits Modal */}
+      <Dialog open={isInsufficientCreditsModalOpen} onOpenChange={setIsInsufficientCreditsModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Insufficient Credits</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Not enough credits
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              You need at least {calculateCredits()} credits to generate video. Please purchase more credits to continue.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsInsufficientCreditsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsInsufficientCreditsModalOpen(false);
+                  window.open('/pricing', '_blank');
+                }}
+              >
+                Buy Credits
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invalid Audio Format Modal */}
+      <Dialog open={isInvalidAudioModalOpen} onOpenChange={setIsInvalidAudioModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Invalid Audio Format</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Unsupported audio format
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Please upload audio files in supported formats: mp3, wav, m4a, ogg, flac
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setIsInvalidAudioModalOpen(false)}
+                className="w-full"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }

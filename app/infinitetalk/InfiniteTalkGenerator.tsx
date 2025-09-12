@@ -12,6 +12,12 @@ import { api } from '@/lib/api';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 type ViewState = 'videodemo' | 'loading' | 'result';
 type TabMode = 'image-to-video' | 'video-to-video';
@@ -85,6 +91,9 @@ export default function InfiniteTalkGenerator() {
   const [progress, setProgress] = useState(0);
   const [resultVideoUrl, setResultVideoUrl] = useState<string>('');
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
+  const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
+  const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
 
   // 启动虚假进度条 (约1分钟到达95%)
   const startFakeProgress = () => {
@@ -162,7 +171,14 @@ export default function InfiniteTalkGenerator() {
   // 处理音频上传
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
-    if (file && file.type.startsWith('audio/')) {
+    if (file) {
+      // 检查音频格式
+      const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
+      if (!validFormats.includes(file.type)) {
+        setIsInvalidAudioModalOpen(true);
+        return;
+      }
+      
       setSelectedAudio(file);
       
       // 获取音频时长
@@ -246,7 +262,7 @@ export default function InfiniteTalkGenerator() {
 
     const requiredCredits = calculateCredits();
     if (userInfo.total_credits < requiredCredits) {
-      toast.error(`Insufficient credits. You need ${requiredCredits} credits but only have ${userInfo.total_credits} credits. Please purchase more credits.`);
+      setIsInsufficientCreditsModalOpen(true);
       return;
     }
 
@@ -260,6 +276,7 @@ export default function InfiniteTalkGenerator() {
     setIsGenerating(true);
     setViewState('loading');
     setProgress(0);
+    setTaskCreated(false); // 重置任务创建状态
     
     // 启动虚假进度条
     startFakeProgress();
@@ -294,6 +311,7 @@ export default function InfiniteTalkGenerator() {
       }
 
       const taskId = createResult.data.task_id;
+      setTaskCreated(true); // 任务创建成功，显示提示信息
 
       // 轮询任务状态（不使用API进度，只检查状态）
       const result = await api.infiniteTalk.pollTaskStatus(
@@ -317,6 +335,7 @@ export default function InfiniteTalkGenerator() {
       toast.error(errorMessage);
       stopFakeProgress();
       setViewState('videodemo');
+      setTaskCreated(false); // 重置任务创建状态
     } finally {
       setIsGenerating(false);
       // 不在这里重置progress，让结果状态保持
@@ -448,11 +467,11 @@ export default function InfiniteTalkGenerator() {
                 >
                   {selectedAudio ? (
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <FileAudio className="w-4 h-4 text-primary mr-2" />
-                        <span className="text-white">{selectedAudio.name}</span>
+                      <div className="flex items-center min-w-0 flex-1">
+                        <FileAudio className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
+                        <span className="text-white truncate" title={selectedAudio.name}>{selectedAudio.name}</span>
                         {audioDuration > 0 && (
-                          <span className="text-slate-400 ml-2">({audioDuration}s)</span>
+                          <span className="text-slate-400 ml-2 flex-shrink-0">({audioDuration}s)</span>
                         )}
                       </div>
                       <button
@@ -542,7 +561,7 @@ export default function InfiniteTalkGenerator() {
                 {isGenerating ? 'Generating...' : 'Generate Video'}
               </Button>
               {/* Credit cost label */}
-              <div className="absolute -top-2 -right-2 bg-yellow-500 text-yellow-900 px-2 py-1 rounded-full text-xs font-bold">
+              <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
                 {audioDuration > 0 ? `${calculateCredits()} Credits` : 
                   `${resolution === '480p' ? '5' : '10'} Credits`}
               </div>
@@ -597,6 +616,17 @@ export default function InfiniteTalkGenerator() {
                     <Progress value={progress} className="w-full mb-2" />
                     <p className="text-slate-400 text-sm text-center">{Math.round(progress)}% complete</p>
                   </div>
+                  {taskCreated && (
+                    <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+                      <p className="text-slate-300 text-sm text-center">
+                        You don't need to wait here. Check your work in the{' '}
+                        <Link href="/profile" className="text-primary hover:text-primary/80 underline">
+                          Profile Center
+                        </Link>{' '}
+                        after 5 minutes.
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -630,6 +660,70 @@ export default function InfiniteTalkGenerator() {
           </div>
         </div>
       </div>
+
+      {/* Insufficient Credits Modal */}
+      <Dialog open={isInsufficientCreditsModalOpen} onOpenChange={setIsInsufficientCreditsModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Insufficient Credits</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Not enough credits
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              You need at least {calculateCredits()} credits to generate video. Please purchase more credits to continue.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsInsufficientCreditsModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsInsufficientCreditsModalOpen(false);
+                  window.open('/pricing', '_blank');
+                }}
+              >
+                Buy Credits
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Invalid Audio Format Modal */}
+      <Dialog open={isInvalidAudioModalOpen} onOpenChange={setIsInvalidAudioModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Invalid Audio Format</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-red-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Unsupported audio format
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Please upload audio files in supported formats: mp3, wav, m4a, ogg, flac
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                onClick={() => setIsInvalidAudioModalOpen(false)}
+                className="w-full"
+              >
+                OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

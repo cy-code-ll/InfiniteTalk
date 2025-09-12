@@ -353,45 +353,12 @@ export default function PromotionClient() {
   return (
     <>
       <div className="container mx-auto px-4 pt-24 pb-0 relative">
-        <div className="mb-12">
-          <nav className="flex items-center space-x-2 text-sm overflow-x-auto whitespace-nowrap">
-            <Link 
-              title="Seedance Pro"
-              href="https://www.seedancepro.com/" 
-              className="flex items-center gap-1 text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              <Home className="w-4 h-4" />
-              Seedance Pro
-            </Link>
-            <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <Link 
-              title="Seedance 1.0 Pro AI Video Generator"
-              href="/seedance" 
-              className="text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              <span className="hidden sm:inline">Seedance 1.0 Pro AI Video Generator</span>
-              <span className="inline sm:hidden">Seedance 1.0 Pro AI Video Generator</span>
-            </Link>
-            <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <Link 
-              title="Seedance 1.0 Pro AI Video Generator for Free"
-              href="/seedance/free" 
-              className="text-gray-300 hover:text-white transition-colors duration-200"
-            >
-              <span className="hidden sm:inline">Seedance 1.0 Pro AI Video Generator for Free</span>
-              <span className="inline sm:hidden">Seedance 1.0 Pro AI Video Generator for Free</span>
-            </Link>
-            <ChevronRight className="w-4 h-4 text-gray-500 flex-shrink-0" />
-            <span className="text-gray-100 font-medium">
-              Seedance 1.0 Pro Referral
-            </span>
-          </nav>
-        </div>
+    
       </div>
       <div className="container mx-auto px-4 py-0 pb-30 max-w-6xl">
         <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2 text-foreground">Referral Center</h1>
-        <h2 className="text-xl font-semibold text-foreground mb-2">Seedance 1.0 Pro AI Video Generator for Free By Referral</h2>
+        <h2 className="text-xl font-semibold text-foreground mb-2">Infinite Talk AI Video Generator for Free By Referral</h2>
         <p className="text-foreground">
           Share your personal referral link. When someone signs up and makes a payment through your link, you’ll earn {promotionRatioDisplay} back in credits.
         </p>

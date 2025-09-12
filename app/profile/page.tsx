@@ -267,6 +267,7 @@ export default function ProfilePage() {
   const [totalHistoryCount, setTotalHistoryCount] = useState(0);
   const historyPageSize = 16;
   const [isDownloading, setIsDownloading] = useState<number | null>(null); // 跟踪正在下载的图片ID
+  const [autoRefreshInterval, setAutoRefreshInterval] = useState<NodeJS.Timeout | null>(null);
 
   // 积分记录状态
   const [timesLogList, setTimesLogList] = useState<TimesLogItem[]>([]);
@@ -510,6 +511,42 @@ export default function ProfilePage() {
     // 首次加载数据
     fetchGenerationHistory(currentPage);
   }, [isLoaded, userId, currentPage]); // 使用userId替换user作为依赖项
+
+  // Auto-refresh effect - 每30秒自动刷新一次
+  useEffect(() => {
+    if (!isLoaded || !userId) return;
+
+    const startAutoRefresh = () => {
+      const interval = setInterval(() => {
+        // 静默刷新，不显示loading状态
+        const fetchGenerationHistory = async (page: number) => {
+          try {
+            const result = await api.user.getUserOpusList(page, historyPageSize);
+            if (result.code === 200 && result.data) {
+              setHistoryList(result.data.list || []);
+              setTotalPages(result.data.total_page || 0);
+              setTotalHistoryCount(result.data.count || 0);
+            }
+          } catch (error) {
+            console.error("Auto-refresh failed:", error);
+          }
+        };
+        fetchGenerationHistory(currentPage);
+      }, 30000); // 30秒
+
+      setAutoRefreshInterval(interval);
+    };
+
+    startAutoRefresh();
+
+    // 清理定时器
+    return () => {
+      if (autoRefreshInterval) {
+        clearInterval(autoRefreshInterval);
+        setAutoRefreshInterval(null);
+      }
+    };
+  }, [isLoaded, userId, currentPage]);
 
   // 处理分页变化
   const handlePageChange = (newPage: number) => {
@@ -970,9 +1007,10 @@ export default function ProfilePage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             {historyList.length > 0 ? (
               historyList
-                .filter(item => item.status !== -1 || (item.status === -1 && item.generate_image === '')) // 显示成功作品和失败作品
+                .filter(item => item.status === 0 || item.status === 1 || (item.status === -1 && item.generate_image === '')) // 显示成功作品、失败作品和生成中的作品
                 .map((item) => {
                   const isFailed = item.status === -1 && item.generate_image === '';
+                  const isGenerating = item.status === 0 && item.generate_image === '';
                   
                   // 从 size_image 中提取模型名称
                   const getModelName = (sizeImage: string) => {
@@ -992,7 +1030,7 @@ export default function ProfilePage() {
                       )}
                       
                       {/* 下载按钮 - 只在成功作品时显示 */}
-                      {!isFailed && ( 
+                      {!isFailed && !isGenerating && ( 
                         <button 
                           className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
                           onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
@@ -1012,6 +1050,17 @@ export default function ProfilePage() {
                               </div>
                               <p className="text-red-400 font-semibold text-sm mb-1">Generation Failed</p>
                               <p className="text-red-300/70 text-xs">Please try again</p>
+                            </div>
+                          </div>
+                        ) : isGenerating ? (
+                          // 正在生成中占位符
+                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex flex-col items-center justify-center border-2 border-dashed border-primary/50">
+                            <div className="text-center p-4">
+                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <ReloadIcon className="h-6 w-6 text-primary animate-spin" />
+                              </div>
+                              <p className="text-primary font-semibold text-sm mb-1">Generating...</p>
+                              <p className="text-primary/70 text-xs">Please wait</p>
                             </div>
                           </div>
                         ) : (

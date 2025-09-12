@@ -223,7 +223,10 @@ export default function InfiniteTalkPage() {
                     <p className="text-slate-300 text-sm">
                       For best results, use high-quality images with clear facial features and audio with good clarity. 
                       The AI works better with frontal face images and clear speech audio. 
-                      <strong className="text-yellow-400">Maximum generation duration is 120 seconds.</strong>
+                      <strong className="text-yellow-400">Maximum generation duration is 600 seconds.</strong>
+                    </p>
+                    <p className="text-slate-300 text-sm mt-2">
+                      <strong className="text-primary">Credit Cost:</strong> Every 5 seconds, 480P requires 5 credits, 720P requires 10 credits.
                     </p>
                   </div>
                 </div>
