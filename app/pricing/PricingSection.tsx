@@ -383,7 +383,7 @@ export default function PricingSection() {
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 text-white">
               <span>✓ Choose one-time or subscription</span>
-              <span>✓ Credits never expire (one-time)</span>
+              <span>✓ Credits never expire</span>
               <span>✓ Secure payments</span>
               <span>✓ Email support</span>
             </div>
