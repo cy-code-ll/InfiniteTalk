@@ -101,6 +101,17 @@ export function Navbar() {
               Price
             </Link>
           </SheetClose>
+          <SheetClose asChild>
+            <Link
+              href="/free/referral"
+              className={cn(
+                'nav-link-item px-4 py-2 rounded-md transition-colors',
+                pathname === '/free/referral' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              )}
+            >
+              Referral
+            </Link>
+          </SheetClose>
         </>
       );
     }
@@ -161,6 +172,15 @@ export function Navbar() {
           )}
         >
           Price
+        </Link>
+        <Link
+          href="/free/referral"
+          className={cn(
+            'nav-link-item px-4 py-2 rounded-md transition-colors',
+            pathname === '/free/referral' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+          )}
+        >
+          Referral
         </Link>
       </>
     );

@@ -50,6 +50,7 @@ export const authApi = {
     nickname?: string;
     avatar?: string;
     from_login: string;
+    ivcode?: string;
   }) => {
     const isDevelopment = process.env.NODE_ENV === 'development';
     const endpoint = isDevelopment ? 'loginAuthCyTest' : 'loginAuth';
@@ -127,6 +128,53 @@ export const userApi = {
 
     return handleApiError(response);
   },
+    // 获取推广链接
+    getPromotionLink: async () => {
+      const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_link`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+  
+      return handleApiError(response);
+    },
+  
+    // 获取推广统计数据
+    getPromotionStatistics: async () => {
+      const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_statistics`, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+  
+      return handleApiError(response);
+    },
+  
+    // 获取推广收益明细
+    getPromotionScoreLog: async (page: number = 1, pageSize: number = 10, status?: number) => {
+      let url = `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_score_log?page=${page}&page_size=${pageSize}`;
+      if (status !== undefined) {
+        url += `&status=${status}`;
+      }
+      
+      const response = await fetch(url, {
+        method: 'GET',
+        headers: getHeaders(),
+      });
+  
+      return handleApiError(response);
+    },
+  
+    // 获取推广用户列表
+    getPromotionUsers: async (page: number = 1, pageSize: number = 10) => {
+      const response = await fetch(
+        `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_users?page=${page}&page_size=${pageSize}`,
+        {
+          method: 'GET',
+          headers: getHeaders(),
+        }
+      );
+  
+      return handleApiError(response);
+    },
 };
 
 // 支付相关接口
@@ -432,6 +480,31 @@ export const cmsApi = {
   },
 };
 
+// 站点配置相关接口
+export const websiteApi = {
+  // 获取站点配置
+  getConfig: async () => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/website/config`, {
+      method: 'GET',
+      headers: getHeaders(false), // 不需要认证
+    });
+
+    return handleApiError(response);
+  },
+
+  // 获取公开作品列表
+  getOpenOpusList: async (page: number = 1, pageSize: number = 10) => {
+    const response = await fetch(
+      `${API_CONFIG.VIDOR_AI_BASE}/api/website/open/opus_list?page=${page}&page_size=${pageSize}`,
+      {
+        method: 'GET',
+        headers: getHeaders(false), // 不需要认证
+      }
+    );
+
+    return handleApiError(response);
+  },
+};
 // 重新导出FriendLink类型以保持兼容性
 export type { FriendLink } from './server-api';
 
@@ -472,6 +545,8 @@ export const api = {
   payment: paymentApi,
   video: videoApi,
   infiniteTalk: infiniteTalkApi,
+  website: websiteApi,
   cms: cmsApi,
+
   withRetry: apiWithRetry,
 }; 
