@@ -178,7 +178,7 @@ export default function MultiHero() {
     }
 
     setIsGenerating(true);
-    setGenerationState({ status: 'loading', progress: 0 });
+    setGenerationState({ status: 'loading', progress: 0, taskId: undefined, videoUrl: undefined }); // 重置状态，清除之前的 taskId
     setTaskCreated(false); // 重置任务创建状态
     
     // 创建新的 AbortController
@@ -248,7 +248,7 @@ export default function MultiHero() {
     } catch (error) {
       console.error('Generation failed:', error);
       clearInterval(progressInterval);
-      setGenerationState({ status: 'demo', progress: 0 });
+      setGenerationState({ status: 'demo', progress: 0, taskId: undefined, videoUrl: undefined });
       setTaskCreated(false); // 重置任务创建状态
       
       const errorMessage = error instanceof Error ? error.message : 'Generation failed';
