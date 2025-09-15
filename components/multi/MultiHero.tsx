@@ -101,9 +101,12 @@ export default function MultiHero() {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
       if (file) {
-        // 检查音频格式
-        const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
-        if (!validFormats.includes(file.type)) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        
+        if (!hasValidExtension) {
           setIsInvalidAudioModalOpen(true);
           return;
         }
@@ -119,9 +122,12 @@ export default function MultiHero() {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
       if (file) {
-        // 检查音频格式
-        const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
-        if (!validFormats.includes(file.type)) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        
+        if (!hasValidExtension) {
           setIsInvalidAudioModalOpen(true);
           return;
         }
