@@ -254,16 +254,40 @@ export const videoApi = {
 
   // 轮询检查任务状态，直到完成或失败
   pollTaskStatus: async (
-    taskId: string
+    taskId: string,
+    abortController?: AbortController
   ): Promise<{ video_url: string; status: number; status_msg: string }> => {
     return new Promise((resolve, reject) => {
-      const poll = async () => {
-        try {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let isAborted = false;
 
+      // 监听取消信号
+      if (abortController) {
+        abortController.signal.addEventListener('abort', () => {
+          isAborted = true;
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          reject(new Error('Polling cancelled'));
+        });
+      }
+
+      const poll = async () => {
+        // 检查是否已取消
+        if (isAborted || abortController?.signal.aborted) {
+          return;
+        }
+
+        try {
           const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/infinitetalk/check_task?task_id=${taskId}`, {
             method: 'GET',
             headers: getHeaders(),
           });
+
+          // 再次检查是否已取消
+          if (isAborted || abortController?.signal.aborted) {
+            return;
+          }
 
           const result = await handleApiError(response);
 
@@ -286,10 +310,13 @@ export const videoApi = {
             reject(new Error(status_msg || 'Task failed'));
           } else {
             // 任务进行中，2秒后继续轮询
-            setTimeout(poll, 2000);
+            timeoutId = setTimeout(poll, 2000);
           }
         } catch (error) {
-          reject(error);
+          // 如果是取消错误，不重复抛出
+          if (!isAborted && !abortController?.signal.aborted) {
+            reject(error);
+          }
         }
       };
 
@@ -347,12 +374,37 @@ export const infiniteTalkApi = {
   // 轮询检查InfiniteTalk任务状态
   pollTaskStatus: async (
     taskId: string,
-    onProgress?: (progress: number, statusMsg: string) => void
+    onProgress?: (progress: number, statusMsg: string) => void,
+    abortController?: AbortController
   ): Promise<{ image_url: string; status: number; status_msg: string }> => {
     return new Promise((resolve, reject) => {
+      let timeoutId: NodeJS.Timeout | null = null;
+      let isAborted = false;
+
+      // 监听取消信号
+      if (abortController) {
+        abortController.signal.addEventListener('abort', () => {
+          isAborted = true;
+          if (timeoutId) {
+            clearTimeout(timeoutId);
+          }
+          reject(new Error('Polling cancelled'));
+        });
+      }
+
       const poll = async () => {
+        // 检查是否已取消
+        if (isAborted || abortController?.signal.aborted) {
+          return;
+        }
+
         try {
           const result = await infiniteTalkApi.checkTaskStatus(taskId);
+
+          // 再次检查是否已取消
+          if (isAborted || abortController?.signal.aborted) {
+            return;
+          }
 
           if (result.code !== 200) {
             reject(new Error(result.msg || 'Task check failed'));
@@ -379,10 +431,13 @@ export const infiniteTalkApi = {
             reject(new Error(status_msg || 'Task failed'));
           } else {
             // 任务进行中，2秒后继续轮询
-            setTimeout(poll, 2000);
+            timeoutId = setTimeout(poll, 2000);
           }
         } catch (error) {
-          reject(error);
+          // 如果是取消错误，不重复抛出
+          if (!isAborted && !abortController?.signal.aborted) {
+            reject(error);
+          }
         }
       };
 

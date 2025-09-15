@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
@@ -44,6 +44,7 @@ export default function MultiHero() {
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const leftAudioInputRef = useRef<HTMLInputElement>(null);
@@ -52,6 +53,15 @@ export default function MultiHero() {
   const { isSignedIn } = useAuth();
   const { openSignIn } = useClerk();
   const { userInfo } = useUserInfo();
+
+  // 组件卸载时清理轮询
+  useEffect(() => {
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [abortController]);
 
   // 检查登录状态
   const checkAuthAndProceed = (callback: () => void) => {
@@ -170,6 +180,10 @@ export default function MultiHero() {
     setIsGenerating(true);
     setGenerationState({ status: 'loading', progress: 0 });
     setTaskCreated(false); // 重置任务创建状态
+    
+    // 创建新的 AbortController
+    const newAbortController = new AbortController();
+    setAbortController(newAbortController);
 
     // 启动虚假进度条 (约2-3分钟到达95%)
     const progressInterval = setInterval(() => {
@@ -215,7 +229,8 @@ export default function MultiHero() {
         // 轮询检查任务状态
         const pollResult = await api.infiniteTalk.pollTaskStatus(
           taskId,
-          () => {} // 空函数，不使用API返回的进度
+          () => {}, // 空函数，不使用API返回的进度
+          newAbortController
         );
         
         clearInterval(progressInterval);
@@ -235,12 +250,16 @@ export default function MultiHero() {
       clearInterval(progressInterval);
       setGenerationState({ status: 'demo', progress: 0 });
       setTaskCreated(false); // 重置任务创建状态
-      toast.showToast(
-        error instanceof Error ? error.message : 'Generation failed',
-        'error'
-      );
+      
+      const errorMessage = error instanceof Error ? error.message : 'Generation failed';
+      
+      // 如果是取消错误，不显示错误提示
+      if (errorMessage !== 'Polling cancelled') {
+        toast.showToast(errorMessage, 'error');
+      }
     } finally {
       setIsGenerating(false);
+      setAbortController(null); // 清理 AbortController
     }
   };
 

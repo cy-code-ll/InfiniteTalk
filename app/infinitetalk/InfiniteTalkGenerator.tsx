@@ -94,6 +94,7 @@ export default function InfiniteTalkGenerator() {
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
+  const [abortController, setAbortController] = useState<AbortController | null>(null);
 
   // 启动虚假进度条 (约1分钟到达95%)
   const startFakeProgress = () => {
@@ -143,14 +144,17 @@ export default function InfiniteTalkGenerator() {
 
 
 
-  // 组件卸载时清理定时器
+  // 组件卸载时清理定时器和轮询
   useEffect(() => {
     return () => {
       if (progressInterval) {
         clearInterval(progressInterval);
       }
+      if (abortController) {
+        abortController.abort();
+      }
     };
-  }, [progressInterval]);
+  }, [progressInterval, abortController]);
 
   // 处理图片上传
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -278,6 +282,10 @@ export default function InfiniteTalkGenerator() {
     setProgress(0);
     setTaskCreated(false); // 重置任务创建状态
     
+    // 创建新的 AbortController
+    const newAbortController = new AbortController();
+    setAbortController(newAbortController);
+    
     // 启动虚假进度条
     startFakeProgress();
 
@@ -316,7 +324,8 @@ export default function InfiniteTalkGenerator() {
       // 轮询任务状态（不使用API进度，只检查状态）
       const result = await api.infiniteTalk.pollTaskStatus(
         taskId,
-        () => {} // 空函数，不使用API返回的进度
+        () => {}, // 空函数，不使用API返回的进度
+        newAbortController
       );
 
       // 任务完成时，完成进度条
@@ -332,12 +341,18 @@ export default function InfiniteTalkGenerator() {
     } catch (error) {
       console.error('Generation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Generation failed';
-      toast.error(errorMessage);
+      
+      // 如果是取消错误，不显示错误提示
+      if (errorMessage !== 'Polling cancelled') {
+        toast.error(errorMessage);
+      }
+      
       stopFakeProgress();
       setViewState('videodemo');
       setTaskCreated(false); // 重置任务创建状态
     } finally {
       setIsGenerating(false);
+      setAbortController(null); // 清理 AbortController
       // 不在这里重置progress，让结果状态保持
     }
   };
