@@ -4,12 +4,14 @@ import React, { useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
-import { Upload, Play, Download, Loader2, X } from 'lucide-react';
+import { Upload, Play, Pause, Download, Loader2, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/toast-provider';
 import { useAuth } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import Link from 'next/link';
+import { isMobileDevice } from '@/lib/utils';
+import AudioCutterModal from '@/components/media/AudioCutterModal';
 import {
   Dialog,
   DialogContent,
@@ -37,6 +39,10 @@ export function Wans2vHero() {
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
+  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +102,70 @@ export function Wans2vHero() {
       setAudioFile(file);
       setAudioDuration(duration);
     }
+  };
+
+  // 音频预览播放/暂停
+  const previewSelectedAudio = () => {
+    if (!audioFile || !previewAudioRef.current) return;
+    const el = previewAudioRef.current;
+    try {
+      if (el.paused) {
+        el.play().catch(() => {
+          toast.showToast('Preview failed: format not supported', 'error');
+        });
+      } else {
+        el.pause();
+      }
+    } catch {
+      toast.showToast('Preview failed', 'error');
+    }
+  };
+
+  // 维护 object URL
+  React.useEffect(() => {
+    if (!audioFile) {
+      if (previewAudioRef.current) {
+        try { previewAudioRef.current.pause(); } catch {}
+      }
+      if (previewAudioUrl) URL.revokeObjectURL(previewAudioUrl);
+      setPreviewAudioUrl(null);
+      setIsPreviewPlaying(false);
+      return;
+    }
+    const url = URL.createObjectURL(audioFile);
+    setPreviewAudioUrl(url);
+    const el = previewAudioRef.current;
+    if (el) {
+      el.src = url;
+      el.load();
+    }
+    return () => {
+      if (previewAudioRef.current) {
+        try { previewAudioRef.current.pause(); } catch {}
+      }
+      URL.revokeObjectURL(url);
+    };
+  }, [audioFile]);
+
+  // 同步按钮状态
+  React.useEffect(() => {
+    const el = previewAudioRef.current;
+    if (!el) return;
+    const onPlay = () => setIsPreviewPlaying(true);
+    const onPause = () => setIsPreviewPlaying(false);
+    const onEnded = () => setIsPreviewPlaying(false);
+    el.addEventListener('play', onPlay);
+    el.addEventListener('pause', onPause);
+    el.addEventListener('ended', onEnded);
+    return () => {
+      el.removeEventListener('play', onPlay);
+      el.removeEventListener('pause', onPause);
+      el.removeEventListener('ended', onEnded);
+    };
+  }, [previewAudioRef.current]);
+
+  const openAudioPicker = () => {
+    setIsAudioModalOpen(true);
   };
 
   const handleGenerate = async () => {
@@ -270,22 +340,53 @@ export function Wans2vHero() {
 
               {/* Audio Upload */}
               <div>
-                <Label htmlFor="audio-upload" className="text-base font-semibold text-foreground mb-3 block">
-                  Upload Audio
-                </Label>
+                <div className="flex items-center justify-between mb-3">
+                  <Label htmlFor="audio-upload" className="text-base font-semibold text-foreground">
+                    Upload Audio
+                  </Label>
+                  <div>
+                    <Button
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      onClick={(e) => { e.preventDefault(); previewSelectedAudio(); }}
+                      disabled={!audioFile}
+                    >
+                      {isPreviewPlaying ? (
+                        <>
+                          <Pause className="w-4 h-4 mr-1" /> Pause
+                        </>
+                      ) : (
+                        <>
+                          <Play className="w-4 h-4 mr-1" /> Preview
+                        </>
+                      )}
+                    </Button>
+                    {/* Hidden audio for preview */}
+                    <audio ref={previewAudioRef} className="hidden" controls preload="auto">
+                      {previewAudioUrl ? (
+                        <>
+                          <source src={previewAudioUrl} type={audioFile?.type || ''} />
+                          <source src={previewAudioUrl} type="audio/mpeg" />
+                          <source src={previewAudioUrl} type="audio/mp4" />
+                        </>
+                      ) : null}
+                    </audio>
+                  </div>
+                </div>
                 <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
                   <input
                     ref={audioInputRef}
                     id="audio-upload"
                     type="file"
-                    accept="audio/*"
+                    accept=".mp3,.wav,.m4a,.ogg,.flac"
                     onChange={handleAudioUpload}
                     className="hidden"
                   />
-                                     <div 
+                  <div 
                      className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                     onClick={() => audioInputRef.current?.click()}
+                    onClick={openAudioPicker}
                    >
                      <input
                        type="text"
@@ -499,6 +600,21 @@ export function Wans2vHero() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Audio Cutter Modal (Desktop only) */}
+      <AudioCutterModal
+        open={isAudioModalOpen}
+        onOpenChange={setIsAudioModalOpen}
+        onConfirm={(file, dur) => {
+          // Duration check: max 600s for this page
+          if (dur > 600) {
+            toast.showToast('Audio file must be 600 seconds or less', 'error');
+            return;
+          }
+          setAudioFile(file);
+          setAudioDuration(dur);
+        }}
+      />
     </section>
   );
 }

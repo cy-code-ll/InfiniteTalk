@@ -9,7 +9,7 @@ import { useUser, useClerk } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
 import { api } from '@/lib/api';
-import { cn } from '@/lib/utils';
+import { cn, isMobileDevice } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import {
@@ -18,6 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import AudioCutterModal from '@/components/media/AudioCutterModal';
 
 type ViewState = 'videodemo' | 'loading' | 'result';
 type TabMode = 'image-to-video' | 'video-to-video';
@@ -95,6 +96,70 @@ export default function InfiniteTalkGenerator() {
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
+  const previewAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
+  const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+
+  // Preview helper: robust playback with multiple type fallbacks
+  const previewSelectedAudio = useCallback(() => {
+    if (!selectedAudio || !previewAudioRef.current) return;
+    const el = previewAudioRef.current;
+    try {
+      if (el.paused) {
+        el.play().catch(() => {
+          toast.error('Preview failed: format not supported');
+        });
+      } else {
+        el.pause();
+      }
+    } catch {
+      toast.error('Preview failed');
+    }
+  }, [selectedAudio, toast]);
+
+  // Maintain object URL for preview <audio>
+  useEffect(() => {
+    if (!selectedAudio) {
+      if (previewAudioRef.current) {
+        try { previewAudioRef.current.pause(); } catch { /* no-op */ }
+      }
+      if (previewAudioUrl) URL.revokeObjectURL(previewAudioUrl);
+      setPreviewAudioUrl(null);
+      setIsPreviewPlaying(false);
+      return;
+    }
+    const url = URL.createObjectURL(selectedAudio);
+    setPreviewAudioUrl(url);
+    const el = previewAudioRef.current;
+    if (el) {
+      el.src = url;
+      el.load();
+    }
+    return () => {
+      if (previewAudioRef.current) {
+        try { previewAudioRef.current.pause(); } catch { /* no-op */ }
+      }
+      URL.revokeObjectURL(url);
+    };
+  }, [selectedAudio]);
+
+  // Track play/pause/ended to update button state
+  useEffect(() => {
+    const el = previewAudioRef.current;
+    if (!el) return;
+    const onPlay = () => setIsPreviewPlaying(true);
+    const onPause = () => setIsPreviewPlaying(false);
+    const onEnded = () => setIsPreviewPlaying(false);
+    el.addEventListener('play', onPlay);
+    el.addEventListener('pause', onPause);
+    el.addEventListener('ended', onEnded);
+    return () => {
+      el.removeEventListener('play', onPlay);
+      el.removeEventListener('pause', onPause);
+      el.removeEventListener('ended', onEnded);
+    };
+  }, [previewAudioRef.current]);
 
   // 启动虚假进度条 (约1分钟到达95%)
   const startFakeProgress = () => {
@@ -196,6 +261,10 @@ export default function InfiniteTalkGenerator() {
         URL.revokeObjectURL(audio.src);
       });
     }
+  };
+
+  const openAudioPicker = () => {
+    setIsAudioModalOpen(true);
   };
 
   // 删除选中的图片
@@ -476,11 +545,45 @@ export default function InfiniteTalkGenerator() {
 
             {/* Audio Upload */}
             <div className="mb-6">
-              <label className="block text-white font-medium mb-3">Upload Audio <span className="text-red-500">*</span></label>
+                <div className="flex items-center justify-between mb-3">
+                <label className="block text-white font-medium">Upload Audio <span className="text-red-500">*</span></label>
+                <div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="outline"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        previewSelectedAudio();
+                      }}
+                    disabled={!selectedAudio}
+                  >
+                    {isPreviewPlaying ? (
+                      <>
+                        <Pause className="w-4 h-4 mr-1" /> Pause
+                      </>
+                    ) : (
+                      <>
+                        <Play className="w-4 h-4 mr-1" /> Preview
+                      </>
+                    )}
+                  </Button>
+                    {/* Hidden audio element for robust preview */}
+                    <audio ref={previewAudioRef} className="hidden" controls preload="auto">
+                      {previewAudioUrl ? (
+                        <>
+                          <source src={previewAudioUrl} type={selectedAudio?.type || ''} />
+                          <source src={previewAudioUrl} type="audio/mpeg" />
+                          <source src={previewAudioUrl} type="audio/mp4" />
+                        </>
+                      ) : null}
+                    </audio>
+                </div>
+              </div>
               <p className="text-slate-400 text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
               <div className="relative">
                 <div
-                  onClick={() => audioInputRef.current?.click()}
+                  onClick={openAudioPicker}
                   className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50 cursor-pointer"
                 >
                   {selectedAudio ? (
@@ -512,7 +615,7 @@ export default function InfiniteTalkGenerator() {
                 <input
                   ref={audioInputRef}
                   type="file"
-                  accept="audio/*"
+                  accept=".mp3,.wav,.m4a,.ogg,.flac"
                   onChange={handleAudioUpload}
                   className="hidden"
                 />
@@ -742,6 +845,16 @@ export default function InfiniteTalkGenerator() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Audio Cutter Modal (Desktop only) */}
+      <AudioCutterModal
+        open={isAudioModalOpen}
+        onOpenChange={setIsAudioModalOpen}
+        onConfirm={(file, dur) => {
+          setSelectedAudio(file);
+          setAudioDuration(Math.ceil(dur));
+        }}
+      />
     </div>
   );
 }

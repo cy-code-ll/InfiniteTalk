@@ -5,7 +5,7 @@ import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
 import { Textarea } from '../ui/textarea';
-import { Upload, Play, Download, Loader2, X, HelpCircle } from 'lucide-react';
+import { Upload, Play, Pause, Download, Loader2, X, HelpCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '../ui/toast-provider';
 import { useAuth, useClerk } from '@clerk/nextjs';
@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from "../ui/dialog";
+import { isMobileDevice } from '@/lib/utils';
+import AudioCutterModal from '@/components/media/AudioCutterModal';
 
 interface GenerationState {
   status: 'demo' | 'loading' | 'result';
@@ -45,6 +47,13 @@ export default function MultiHero() {
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  const [isAudioModalOpen, setIsAudioModalOpen] = useState<false | 'left' | 'right'>(false);
+  const leftPreviewRef = useRef<HTMLAudioElement | null>(null);
+  const rightPreviewRef = useRef<HTMLAudioElement | null>(null);
+  const [leftPreviewUrl, setLeftPreviewUrl] = useState<string | null>(null);
+  const [rightPreviewUrl, setRightPreviewUrl] = useState<string | null>(null);
+  const [isLeftPlaying, setIsLeftPlaying] = useState(false);
+  const [isRightPlaying, setIsRightPlaying] = useState(false);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const leftAudioInputRef = useRef<HTMLInputElement>(null);
@@ -137,6 +146,76 @@ export default function MultiHero() {
         setRightAudioDuration(duration);
       }
     });
+  };
+
+  // Left preview lifecycle
+  useEffect(() => {
+    if (!leftAudioFile) {
+      if (leftPreviewRef.current) { try { leftPreviewRef.current.pause(); } catch {} }
+      if (leftPreviewUrl) URL.revokeObjectURL(leftPreviewUrl);
+      setLeftPreviewUrl(null);
+      setIsLeftPlaying(false);
+      return;
+    }
+    const url = URL.createObjectURL(leftAudioFile);
+    setLeftPreviewUrl(url);
+    const el = leftPreviewRef.current;
+    if (el) { el.src = url; el.load(); }
+    return () => { if (leftPreviewRef.current) { try { leftPreviewRef.current.pause(); } catch {} } URL.revokeObjectURL(url); };
+  }, [leftAudioFile]);
+
+  useEffect(() => {
+    const el = leftPreviewRef.current; if (!el) return;
+    const onPlay = () => setIsLeftPlaying(true);
+    const onPause = () => setIsLeftPlaying(false);
+    const onEnded = () => setIsLeftPlaying(false);
+    el.addEventListener('play', onPlay); el.addEventListener('pause', onPause); el.addEventListener('ended', onEnded);
+    return () => { el.removeEventListener('play', onPlay); el.removeEventListener('pause', onPause); el.removeEventListener('ended', onEnded); };
+  }, [leftPreviewRef.current]);
+
+  const previewLeft = () => {
+    if (!leftAudioFile || !leftPreviewRef.current) return;
+    const el = leftPreviewRef.current;
+    if (el.paused) { el.play().catch(() => toast.showToast('Preview failed', 'error')); } else { el.pause(); }
+  };
+
+  // Right preview lifecycle
+  useEffect(() => {
+    if (!rightAudioFile) {
+      if (rightPreviewRef.current) { try { rightPreviewRef.current.pause(); } catch {} }
+      if (rightPreviewUrl) URL.revokeObjectURL(rightPreviewUrl);
+      setRightPreviewUrl(null);
+      setIsRightPlaying(false);
+      return;
+    }
+    const url = URL.createObjectURL(rightAudioFile);
+    setRightPreviewUrl(url);
+    const el = rightPreviewRef.current;
+    if (el) { el.src = url; el.load(); }
+    return () => { if (rightPreviewRef.current) { try { rightPreviewRef.current.pause(); } catch {} } URL.revokeObjectURL(url); };
+  }, [rightAudioFile]);
+
+  useEffect(() => {
+    const el = rightPreviewRef.current; if (!el) return;
+    const onPlay = () => setIsRightPlaying(true);
+    const onPause = () => setIsRightPlaying(false);
+    const onEnded = () => setIsRightPlaying(false);
+    el.addEventListener('play', onPlay); el.addEventListener('pause', onPause); el.addEventListener('ended', onEnded);
+    return () => { el.removeEventListener('play', onPlay); el.removeEventListener('pause', onPause); el.removeEventListener('ended', onEnded); };
+  }, [rightPreviewRef.current]);
+
+  const previewRight = () => {
+    if (!rightAudioFile || !rightPreviewRef.current) return;
+    const el = rightPreviewRef.current;
+    if (el.paused) { el.play().catch(() => toast.showToast('Preview failed', 'error')); } else { el.pause(); }
+  };
+
+  const openLeftAudioPicker = () => {
+    setIsAudioModalOpen('left');
+  };
+
+  const openRightAudioPicker = () => {
+    setIsAudioModalOpen('right');
   };
 
   // 计算积分消耗
@@ -320,13 +399,22 @@ export default function MultiHero() {
             <div className="space-y-6">
               {/* Left Audio Upload */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 justify-between">
                   <Label htmlFor="left-audio-upload" className="text-base font-semibold text-foreground">
                     Left Audio <span className="text-red-500">*</span>
                   </Label>
-                  <Tooltip content="Upload the first audio file for the left character">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </Tooltip>
+                  <div>
+                    <Button type="button" size="sm" variant="outline" onClick={(e) => { e.preventDefault(); previewLeft(); }} disabled={!leftAudioFile}>
+                      {isLeftPlaying ? (<><Pause className="w-4 h-4 mr-1" /> Pause</>) : (<><Play className="w-4 h-4 mr-1" /> Preview</>)}
+                    </Button>
+                    <audio ref={leftPreviewRef} className="hidden" controls preload="auto">
+                      {leftPreviewUrl ? (<>
+                        <source src={leftPreviewUrl} type={leftAudioFile?.type || ''} />
+                        <source src={leftPreviewUrl} type="audio/mpeg" />
+                        <source src={leftPreviewUrl} type="audio/mp4" />
+                      </>) : null}
+                    </audio>
+                  </div>
                 </div>
                 <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
@@ -334,13 +422,13 @@ export default function MultiHero() {
                     ref={leftAudioInputRef}
                     id="left-audio-upload"
                     type="file"
-                    accept="audio/*"
+                    accept=".mp3,.wav,.m4a,.ogg,.flac"
                     onChange={handleLeftAudioUpload}
                     className="hidden"
                   />
                   <div 
                     className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => checkAuthAndProceed(() => leftAudioInputRef.current?.click())}
+                    onClick={() => checkAuthAndProceed(openLeftAudioPicker)}
                   >
                     <input
                       type="text"
@@ -359,13 +447,22 @@ export default function MultiHero() {
 
               {/* Right Audio Upload */}
               <div>
-                <div className="flex items-center gap-2 mb-2">
+                <div className="flex items-center gap-2 mb-2 justify-between">
                   <Label htmlFor="right-audio-upload" className="text-base font-semibold text-foreground">
                     Right Audio <span className="text-red-500">*</span>
                   </Label>
-                  <Tooltip content="Upload the second audio file for the right character">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </Tooltip>
+                  <div>
+                    <Button type="button" size="sm" variant="outline" onClick={(e) => { e.preventDefault(); previewRight(); }} disabled={!rightAudioFile}>
+                      {isRightPlaying ? (<><Pause className="w-4 h-4 mr-1" /> Pause</>) : (<><Play className="w-4 h-4 mr-1" /> Preview</>)}
+                    </Button>
+                    <audio ref={rightPreviewRef} className="hidden" controls preload="auto">
+                      {rightPreviewUrl ? (<>
+                        <source src={rightPreviewUrl} type={rightAudioFile?.type || ''} />
+                        <source src={rightPreviewUrl} type="audio/mpeg" />
+                        <source src={rightPreviewUrl} type="audio/mp4" />
+                      </>) : null}
+                    </audio>
+                  </div>
                 </div>
                 <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
                 <div className="relative">
@@ -373,13 +470,13 @@ export default function MultiHero() {
                     ref={rightAudioInputRef}
                     id="right-audio-upload"
                     type="file"
-                    accept="audio/*"
+                    accept=".mp3,.wav,.m4a,.ogg,.flac"
                     onChange={handleRightAudioUpload}
                     className="hidden"
                   />
                   <div 
                     className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => checkAuthAndProceed(() => rightAudioInputRef.current?.click())}
+                    onClick={() => checkAuthAndProceed(openRightAudioPicker)}
                   >
                     <input
                       type="text"
@@ -704,6 +801,21 @@ export default function MultiHero() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Audio Cutter Modal (Desktop only) */}
+      <AudioCutterModal
+        open={!!isAudioModalOpen}
+        onOpenChange={(o) => setIsAudioModalOpen(o ? (isAudioModalOpen || 'left') : false)}
+        onConfirm={(file, dur) => {
+          if (isAudioModalOpen === 'left') {
+            setLeftAudioFile(file);
+            setLeftAudioDuration(Math.ceil(dur));
+          } else if (isAudioModalOpen === 'right') {
+            setRightAudioFile(file);
+            setRightAudioDuration(Math.ceil(dur));
+          }
+        }}
+      />
     </section>
   );
 }
