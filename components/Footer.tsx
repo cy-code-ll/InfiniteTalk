@@ -73,6 +73,14 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
               </li>
               <li>
                 <Link 
+                  href="/app"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                >
+                  App Download
+                </Link>
+              </li>
+              <li>
+                <Link 
                   href="/blog"
                   className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
                 >
