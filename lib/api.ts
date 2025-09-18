@@ -128,6 +128,18 @@ export const userApi = {
 
     return handleApiError(response);
   },
+  // 获取用户支付记录（为与页面调用保持一致）
+  getPayLog: async (page: number = 1, pageSize: number = 10) => {
+    const response = await fetch(
+      `${API_CONFIG.VIDOR_AI_BASE}/api/user/pay_log?page=${page}&page_size=${pageSize}`,
+      {
+        method: 'GET',
+        headers: getHeaders(),
+      }
+    );
+
+    return handleApiError(response);
+  },
     // 获取推广链接
     getPromotionLink: async () => {
       const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_link`, {
@@ -202,6 +214,19 @@ export const paymentApi = {
     return handleApiError(response);
   },
 
+  // 获取支付记录（对齐 seedance 实现）
+  getPayLog: async (page: number = 1, pageSize: number = 10) => {
+    const response = await fetch(
+      `${API_CONFIG.VIDOR_AI_BASE}/api/user/pay_log?page=${page}&page_size=${pageSize}`,
+      {
+        method: 'GET',
+        headers: getHeaders(),
+      }
+    );
+
+    return handleApiError(response);
+  },
+
   // 取消订阅
   cancelSubscription: async (id: number) => {
     const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/subscription/cancel`, {
@@ -210,6 +235,21 @@ export const paymentApi = {
       body: JSON.stringify({
         id: id,
       }),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 创建发票（与 seedance 保持一致）
+  createInvoice: async (params: {
+    company_name: string;
+    company_address?: string;
+    pay_log_id: number;
+  }) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/create_invoice`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(params),
     });
 
     return handleApiError(response);

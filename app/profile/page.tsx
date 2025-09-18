@@ -30,6 +30,7 @@ import { api } from '@/lib/api';
 import { User } from "@clerk/nextjs/server";
 import { cmsApi } from "@/lib/api";
 import { useToast } from '@/components/ui/toast-provider';
+import InvoiceTemplate from '../../components/InvoiceTemplate';
 
 // 友情链接数据类型定义
 interface FriendLink {
@@ -89,6 +90,33 @@ interface GenerationHistoryResponse {
   total_page: number;
 }
 
+// 按日期分组类型与函数
+interface GroupedHistoryItem {
+  date: string;
+  items: GenerationHistoryItem[];
+}
+
+const groupHistoryByDate = (items: GenerationHistoryItem[]): GroupedHistoryItem[] => {
+  const groups: Record<string, GenerationHistoryItem[]> = {};
+  items.forEach((item) => {
+    const date = new Date(item.created_at * 1000).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+    });
+    if (!groups[date]) groups[date] = [];
+    groups[date].push(item);
+  });
+
+  return Object.entries(groups)
+    .map(([date, itemsForDate]) => ({ date, items: itemsForDate }))
+    .sort((a, b) => {
+      const aTs = a.items[0]?.created_at ?? 0;
+      const bTs = b.items[0]?.created_at ?? 0;
+      return bTs - aTs;
+    });
+};
+
 // 定义积分记录项的类型
 interface TimesLogItem {
   id: number;
@@ -103,6 +131,25 @@ interface TimesLogItem {
 interface TimesLogResponse {
   count: number;
   list: TimesLogItem[];
+  total_page: number;
+}
+
+// 定义支付记录项的类型
+interface PayLogItem {
+  id: number;
+  user_id: number;
+  created_at: number;
+  amount: number;
+  currency: string;
+  pay_type: string;
+  price_id?: string;
+  updated_at: number;
+}
+
+// 定义支付记录 API 返回的数据结构
+interface PayLogResponse {
+  count: number;
+  list: PayLogItem[];
   total_page: number;
 }
 
@@ -180,8 +227,8 @@ function getPaginationItems(currentPage: number, totalPages: number, siblingCoun
 
 // --- 将下载逻辑定义为独立函数 --- 
 async function downloadMediaWithCors(
-  mediaUrl: string, 
-  filename: string, 
+  mediaUrl: string,
+  filename: string,
   setIsDownloading: (id: number | null) => void, // 用于更新加载状态
   mediaId: number, // 媒体 ID 用于设置加载状态
   showToast: (message: string, type: 'success' | 'error' | 'info') => void // toast显示函数
@@ -205,7 +252,7 @@ async function downloadMediaWithCors(
     // 4. 创建 <a> 标签并触发下载
     const link = document.createElement('a');
     link.href = objectUrl;
-            link.download = filename || `ideavido-media-${mediaId}.mp4`; // 使用传入的 filename 或生成一个
+    link.download = filename || `ideavido-media-${mediaId}.mp4`; // 使用传入的 filename 或生成一个
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -225,9 +272,9 @@ async function downloadMediaWithCors(
 
     // 检查是否是网络错误或类型错误（通常与 CORS 相关）
     if (error.message.includes('Failed to fetch') || error.name === 'TypeError') {
-        showToast(`${errorMessage} - CORS error. Check server configuration.`, 'error');
+      showToast(`${errorMessage} - CORS error. Check server configuration.`, 'error');
     } else {
-        showToast(`${errorMessage} ${genericMessage}`, 'error');
+      showToast(`${errorMessage} ${genericMessage}`, 'error');
     }
   } finally {
     setIsDownloading(null); // 结束下载（无论成功或失败），清除加载状态
@@ -239,7 +286,7 @@ const formatTimestamp = (timestamp: number): string => {
   if (!timestamp) return 'N/A';
   try {
     return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric', month: 'long', day: 'numeric', 
+      year: 'numeric', month: 'long', day: 'numeric',
       hour: '2-digit', minute: '2-digit'
     }).format(new Date(timestamp * 1000));
   } catch (e) {
@@ -292,6 +339,28 @@ export default function ProfilePage() {
   const [subscriptionError, setSubscriptionError] = useState<string | null>(null);
   const [isSubscriptionDialogOpen, setIsSubscriptionDialogOpen] = useState(false);
   const [cancellingSubscriptionId, setCancellingSubscriptionId] = useState<number | null>(null);
+
+  // 支付记录状态（Pay Log）
+  const [payLogList, setPayLogList] = useState<PayLogItem[]>([]);
+  const [isLoadingPayLog, setIsLoadingPayLog] = useState(false);
+  const [payLogError, setPayLogError] = useState<string | null>(null);
+  const [payLogCurrentPage, setPayLogCurrentPage] = useState(1);
+  const [payLogTotalPages, setPayLogTotalPages] = useState(0);
+  const [isPayLogDialogOpen, setIsPayLogDialogOpen] = useState(false);
+  const payLogPageSize = 10;
+
+  // 发票状态
+  const [isInvoiceDialogOpen, setIsInvoiceDialogOpen] = useState(false);
+  const [selectedPayLogId, setSelectedPayLogId] = useState<number | null>(null);
+  const [invoiceType, setInvoiceType] = useState<'personal' | 'business'>('personal');
+  const [companyName, setCompanyName] = useState('');
+  const [isCreatingInvoice, setIsCreatingInvoice] = useState(false);
+  const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [showInvoicePreview, setShowInvoicePreview] = useState(false);
+
+  // 临时假数据用于测试样式（已移除）
+
+  // 临时支付记录假数据（已移除）
 
   // 获取积分记录数据的函数
   const fetchTimesLog = async (page: number) => {
@@ -411,6 +480,186 @@ export default function ProfilePage() {
   // 格式化特性列表
   const formatFeatures = (features: string): string[] => {
     return features.split(',').map(feature => feature.trim());
+  };
+
+  // 统一弹窗表格样式
+  const dialogTable = {
+    wrapper: 'rounded-lg border border-border overflow-x-auto',
+    table: 'w-full table-fixed',
+    headCell: 'text-left px-6 py-3 md:py-4 text-sm font-semibold text-muted-foreground',
+    cell: 'px-6 py-3 md:py-4 text-sm',
+    row: 'border-b border-border hover:bg-muted/50',
+    mono: 'text-muted-foreground text-sm font-mono',
+    pillBase: 'inline-flex items-center px-3 py-1.5 rounded-full text-sm font-medium',
+  } as const;
+
+  // 打开支付记录弹窗
+  const handleOpenPayLogDialog = () => {
+    setIsPayLogDialogOpen(true);
+    setPayLogCurrentPage(1);
+    fetchPayLog(1);
+  };
+
+  // 获取支付记录
+  const fetchPayLog = async (page: number) => {
+    if (!isLoaded || !userId) return;
+
+    setIsLoadingPayLog(true);
+    setPayLogError(null);
+    try {
+      const result = await api.user.getPayLog(page, payLogPageSize);
+      if (result.code === 200 && result.data) {
+        setPayLogList(result.data.list || []);
+        setPayLogTotalPages(result.data.total_page || 0);
+      } else {
+        setPayLogList([]);
+        setPayLogTotalPages(0);
+        setPayLogError(result.msg || 'Failed to fetch pay log');
+      }
+    } catch (error) {
+      setPayLogError(error instanceof Error ? error.message : 'An unknown error occurred fetching pay log');
+      setPayLogList([]);
+      setPayLogTotalPages(0);
+    } finally {
+      setIsLoadingPayLog(false);
+    }
+  };
+
+  // 支付记录翻页
+  const handlePayLogPageChange = (newPage: number) => {
+    if (newPage >= 1 && newPage <= payLogTotalPages && newPage !== payLogCurrentPage) {
+      setPayLogCurrentPage(newPage);
+      fetchPayLog(newPage);
+    }
+  };
+
+  // 打开发票弹窗
+  const handleOpenInvoiceDialog = (payLogId: number) => {
+    setSelectedPayLogId(payLogId);
+    setInvoiceType('personal');
+    setCompanyName('');
+    setIsInvoiceDialogOpen(true);
+  };
+
+  // 价格映射（参考 seedance）
+  const getPriceFromPriceId = (priceId?: string): string => {
+    if (!priceId) return '-';
+    const priceMap: Record<string, string> = {
+      // Legacy/seedance ids
+      'C938Z6WZUH7WU': '$1',
+      '2HVS2EBUXQJMC': '$5',
+      'P-63W46975WN208225XNBFEG4A': '$10',
+      'MMLMFFTHKPXHG': '$10',
+      'price_1RjVFUAxK12WUhXq5i3sSm7G': '$10',
+      'P-06V038958U832370VNBFHR5Q': '$30',
+      'U9ANZBSMDW4WJ': '$30',
+      'price_1RjVFdAxK12WUhXqCxSKnNVi': '$30',
+      'AM3HRVSV2C2GY': '$99',
+      'price_1RjVFlAxK12WUhXqlbatB1um': '$99',
+      'P-9A720338VD080470HNBFHSWA': '$100',
+
+      // InfiniteTalk current PricingSection one-time plans
+      'price_1S0bzJ2LCxiz8WFQshNuYpsJ': '$9.9',   // Starter 90 credits
+      'price_1S0bze2LCxiz8WFQJBMjVxi0': '$29.9', // Pro 400 credits
+      'price_1S0bzt2LCxiz8WFQXQ5Foe8K': '$49.9', // Ultimate 800 credits
+      'price_1S3sev2LCxiz8WFQana9TXxD': '$99.9', // Enterprise 1800 credits
+
+      // InfiniteTalk subscription plans
+      'price_1S6QPW2LCxiz8WFQit6OMKPr': '$9.9',  // sub-starter 100 credits
+      'price_1S6QPh2LCxiz8WFQZ3HexZwV': '$29.9', // sub-pro 480 credits
+      'price_1S6QQX2LCxiz8WFQIegCJKHt': '$49.9', // sub-ultimate 990 credits
+      'price_1S6QQq2LCxiz8WFQD3mpyy0O': '$99.9', // sub-enterprise 2200 credits
+    };
+    return priceMap[priceId] || '-';
+  };
+
+  // 创建发票（采用 seedance 流程）
+  const handleCreateInvoice = async () => {
+    if (!selectedPayLogId) {
+      toast.error('Please select a payment record');
+      return;
+    }
+    if (invoiceType === 'business' && !companyName.trim()) {
+      toast.error('Please enter company name for business invoice');
+      return;
+    }
+
+    setIsCreatingInvoice(true);
+    try {
+      const payLogItem = payLogList.find((item: PayLogItem) => item.id === selectedPayLogId);
+      if (!payLogItem) {
+        throw new Error('Payment record not found');
+      }
+
+      const price = getPriceFromPriceId(payLogItem.price_id);
+      const priceValue = parseFloat(price.replace('$', '')) || payLogItem.amount;
+
+      const invoiceNumber = `INFINITETALK-${new Date().getFullYear()}-${payLogItem.id}`;
+      const data = {
+        invoiceNumber,
+        dateOfIssue: formatTimestamp(payLogItem.created_at),
+        companyName: 'InfiniteTalk',
+        companyEmailAddress: 'support@infinitetalk.net',
+        customerName: user?.fullName || user?.username || 'Customer',
+        customerEmail: user?.primaryEmailAddress?.emailAddress || 'customer@example.com',
+        customerCompanyName: invoiceType === 'business' ? companyName.trim() : '',
+        description: `${payLogItem.amount} Credits`,
+        quantity: 1,
+        unitPrice: priceValue,
+        amount: priceValue,
+        subtotal: priceValue,
+        total: priceValue,
+        amountPaid: priceValue,
+        notes: `Payment received in full on ${formatTimestamp(payLogItem.created_at)}. Thank you for your business!`
+      };
+
+      setInvoiceData(data);
+      setShowInvoicePreview(true);
+
+      setTimeout(() => {
+        generateInvoicePDF(invoiceNumber);
+      }, 300);
+    } catch (error) {
+      console.error('Failed to generate invoice:', error);
+      toast.error('Failed to generate invoice');
+      setShowInvoicePreview(false);
+      setInvoiceData(null);
+    } finally {
+      setIsCreatingInvoice(false);
+    }
+  };
+
+  const generateInvoicePDF = async (invoiceNumber: string) => {
+    try {
+      const invoiceElement = document.querySelector('.invoice-template') as HTMLElement;
+      if (!invoiceElement) {
+        throw new Error('Invoice template not found');
+      }
+
+      const html2pdfModule = await import('html2pdf.js');
+      const html2pdf = (html2pdfModule as any).default || html2pdfModule;
+
+      const options = {
+        margin: [0, 0, 0, 0] as [number, number, number, number],
+        filename: `invoice-${invoiceNumber}.pdf`,
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff' },
+        jsPDF: { unit: 'mm' as const, format: 'a4' as const, orientation: 'portrait' as const },
+      };
+
+      await (html2pdf().from(invoiceElement).set(options) as any).save();
+
+      toast.success('Invoice generated and downloaded successfully!');
+      setIsInvoiceDialogOpen(false);
+      setSelectedPayLogId(null);
+      setCompanyName('');
+    } catch (error) {
+      console.error('Failed to generate PDF:', error);
+      toast.error('Failed to generate PDF');
+    } finally {
+      setShowInvoicePreview(false);
+      setInvoiceData(null);
+    }
   };
 
   // 修改useEffect，添加userId作为依赖项以确保登录时触发
@@ -619,10 +868,10 @@ export default function ProfilePage() {
         <main className="flex-grow py-12 px-6">
           <div className="container mx-auto max-w-lg">
             <div className="bg-card rounded-2xl p-8 text-center shadow-custom border border-border">
-                              <h1 className="text-2xl font-bold mb-4 text-card-foreground">Profile</h1>
-                <p className="mb-6 text-muted-foreground">Please sign in to view your profile</p>
+              <h1 className="text-2xl font-bold mb-4 text-card-foreground">Profile</h1>
+              <p className="mb-6 text-muted-foreground">Please sign in to view your profile</p>
               <Link href="/sign-in">
-                                      <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
                   Sign In
                 </Button>
               </Link>
@@ -656,6 +905,9 @@ export default function ProfilePage() {
 
   // Pagination items calculation
   const paginationItems = getPaginationItems(currentPage, totalPages);
+
+  // Grouped history by date
+  const groupedHistory = groupHistoryByDate(historyList);
 
   // 用户信息卡片统计项
   const stats = [
@@ -738,21 +990,177 @@ export default function ProfilePage() {
               </div>
               {/* Action Buttons */}
               <div className="mt-6 flex gap-3">
+                <Dialog open={isPayLogDialogOpen} onOpenChange={setIsPayLogDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="flex items-center gap-2 rounded-full border-border bg-card/50 hover:bg-card/80 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md px-4 py-2"
+                      onClick={handleOpenPayLogDialog}
+                    >
+                      <span className="text-card-foreground">Pay Log</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent 
+                    className="max-h-[85vh] overflow-y-auto rounded-3xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted/80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted"
+                    style={{ 
+                      width: 'min(98vw, 1200px)',
+                      maxWidth: 'min(98vw, 1200px)',
+                      minWidth: '360px'
+                    }}
+                  >
+                    <DialogHeader className="text-center pb-6 border-b border-border">
+                      <DialogTitle className="text-2xl font-semibold text-card-foreground tracking-tight">Pay Log</DialogTitle>
+                      <DialogDescription className="text-muted-foreground mt-2">
+                        View your payment transaction history
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="pt-6">
+                      {isLoadingPayLog ? (
+                        <div className="text-center py-12">
+                          <ReloadIcon className="animate-spin h-8 w-8 text-primary mx-auto mb-4" />
+                          <p className="text-muted-foreground font-medium">Loading...</p>
+                        </div>
+                      ) : payLogError ? (
+                        <div className="text-center py-12">
+                          <div className="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-red-400 text-2xl">⚠️</span>
+                          </div>
+                          <p className="text-red-400 font-medium">Failed to load: {payLogError}</p>
+                        </div>
+                      ) : payLogList.length > 0 ? (
+                        <>
+                          <div className={dialogTable.wrapper}>
+                            <table className={dialogTable.table} style={{ minWidth: '700px' }}>
+                              <thead>
+                                <tr className="border-b border-border">
+                                  <th className={`${dialogTable.headCell} w-1/4`}>Date</th>
+                                  <th className={`${dialogTable.headCell} w-1/6`}>Points</th>
+                                  <th className={`${dialogTable.headCell} w-1/6`}>Price</th>
+                                  <th className={`${dialogTable.headCell} w-1/6 hidden sm:table-cell`}>Currency</th>
+                                  <th className={`${dialogTable.headCell} w-1/6 hidden sm:table-cell`}>Payment Type</th>
+                                  <th className={`${dialogTable.headCell} w-1/6`}>Invoice</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {payLogList.map((item) => (
+                                  <tr key={item.id} className={dialogTable.row}>
+                                    <td className={`${dialogTable.cell} text-muted-foreground`}>{formatTimestamp(item.created_at)}</td>
+                                    <td className={dialogTable.cell}>
+                                      <span className={`${dialogTable.pillBase} bg-green-500/20 text-green-400 font-bold`}>
+                                        {item.amount}
+                                      </span>
+                                    </td>
+                                    <td className={`${dialogTable.cell} text-card-foreground font-medium whitespace-nowrap`}>
+                                      {(() => {
+                                        const mapped = getPriceFromPriceId(item.price_id);
+                                        if (mapped && mapped !== '-') return mapped;
+                                        return (
+                                          <span className="inline-block max-w-[180px] truncate align-middle" title={item.price_id || '-' }>
+                                            {item.price_id || '-'}
+                                          </span>
+                                        );
+                                      })()}
+                                    </td>
+                                    <td className={`${dialogTable.cell} text-card-foreground hidden sm:table-cell`}>{item.currency}</td>
+                                    <td className={`${dialogTable.cell} text-card-foreground hidden sm:table-cell`}>{item.pay_type}</td>
+                                    <td className={dialogTable.cell}>
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        onClick={() => handleOpenInvoiceDialog(item.id)}
+                                        className="h-8 px-3 text-sm"
+                                      >
+                                        Invoice
+                                      </Button>
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
+                          </div>
+
+                          {payLogTotalPages > 1 && (
+                            <div className="flex justify-center mt-6">
+                              <Pagination>
+                                <PaginationContent>
+                                  <PaginationItem>
+                                    <PaginationPrevious
+                                      href="#"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handlePayLogPageChange(payLogCurrentPage - 1);
+                                      }}
+                                      className={payLogCurrentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
+                                    />
+                                  </PaginationItem>
+                                  {getPaginationItems(payLogCurrentPage, payLogTotalPages).map((item, index) => (
+                                    <PaginationItem key={index}>
+                                      {item === '...' ? (
+                                        <PaginationEllipsis />
+                                      ) : (
+                                        <PaginationLink
+                                          href="#"
+                                          onClick={(e) => {
+                                            e.preventDefault();
+                                            handlePayLogPageChange(item as number);
+                                          }}
+                                          isActive={item === payLogCurrentPage}
+                                        >
+                                          {item}
+                                        </PaginationLink>
+                                      )}
+                                    </PaginationItem>
+                                  ))}
+                                  <PaginationItem>
+                                    <PaginationNext
+                                      href="#"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handlePayLogPageChange(payLogCurrentPage + 1);
+                                      }}
+                                      className={payLogCurrentPage >= payLogTotalPages ? 'pointer-events-none opacity-50' : ''}
+                                    />
+                                  </PaginationItem>
+                                </PaginationContent>
+                              </Pagination>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        <div className="text-center py-16">
+                          <div className="w-20 h-20 bg-muted rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span className="text-muted-foreground text-3xl">💳</span>
+                          </div>
+                          <p className="text-muted-foreground font-medium text-lg">No payment records yet</p>
+                          <p className="text-muted-foreground/60 text-sm mt-1">Your payment history will appear here</p>
+                        </div>
+                      )}
+                    </div>
+                  </DialogContent>
+                </Dialog>
                 <Dialog open={isTimesLogDialogOpen} onOpenChange={setIsTimesLogDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex items-center gap-2 rounded-full border-border bg-card/50 hover:bg-card/80 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md px-4 py-2"
                       onClick={handleOpenTimesLogDialog}
                     >
                       <span className="text-card-foreground">Points Log</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-4xl max-h-[85vh] overflow-y-auto rounded-3xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted/80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted">
-                                          <DialogHeader className="text-center pb-6 border-b border-border">
-                        <DialogTitle className="text-2xl font-semibold text-card-foreground tracking-tight">Points Log</DialogTitle>
-                        <DialogDescription className="text-muted-foreground mt-2">
+                  <DialogContent 
+                    className="max-h-[85vh] overflow-y-auto rounded-3xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted/80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted"
+                    style={{ 
+                      width: 'min(98vw, 1200px)',
+                      maxWidth: 'min(98vw, 1200px)',
+                      minWidth: '360px'
+                    }}
+                  >
+                    <DialogHeader className="text-center pb-6 border-b border-border">
+                      <DialogTitle className="text-2xl font-semibold text-card-foreground tracking-tight">Points Log</DialogTitle>
+                      <DialogDescription className="text-muted-foreground mt-2">
                         View your points transaction history
                       </DialogDescription>
                     </DialogHeader>
@@ -771,40 +1179,39 @@ export default function ProfilePage() {
                         </div>
                       ) : timesLogList.length > 0 ? (
                         <>
-                                                     {/* Points Log List */}
-                          <div className="space-y-3">
-                            {timesLogList.map((item) => (
-                              <div key={item.id} className="group p-6 rounded-2xl bg-secondary/80 hover:bg-card hover:shadow-lg transition-all duration-200 border border-border">
-                                <div className="flex items-center justify-between">
-                                  <div className="flex-1">
-                                    <div className="flex items-center gap-4 mb-2">
-                                      <span className="font-semibold text-card-foreground text-lg">
-                                        {formatChangeType(item.change_type)}
-                                      </span>
-                                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-bold ${
-                                        item.use_limit > 0 
-                                          ? 'bg-green-500/20 text-green-400' 
-                                          : 'bg-red-500/20 text-red-400'
-                                      }`}>
+                          {/* Points Log Table */}
+                          <div className={dialogTable.wrapper}>
+                            <table className={dialogTable.table} style={{ minWidth: '600px' }}>
+                              <thead>
+                                <tr className="border-b border-border">
+                                  <th className={`${dialogTable.headCell} w-1/3`}>Type</th>
+                                  <th className={`${dialogTable.headCell} w-1/6`}>Points</th>
+                                  <th className={`${dialogTable.headCell} w-1/2`}>Date</th>
+                                </tr>
+                              </thead>
+                              <tbody>
+                                {timesLogList.map((item) => (
+                                  <tr key={item.id} className={dialogTable.row}>
+                                    <td className={`${dialogTable.cell} text-card-foreground font-medium`}>{formatChangeType(item.change_type)}</td>
+                                    <td className={dialogTable.cell}>
+                                      <span className={`${dialogTable.pillBase} font-bold ${item.use_limit > 0 ? 'bg-green-500/20 text-green-400' : 'bg-red-500/20 text-red-400'}`}>
                                         {item.use_limit > 0 ? '+' : ''}{item.use_limit}
                                       </span>
-                                    </div>
-                                    <p className="text-muted-foreground text-sm font-medium">
-                                      {formatTimestamp(item.created_at)}
-                                    </p>
-                                  </div>
-                                </div>
-                              </div>
-                            ))}
+                                    </td>
+                                    <td className={`${dialogTable.cell} text-muted-foreground`}>{formatTimestamp(item.created_at)}</td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
-                          
-                                                     {/* Points Log Pagination */}
+
+                          {/* Points Log Pagination */}
                           {timesLogTotalPages > 1 && (
                             <div className="flex justify-center mt-6">
                               <Pagination>
                                 <PaginationContent>
                                   <PaginationItem>
-                                    <PaginationPrevious 
+                                    <PaginationPrevious
                                       href="#"
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -813,7 +1220,6 @@ export default function ProfilePage() {
                                       className={timesLogCurrentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
                                     />
                                   </PaginationItem>
-                                  
                                   {getPaginationItems(timesLogCurrentPage, timesLogTotalPages).map((item, index) => (
                                     <PaginationItem key={index}>
                                       {item === '...' ? (
@@ -832,9 +1238,8 @@ export default function ProfilePage() {
                                       )}
                                     </PaginationItem>
                                   ))}
-                                  
                                   <PaginationItem>
-                                    <PaginationNext 
+                                    <PaginationNext
                                       href="#"
                                       onClick={(e) => {
                                         e.preventDefault();
@@ -861,19 +1266,26 @@ export default function ProfilePage() {
                   </DialogContent>
                 </Dialog>
 
-                    
+
                 <Dialog open={isSubscriptionDialogOpen} onOpenChange={setIsSubscriptionDialogOpen}>
                   <DialogTrigger asChild>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
+                    <Button
+                      variant="outline"
+                      size="sm"
                       className="flex items-center gap-2 rounded-full border-border bg-card/50 hover:bg-card/80 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md px-4 py-2"
                       onClick={handleOpenSubscriptionDialog}
                     >
                       <span className="text-card-foreground">Subscriptions</span>
                     </Button>
                   </DialogTrigger>
-                  <DialogContent className="max-w-fit min-w-[800px] max-h-[90vh] overflow-y-auto rounded-3xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted/80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted">
+                  <DialogContent 
+                    className="max-h-[85vh] overflow-y-auto rounded-3xl border border-border shadow-2xl bg-card/95 backdrop-blur-xl [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:hover:bg-muted/80 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-muted"
+                    style={{ 
+                      width: 'min(98vw, 1200px)',
+                      maxWidth: 'min(98vw, 1200px)',
+                      minWidth: '360px'
+                    }}
+                  >
                     <DialogHeader className="text-center pb-6 border-b border-border">
                       <DialogTitle className="text-2xl font-semibold text-card-foreground tracking-tight">Subscription Records</DialogTitle>
                       <DialogDescription className="text-muted-foreground mt-2">
@@ -894,69 +1306,61 @@ export default function ProfilePage() {
                           <p className="text-red-400 font-medium">Failed to load: {subscriptionError}</p>
                         </div>
                       ) : subscriptionList.length > 0 ? (
-                        <div className="grid gap-6">
-                          {subscriptionList.map((subscription) => (
-                            <div key={subscription.id} className="group relative p-6 rounded-3xl bg-gradient-to-br from-card to-secondary/50 border border-border shadow-lg hover:shadow-xl transition-all duration-300">
-                            
-                              <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-primary to-primary/60 rounded-t-3xl"></div>
-                              
-                      
-                              <div className="flex items-center justify-between gap-4">
-                                <div className="flex items-center gap-4">
-                                  <h3 className="text-2xl font-bold text-card-foreground tracking-tight">
-                                    {subscription.price_info.name}
-                                  </h3>
-                                  <span className="inline-flex items-center px-3 py-1.5 rounded-full bg-green-500/20 text-green-400 text-sm font-semibold">
-                                    <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
-                                    Active
-                                  </span>
-                                </div>
-                                
-                                <div className="flex items-center gap-6">
-                                  <div className="text-3xl font-bold text-card-foreground">
-                                    {formatPrice(subscription.price_info.price)}
-                                  </div>
-                                  <Button
-                                    variant={subscription.price_info.button_text === 'Contact Sales' ? 'outline' : 'destructive'}
-                                    size="sm"
-                                    onClick={() => handleCancelSubscription(subscription.id)}
-                                    disabled={cancellingSubscriptionId === subscription.id || subscription.price_info.button_text === 'Contact Sales'}
-                                    className={`min-w-[120px] rounded-full transition-all duration-200 ${
-                                      subscription.price_info.button_text === 'Contact Sales' 
-                                        ? 'border-muted-foreground/30 text-muted-foreground cursor-not-allowed opacity-60' 
-                                        : 'bg-red-500 hover:bg-red-600 text-white border-red-500 hover:border-red-600 shadow-md hover:shadow-lg'
-                                    }`}
-                                  >
-                                    {cancellingSubscriptionId === subscription.id ? (
-                                      <>
-                                        <ReloadIcon className="h-4 w-4 animate-spin mr-2" />
-                                        <span>Cancelling...</span>
-                                      </>
-                                    ) : (
-                                      subscription.price_info.button_text === 'Contact Sales' ? 'Contact Sales' : 'Cancel Plan'
-                                    )}
-                                  </Button>
-                                </div>
-                              </div>
-                              
-             
-                              <div className="flex flex-wrap items-center gap-6 text-sm text-muted-foreground bg-secondary/80 rounded-2xl p-4 mt-4">
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-card-foreground">ID:</span>
-                                  <span className="font-mono text-xs bg-muted px-2 py-1 rounded">{subscription.subscription_id.slice(-8)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-card-foreground">Started:</span>
-                                  <span>{formatTimestamp(subscription.created_at)}</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-medium text-card-foreground">Usage Limit:</span>
-                                  <span className="font-semibold text-primary">{subscription.price_info.usage_limit === 999999 ? 'Unlimited' : subscription.price_info.usage_limit}</span>
-                                </div>
-                              </div>
+                        <>
+                          {/* Subscriptions Table */}
+                          <div className={dialogTable.wrapper}>
+                            <div className="overflow-x-auto">
+                              <table className="w-full">
+                                <thead>
+                                  <tr className="border-b border-border">
+                                    <th className={`${dialogTable.headCell} w-1/4`}>Plan</th>
+                                    <th className={`${dialogTable.headCell} w-1/6`}>Status</th>
+                                    <th className={`${dialogTable.headCell} w-1/6`}>Price</th>
+                                    <th className={`${dialogTable.headCell} w-1/6 hidden lg:table-cell`}>ID</th>
+                                    <th className={`${dialogTable.headCell} w-1/6 hidden xl:table-cell`}>Started</th>
+                                    <th className={`${dialogTable.headCell} w-1/6`}>Limit</th>
+                                    <th className={`${dialogTable.headCell} w-1/6`}>Action</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {subscriptionList.map((subscription) => (
+                                    <tr key={subscription.id} className={dialogTable.row}>
+                                      <td className={`${dialogTable.cell} text-card-foreground font-medium`}>{subscription.price_info.name}</td>
+                                      <td className={dialogTable.cell}>
+                                        <span className={`${dialogTable.pillBase} bg-green-500/20 text-green-400`}>
+                                          <div className="w-2 h-2 bg-green-400 rounded-full mr-2"></div>
+                                          Active
+                                        </span>
+                                      </td>
+                                      <td className={`${dialogTable.cell} text-card-foreground font-semibold`}>{formatPrice(subscription.price_info.price)}</td>
+                                      <td className={`${dialogTable.cell} ${dialogTable.mono} hidden lg:table-cell`}>{subscription.subscription_id.slice(-8)}</td>
+                                      <td className={`${dialogTable.cell} text-muted-foreground hidden xl:table-cell`}>{formatTimestamp(subscription.created_at)}</td>
+                                      <td className={`${dialogTable.cell} text-card-foreground font-semibold`}>{subscription.price_info.usage_limit === 999999 ? '∞' : subscription.price_info.usage_limit}</td>
+                                      <td className={dialogTable.cell}>
+                                        <Button
+                                          variant={subscription.price_info.button_text === 'Contact Sales' ? 'outline' : 'destructive'}
+                                          size="sm"
+                                          onClick={() => handleCancelSubscription(subscription.id)}
+                                          disabled={cancellingSubscriptionId === subscription.id || subscription.price_info.button_text === 'Contact Sales'}
+                                          className={`text-sm px-4 py-2 h-8 ${subscription.price_info.button_text === 'Contact Sales' ? 'border-muted-foreground/30 text-muted-foreground cursor-not-allowed opacity-60' : ''}`}
+                                        >
+                                          {cancellingSubscriptionId === subscription.id ? (
+                                            <>
+                                              <ReloadIcon className="h-3 w-3 animate-spin mr-1" />
+                                              <span>Cancelling...</span>
+                                            </>
+                                          ) : (
+                                            subscription.price_info.button_text === 'Contact Sales' ? 'Contact' : 'Cancel'
+                                          )}
+                                        </Button>
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        </>
                       ) : (
                         <div className="text-center py-20">
                           <div className="w-24 h-24 bg-gradient-to-br from-primary/20 to-primary/10 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -970,7 +1374,86 @@ export default function ProfilePage() {
                   </DialogContent>
                 </Dialog>
 
-               
+                {/* 发票创建对话框（简单版） */}
+                <Dialog open={isInvoiceDialogOpen} onOpenChange={setIsInvoiceDialogOpen}>
+                  <DialogContent className="max-w-md">
+                    <DialogHeader>
+                      <DialogTitle className="text-lg font-semibold text-card-foreground">Create Invoice</DialogTitle>
+                      <DialogDescription className="text-muted-foreground">
+                        Choose invoice type and generate your invoice.
+                      </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="flex border-b border-border mt-6">
+                      <button
+                        onClick={() => setInvoiceType('personal')}
+                        className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${invoiceType === 'personal'
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-muted-foreground hover:text-card-foreground'
+                          }`}
+                        disabled={isCreatingInvoice}
+                      >
+                        Personal Invoice
+                      </button>
+                      <button
+                        onClick={() => setInvoiceType('business')}
+                        className={`flex-1 py-2 px-4 text-sm font-medium transition-colors ${invoiceType === 'business'
+                            ? 'text-primary border-b-2 border-primary'
+                            : 'text-muted-foreground hover:text-card-foreground'
+                          }`}
+                        disabled={isCreatingInvoice}
+                      >
+                        Business Invoice
+                      </button>
+                    </div>
+
+                    {invoiceType === 'business' ? (
+                      <div className="mt-6">
+                        <label className="block text-sm font-medium text-card-foreground mb-2">
+                          Company Name *
+                        </label>
+                        <input
+                          type="text"
+                          value={companyName}
+                          onChange={(e) => setCompanyName(e.target.value)}
+                          placeholder="Enter your company name"
+                          className="w-full px-3 py-2 border border-border rounded-lg bg-background text-card-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                          disabled={isCreatingInvoice}
+                        />
+                      </div>
+                    ) : (
+                      <div className="mt-6 p-3 bg-muted/50 rounded-lg text-center text-sm text-muted-foreground">
+                        Personal Invoice: Click Create Invoice to download.
+                      </div>
+                    )}
+
+                    <div className="flex justify-end gap-3 mt-6">
+                      <Button
+                        variant="outline"
+                        onClick={() => {
+                          setIsInvoiceDialogOpen(false);
+                          setSelectedPayLogId(null);
+                          setInvoiceType('personal');
+                          setCompanyName('');
+                        }}
+                        disabled={isCreatingInvoice}
+                      >
+                        Cancel
+                      </Button>
+                      <Button onClick={handleCreateInvoice} disabled={isCreatingInvoice} className="flex items-center gap-2">
+                        {isCreatingInvoice ? (
+                          <>
+                            <ReloadIcon className="h-4 w-4 animate-spin" />
+                            Creating...
+                          </>
+                        ) : (
+                          'Create Invoice'
+                        )}
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+
               </div>
             </div>
           </div>
@@ -980,10 +1463,10 @@ export default function ProfilePage() {
         <div className="container mx-auto mb-4">
           <div className="flex justify-between items-center">
             <h2 className="text-primary text-2xl font-bold mb-4">Video Generation History</h2>
-            <Button 
-              onClick={refreshHistory} 
-              variant="outline" 
-              size="sm" 
+            <Button
+              onClick={refreshHistory}
+              variant="outline"
+              size="sm"
               className="flex items-center gap-2"
               disabled={isLoadingHistory}
             >
@@ -1002,100 +1485,97 @@ export default function ProfilePage() {
           </div>
         </div>
 
-        {/* 视频历史区域 */}
+        {/* 视频历史区域（按日期分组） */}
         <div className="container mx-auto pb-16">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {historyList.length > 0 ? (
-              historyList
-                .filter(item => item.status === 0 || item.status === 1 || (item.status === -1 && item.generate_image === '')) // 显示成功作品、失败作品和生成中的作品
-                .map((item) => {
-                  const isFailed = item.status === -1 && item.generate_image === '';
-                  const isGenerating = item.status === 0 && item.generate_image === '';
-                  
-                  // 从 size_image 中提取模型名称
-                  const getModelName = (sizeImage: string) => {
-                    const modelMatch = sizeImage.match(/Model:\s*([^;]+)/);
-                    return modelMatch ? modelMatch[1].trim() : null;
-                  };
-                  
-                  const modelName = item.size_image ? getModelName(item.size_image) : null;
-                  
-                  return (
-                    <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
-                      {/* 模型标识 - 左上角悬浮 */}
-                      {modelName && (
-                        <div className="absolute top-2 left-2 z-10 bg-primary/90 hover:bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
-                          Model: {modelName}
-                        </div>
-                      )}
-                      
-                      {/* 下载按钮 - 只在成功作品时显示 */}
-                      {!isFailed && !isGenerating && ( 
-                        <button 
-                          className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
-                          onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
-                        >
-                          <DownloadIcon className="h-4 w-4" />
-                        </button>
-                      )}
-                      
-                      {/* 视频内容或失败占位 - 16:9比例 */}
-                      <div className="relative w-full aspect-video overflow-hidden">
-                        {isFailed ? (
-                          // 生成失败占位符
-                          <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-red-600/20 flex flex-col items-center justify-center border-2 border-dashed border-red-300/50">
-                            <div className="text-center p-4">
-                              <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <span className="text-red-400 text-2xl">⚠️</span>
+          {historyList.length > 0 ? (
+            <div className="space-y-8">
+              {groupedHistory.map((group, groupIndex) => (
+                <div key={groupIndex} className="space-y-4">
+                  {/* 日期标题 */}
+                  <h3 className="text-xl font-semibold text-card-foreground border-b border-border pb-2">
+                    {group.date}
+                  </h3>
+                  {/* 分组内网格 */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                    {group.items
+                      .filter(item => item.status === 0 || item.status === 1 || (item.status === -1 && item.generate_image === ''))
+                      .map((item) => {
+                        const isFailed = item.status === -1 && item.generate_image === '';
+                        const isGenerating = item.status === 0 && item.generate_image === '';
+                        const getModelName = (sizeImage: string) => {
+                          const modelMatch = sizeImage.match(/Model:\s*([^;]+)/);
+                          return modelMatch ? modelMatch[1].trim() : null;
+                        };
+                        const modelName = item.size_image ? getModelName(item.size_image) : null;
+                        return (
+                          <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
+                            {modelName && (
+                              <div className="absolute top-2 left-2 z-10 bg-primary/90 hover:bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
+                                Model: {modelName}
                               </div>
-                              <p className="text-red-400 font-semibold text-sm mb-1">Generation Failed</p>
-                              <p className="text-red-300/70 text-xs">Please try again</p>
+                            )}
+                            {!isFailed && !isGenerating && (
+                              <button
+                                className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
+                                onClick={() => downloadMediaWithCors(item.generate_image, `video-${item.id}.mp4`, setIsDownloading, item.id, toast.showToast)}
+                              >
+                                <DownloadIcon className="h-4 w-4" />
+                              </button>
+                            )}
+                            <div className="relative w-full aspect-video overflow-hidden">
+                              {isFailed ? (
+                                <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-red-600/20 flex flex-col items-center justify-center border-2 border-dashed border-red-300/50">
+                                  <div className="text-center p-4">
+                                    <div className="w-12 h-12 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                      <span className="text-red-400 text-2xl">⚠️</span>
+                                    </div>
+                                    <p className="text-red-400 font-semibold text-sm mb-1">Generation Failed</p>
+                                    <p className="text-red-300/70 text-xs">Please try again</p>
+                                  </div>
+                                </div>
+                              ) : isGenerating ? (
+                                <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex flex-col items-center justify-center border-2 border-dashed border-primary/50">
+                                  <div className="text-center p-4">
+                                    <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
+                                      <ReloadIcon className="h-6 w-6 text-primary animate-spin" />
+                                    </div>
+                                    <p className="text-primary font-semibold text-sm mb-1">Generating...</p>
+                                    <p className="text-primary/70 text-xs">Please wait</p>
+                                  </div>
+                                </div>
+                              ) : (
+                                <video
+                                  src={item.generate_image}
+                                  controls
+                                  muted
+                                  preload="metadata"
+                                  className="w-full h-full"
+                                  playsInline
+                                >
+                                  Your browser does not support the video tag.
+                                </video>
+                              )}
+                            </div>
+                            <div className="px-3 py-1.5 text-xs text-muted-foreground bg-muted">
+                              {formatTimestamp(item.created_at)}
                             </div>
                           </div>
-                        ) : isGenerating ? (
-                          // 正在生成中占位符
-                          <div className="w-full h-full bg-gradient-to-br from-primary/10 to-primary/20 flex flex-col items-center justify-center border-2 border-dashed border-primary/50">
-                            <div className="text-center p-4">
-                              <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center mx-auto mb-3">
-                                <ReloadIcon className="h-6 w-6 text-primary animate-spin" />
-                              </div>
-                              <p className="text-primary font-semibold text-sm mb-1">Generating...</p>
-                              <p className="text-primary/70 text-xs">Please wait</p>
-                            </div>
-                          </div>
-                        ) : (
-                          // 成功作品的视频
-                          <video
-                            src={item.generate_image}
-                            controls
-                            muted
-                            preload="metadata"
-                            className="w-full h-full"
-                            playsInline
-                          >
-                            Your browser does not support the video tag.
-                          </video>
-                        )}
-                      </div>
-                      
-                      {/* 日期 - 减少内边距使其更紧凑 */}
-                      <div className="px-3 py-1.5 text-xs text-muted-foreground bg-muted">
-                        {formatTimestamp(item.created_at)}
-                      </div>
-                    </div>
-                  );
-                })
-            ) : (
-              <div className="col-span-full text-center text-muted-foreground py-12">No videos yet.</div>
-            )}
-          </div>
-          
+                        );
+                      })}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground py-12">No videos yet.</div>
+          )}
+
           {/* 分页组件 */}
           <div className="flex justify-center mt-8">
             <Pagination>
               <PaginationContent>
                 <PaginationItem>
-                  <PaginationPrevious 
+                  <PaginationPrevious
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
@@ -1104,7 +1584,7 @@ export default function ProfilePage() {
                     className={currentPage <= 1 ? 'pointer-events-none opacity-50' : ''}
                   />
                 </PaginationItem>
-                
+
                 {paginationItems.map((item, index) => (
                   <PaginationItem key={index}>
                     {item === '...' ? (
@@ -1123,9 +1603,9 @@ export default function ProfilePage() {
                     )}
                   </PaginationItem>
                 ))}
-                
+
                 <PaginationItem>
-                  <PaginationNext 
+                  <PaginationNext
                     href="#"
                     onClick={(e) => {
                       e.preventDefault();
@@ -1139,6 +1619,9 @@ export default function ProfilePage() {
           </div>
         </div>
       </main>
+      {invoiceData && (
+        <InvoiceTemplate data={invoiceData} isVisible={showInvoicePreview} />
+      )}
       <Footer friendlyLinks={friendlyLinks} />
     </div>
   );
