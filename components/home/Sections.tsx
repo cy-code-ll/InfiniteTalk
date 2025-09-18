@@ -63,6 +63,19 @@ const StarIcon = () => (
   </svg>
 );
 
+// Small status icons for tables
+const CheckIcon = () => (
+  <svg className="w-4 h-4 text-emerald-400" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-7.25 7.25a1 1 0 01-1.414 0l-3-3a1 1 0 111.414-1.414l2.293 2.293 6.543-6.543a1 1 0 011.414 0z" clipRule="evenodd" />
+  </svg>
+);
+
+const CrossIcon = () => (
+  <svg className="w-4 h-4 text-rose-400" viewBox="0 0 20 20" fill="currentColor">
+    <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+  </svg>
+);
+
 const GlobeIcon = () => (
   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -122,11 +135,11 @@ function SectionHeading({ title, kicker, icon }: { title: string; kicker?: strin
     </div>
   )}
 
-function GlowCard({ children, className = '', padding = 'p-6' }: React.PropsWithChildren<{ className?: string; padding?: string }>) {
+function GlowCard({ children, className = '', padding = 'p-6', innerClassName = '' }: React.PropsWithChildren<{ className?: string; padding?: string; innerClassName?: string }>) {
   return (
     <div className={`group relative ${className}`}>
       {/* Transparent glass card */}
-      <div className={`relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl ${padding} shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)]`}>
+      <div className={`relative rounded-2xl border border-white/10 bg-white/5 backdrop-blur-xl ${padding} shadow-[0_8px_24px_rgba(0,0,0,0.18)] transition-shadow duration-200 group-hover:shadow-[0_12px_28px_rgba(0,0,0,0.22)] transition-transform group-hover:-translate-y-0.5 ${innerClassName}`}>
         {children}
       </div>
     </div>
@@ -195,86 +208,89 @@ export function KeyFeatures() {
   return (
     <SectionShell>
       <SectionHeading title="InfiniteTalk Key Features" kicker="Highlights" icon={<StarIcon />} />
-      <ul className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-7 text-muted-foreground text-base">
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+      <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-8">
+        InfiniteTalk is designed to push the boundaries of AI-driven video dubbing. With advanced synchronization and flexible generation options, it enables creators, businesses, and developers to produce videos that feel authentic, scalable, and professional.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 text-muted-foreground text-base items-stretch">
+        <div className="h-full ">
+          <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <VideoIcon />
               </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Sparse-Frame Video Dubbing</h3>
-                <p>InfiniteTalk AI animates not just lips, but also head, body, and expressions for natural results.</p>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Sparse-Frame Dubbing Technology</h3>
+                <p>Unlike traditional lip-sync tools, InfiniteTalk drives not only lip movements but also subtle head tilts, posture shifts, and facial expressions for a human-like experience.</p>
               </div>
             </div>
           </GlowCard>
-        </li>
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+        </div>
+        <div className="h-full">
+          <GlowCard className="h-full flex flex-col " innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <ZapIcon />
               </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Infinite-Length Generation</h3>
-                <p>InfiniteTalk AI supports long, continuous talking videos with smooth motion across segments.</p>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Unlimited Duration Video Generation</h3>
+                <p>Remove short‑clip limits. Create lectures, podcasts, and full presentations without interruption.</p>
               </div>
             </div>
           </GlowCard>
-        </li>
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <SparklesIcon />
-              </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Flexible Inputs</h3>
-                <p>InfiniteTalk AI supports both video‑to‑video dubbing and image‑to‑video generation from a single image.</p>
-              </div>
-            </div>
-          </GlowCard>
-        </li>
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <StarIcon />
-              </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Identity & Scene Preservation</h3>
-                <p>InfiniteTalk AI keeps face, posture, lighting, and background consistent throughout the video.</p>
-              </div>
-            </div>
-          </GlowCard>
-        </li>
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+        </div>
+        <div className="h-full">
+          <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <CpuIcon />
               </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Stability & Realism</h3>
-                <p>InfiniteTalk AI minimizes distortions and jitter, delivering smooth, realistic movement.</p>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Next-Level Stability</h3>
+                <p>Minimizes distortion in hands, arms, and body positions, delivering smooth, stable output across extended sequences.</p>
               </div>
             </div>
           </GlowCard>
-        </li>
-        <li>
-          <GlowCard>
-            <div className="flex items-start gap-3">
-              <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+        </div>
+        <div className="h-full">
+          <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <StarIcon />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Precision Lip Alignment</h3>
+                <p>Professional‑grade audio‑to‑visual alignment ensures lip movements match speech precisely.</p>
+              </div>
+            </div>
+          </GlowCard>
+        </div>
+        <div className="h-full">
+          <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <MicrophoneIcon />
+              </div>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Multi-Speaker Capabilities</h3>
+                <p>With InfiniteTalk Multi, support multiple characters in one video—each with independent audio tracks and reference controls.</p>
+              </div>
+            </div>
+          </GlowCard>
+        </div>
+        <div className="h-full">
+          <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
+            <div className="flex items-start gap-4 flex-1 min-h-[120px]">
+              <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
                 <DownloadIcon />
               </div>
-              <div>
-                <h3 className="text-foreground block mb-2 font-semibold">Resolution Options</h3>
-                <p>InfiniteTalk AI exports at 480p and 720p today, with higher resolutions planned.</p>
+              <div className="flex-1">
+                <h3 className="text-foreground block mb-2 font-semibold">Flexible Input Options</h3>
+                <p>Adapt to your workflow with both image‑to‑video generation and video‑to‑video enhancement.</p>
               </div>
             </div>
           </GlowCard>
-        </li>
-      </ul>
+        </div>
+      </div>
     </SectionShell>
   )
 }
@@ -298,63 +314,70 @@ export function HowItWorks() {
 export function QuickInferenceTips() {
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Quick Inference Tips" kicker="Pro tips" icon={<LightbulbIcon />} />
-      <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
+      <SectionHeading title="InfiniteTalk Technical Capabilities" kicker="Technical" icon={<LightbulbIcon />} />
+      <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-8">
+        The strength of InfiniteTalk lies in its technical foundation, combining speed, accuracy, and scalability for creators at every level.
+      </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 text-muted-foreground text-base items-stretch">
         {[
           [
-            'Lip accuracy:',
-            'In InfiniteTalk AI, Audio-CFG ~3–5 increases sync strength without over-driving visuals.',
+            'Advanced Audio Synchronization',
+            'Deep audio analysis synchronizes lip shapes, head turns, and expressions with voice input so avatars behave naturally instead of mechanically.',
           ],
           [
-            'FusionX LoRA:',
-            'Faster and sharper, yet can cause color shifting over long runs; use judiciously in InfiniteTalk AI.',
+            'Memory-Aware Processing',
+            'Overlapping segments keep long videos consistent, preventing visual breaks or sudden motion changes for smooth continuity.',
           ],
           [
-            'Video-to-video (V2V):',
-            'InfiniteTalk AI mirrors original camera motion; SDEdit helps for short clips but may shift color.',
+            'Resolution Options',
+            'Choose from lightweight 480p for faster processing or sharper 720p/1080p when higher quality is needed.',
           ],
           [
-            'Image-to-video (I2V):',
-            'For > 1 minute, translate or slowly zoom your still to help InfiniteTalk AI maintain color consistency.',
-          ],
-          [
-            'Quantized models:',
-            'When memory is tight, use the quantized build of InfiniteTalk AI to keep jobs alive.',
+            'Optimized for All Hardware',
+            'Acceleration, parameter grouping, and quantization let InfiniteTalk run efficiently on limited‑VRAM systems without compromising quality.',
           ],
         ].map(([strong, rest]) => (
-          <li key={String(strong)}>
-            <GlowCard>
+          <div key={String(strong)} className="h-full">
+            <GlowCard className="h-full flex flex-col" innerClassName="group-hover:border-primary/30">
               <h3 className="text-foreground block mb-2 font-semibold">{strong}</h3>
-              <p>{rest}</p>
+              <p className="flex-1 min-h-[100px]">{rest}</p>
             </GlowCard>
-          </li>
+          </div>
         ))}
-      </ul>
+      </div>
     </SectionShell>
   )
 }
 
-export function UseCases() {
+export function UseCases() { 
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Use Cases" kicker="Where it shines" icon={<GlobeIcon />} />
+      <SectionHeading title="InfiniteTalk Application Scenarios" kicker="Where it shines" icon={<GlobeIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
         {[
           [
-            'Global dubbing/localization.',
-            'Redub lectures, ads, explainers, and training at scale with InfiniteTalk AI while keeping the on-screen persona consistent.',
+            'Content Creation',
+            'Produce long-form tutorials, educational materials, and storytelling videos where avatars stay consistent and lifelike.',
           ],
           [
-            'Creator workflows.',
-            'Turn podcasts into talking-head videos, animate thumbnails, or add motion to stills using InfiniteTalk AI.',
+            'Entertainment & Media',
+            'Generate animated hosts, characters, and podcast visuals that scale with your creativity.',
           ],
           [
-            'Studio pipelines.',
-            'Previz long dialogue scenes, iterate performances, and test alt reads in InfiniteTalk AI before final shoots.',
+            'Business & Corporate Communication',
+            'Create polished training modules, investor updates, and product demos with natural, reliable avatars.',
           ],
           [
-            'Product & avatar videos.',
-            'Create spokesperson clips and virtual hosts that stay on-brand with InfiniteTalk AI.',
+            'Accessibility',
+            'Support communities with avatars that provide spoken and visual communication cues for clearer information delivery.',
+          ],
+          [
+            'Research & Innovation',
+            'Explore digital humans, virtual reality, and interactive AI for academic and developer research.',
+          ],
+          [
+            'Multilingual Production',
+            'Keep the same avatar while delivering content in multiple languages, preserving brand identity across markets.',
           ],
         ].map(([strong, rest]) => (
           <li key={String(strong)}>
@@ -373,10 +396,61 @@ export function Comparisons() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="InfiniteTalk Comparisons" kicker="Versus baselines" icon={<ZapIcon />} />
-        <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
-          Unlike mouth-only editors, InfiniteTalk AI edits the whole frame, aligning body language to audio for believable performances. In evaluations on public datasets, InfiniteTalk AI delivered strong realism and emotional coherence, minimizing artifacts that distract viewers. Results remain stable over long sequences, where baseline models often drift; InfiniteTalk AI sustains identity and rhythm.
-        </p>
+        <SectionHeading title="InfiniteTalk Advantages" kicker="Why choose" icon={<ZapIcon />} />
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm md:text-base text-left border-collapse">
+            <thead>
+              <tr className="border-b border-white/10">
+                <th className="py-3 pr-4 text-foreground">Feature</th>
+                <th className="py-3 px-4 text-foreground">Traditional Digital Humans</th>
+                <th className="py-3 pl-4 text-foreground">InfiniteTalk</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Video Length</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Limited to short clips (5s–1 min)</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Unlimited video length generation</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Synchronization</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Lip-sync only; lacks head and body movement</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Full sync of lips, head, body & expressions</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Lip Accuracy</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Often misaligned in professional use</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Superior lip precision</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Multi-Person Support</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Usually limited to one avatar per video</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Multiple characters with independent audio</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Input Options</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Rigid template-to-video workflow, complex to operate</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Flexible image-to-video & video-to-video support</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Output Resolution</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Typically restricted to lower resolutions</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Supports 720P and 1080P HD output</span></td>
+              </tr>
+              <tr className="border-b border-white/5 align-top">
+                <td className="py-3 pr-4">Stability</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Distortions and artifacts in long videos</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Smooth, natural results even for extended content</span></td>
+              </tr>
+              <tr className="align-top">
+                <td className="py-3 pr-4">Scalability</td>
+                <td className="py-3 px-4"><span className="inline-flex items-center gap-2"><CrossIcon /> Mostly used for short marketing clips</span></td>
+                <td className="py-3 pl-4"><span className="inline-flex items-center gap-2"><CheckIcon /> Broad applications: education, business, entertainment, research</span></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p className="mt-6 text-muted-foreground">Choose InfiniteTalk and go beyond traditional digital human limits.</p>
       </GlowCard>
     </SectionShell>
   )
@@ -501,14 +575,15 @@ export function VideoCases() {
   const [currentPlaying, setCurrentPlaying] = useState<number | null>(null);
   const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
 
-  const videos = [
-    { id: 3, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/3.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/3.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 4, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/4.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/4.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 5, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/5.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/5.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case example' },
-    { id: 7, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/7.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/7.webp', title: 'InfiniteTalk AI Video - Long sequence video dubbing - video case' },
-    { id: 10, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/10.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/10.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-    { id: 11, src: 'https://cfsource.infinitetalk.net/infinitetalk/cases/11.mp4', poster: 'https://cfsource.infinitetalk.net/infinitetalk/cases/11.webp', title: 'InfiniteTalk AI Video Long sequence image-to-video human animation - video case example' },
-  ];
+  const videos = Array.from({ length: 9 }).map((_, i) => {
+    const n = i + 1
+    return {
+      id: n,
+      src: `https://cfsource.infinitetalk.net/infinitetalk/newcases/case${n}.mp4`,
+      poster: `https://cfsource.infinitetalk.net/infinitetalk/newcases/case${n}.webp`,
+      title: `InfiniteTalk Video Case ${n}`,
+    }
+  })
 
   const handleVideoClick = (index: number) => {
     const clickedVideo = videoRefs.current[index];
@@ -550,27 +625,24 @@ export function VideoCases() {
   return (
     <SectionShell>
       <SectionHeading title="InfiniteTalk Video Cases" kicker="Examples" icon={<VideoIcon />} />
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="columns-1 md:columns-2 lg:columns-3" style={{ columnGap: '1rem' }}>
         {videos.map((video, index) => (
-          <div key={video.id} className="relative group">
+          <div key={video.id} className="mb-4 break-inside-avoid">
             <GlowCard className="overflow-hidden" padding="p-1">
-              <div className="relative aspect-video bg-black rounded-xl overflow-hidden">
-                                 <video
-                   ref={(el) => { videoRefs.current[index] = el; }}
-                   src={video.src}
-                   poster={video.poster}
-                   className="w-full h-full object-cover cursor-pointer"
-                   loop
-                   controls
-                   playsInline
-                   preload="none"
-                   onClick={() => handleVideoClick(index)}
-                   title={video.title}
-                   aria-label={video.title}
-                 />
-                {/* Play overlay */}
-         
-         
+              <div className="relative w-full bg-black rounded-xl overflow-hidden">
+                <video
+                  ref={(el) => { videoRefs.current[index] = el; }}
+                  src={video.src}
+                  poster={video.poster}
+                  className="w-full h-auto object-cover cursor-pointer"
+                  loop
+                  controls
+                  playsInline
+                  preload="none"
+                  onClick={() => handleVideoClick(index)}
+                  title={video.title}
+                  aria-label={video.title}
+                />
               </div>
             </GlowCard>
           </div>
