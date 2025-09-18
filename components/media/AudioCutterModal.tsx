@@ -600,8 +600,27 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
             Drag to select a range. If you do not trim, click Confirm to use the full audio.
           </div>
 
-          {/* Select All and Preview controls */}
-          <div>
+          {/* Play + Select All in one row (with preview hint) */}
+          <div className="flex items-center gap-2">
+            {sourceType === 'audio' ? (
+              <audio
+                ref={(el) => { mediaRef.current = el as unknown as HTMLMediaElement; }}
+                src={previewUrl ?? undefined}
+                preload="metadata"
+                className="hidden"
+              />
+            ) : (
+              <video
+                ref={(el) => { mediaRef.current = el as unknown as HTMLMediaElement; }}
+                src={previewUrl ?? undefined}
+                preload="metadata"
+                className="hidden"
+              />
+            )}
+      
+            <Button type="button" size="sm" variant="outline" onClick={handlePreviewToggle} disabled={!previewUrl || duration <= 0}>
+              {isPlaying ? <><Pause className="w-4 h-4 mr-1" /> Pause</> : <><Play className="w-4 h-4 mr-1" /> Play selection</>}
+            </Button>
             <Button
               type="button"
               size="sm"
@@ -613,37 +632,13 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
                 }
               }}
               disabled={duration <= 0}
-              className="mb-2"
             >
               Select All
             </Button>
           </div>
-
-          {/* Preview controls */}
-          <div className="flex items-center justify-between pt-1">
-            <div className="text-xs text-muted-foreground">Preview selection ({formatSeconds(Math.max(0, Math.ceil(selectionEnd - selectionStart)))})</div>
-            <div className="flex items-center gap-2">
-              {sourceType === 'audio' ? (
-                <audio
-                  ref={(el) => { mediaRef.current = el as unknown as HTMLMediaElement; }}
-                  src={previewUrl ?? undefined}
-                  preload="metadata"
-                  className="hidden"
-                />
-              ) : (
-                <video
-                  ref={(el) => { mediaRef.current = el as unknown as HTMLMediaElement; }}
-                  src={previewUrl ?? undefined}
-                  preload="metadata"
-                  className="hidden"
-                />
-              )}
-              <Button type="button" size="sm" variant="outline" onClick={handlePreviewToggle} disabled={!previewUrl || duration <= 0}>
-                {isPlaying ? <><Pause className="w-4 h-4 mr-1" /> Pause</> : <><Play className="w-4 h-4 mr-1" /> Play selection</>}
-              </Button>
+          <div className="text-xs text-muted-foreground mr-1">
+              Preview selection ({formatSeconds(Math.max(0, Math.ceil(selectionEnd - selectionStart)))})
             </div>
-          </div>
-
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isExporting}>
               Cancel
