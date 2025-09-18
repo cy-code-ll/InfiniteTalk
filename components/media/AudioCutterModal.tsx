@@ -81,35 +81,66 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
     }
   }, [open]);
 
-  // When source file set, probe duration from metadata
+  // When source file set, probe duration from metadata (iOS-safe)
   useEffect(() => {
     if (!sourceFile) return;
 
     const objectUrl = URL.createObjectURL(sourceFile);
-    const mediaEl = sourceType === 'video' ? document.createElement('video') : new Audio();
+    const mediaEl: HTMLMediaElement = sourceType === 'video' ? document.createElement('video') : document.createElement('audio');
     mediaEl.preload = 'metadata';
-    mediaEl.src = objectUrl;
+    if (sourceType === 'video') {
+      try {
+        (mediaEl as HTMLVideoElement).muted = true; // iOS allows autoplay/metadata fetch when muted
+        (mediaEl as HTMLVideoElement).playsInline = true;
+      } catch {}
+    }
+    // Attach to DOM for iOS Safari to reliably fire loadedmetadata
+    mediaEl.style.position = 'fixed';
+    mediaEl.style.left = '-99999px';
+    mediaEl.style.top = '0';
+    mediaEl.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(mediaEl);
+
+    let timeoutId: number | null = null;
+    const cleanup = () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+        timeoutId = null as any;
+      }
+      try { document.body.removeChild(mediaEl); } catch {}
+      URL.revokeObjectURL(objectUrl);
+    };
+
     const onLoaded = () => {
       const d = Math.max(0, (mediaEl as HTMLMediaElement).duration || 0);
       if (!isFinite(d) || d <= 0) {
         toast.showToast('Failed to read media duration', 'error');
-        URL.revokeObjectURL(objectUrl);
+        cleanup();
         return;
       }
       setDuration(d);
       setSelectionStart(0);
       setSelectionEnd(d);
-      URL.revokeObjectURL(objectUrl);
+      cleanup();
     };
     const onError = () => {
       toast.showToast('Failed to load media', 'error');
-      URL.revokeObjectURL(objectUrl);
+      cleanup();
     };
+
     mediaEl.addEventListener('loadedmetadata', onLoaded);
     mediaEl.addEventListener('error', onError);
+    mediaEl.src = objectUrl;
+    try { mediaEl.load(); } catch {}
+    // Fallback timeout for platforms that never fire events when off-DOM
+    timeoutId = window.setTimeout(() => {
+      onError();
+    }, 4000);
+
     return () => {
       mediaEl.removeEventListener('loadedmetadata', onLoaded);
       mediaEl.removeEventListener('error', onError);
+      cleanup();
     };
   }, [sourceFile, sourceType, toast]);
 
@@ -491,8 +522,11 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
         toast.showToast('Please select a valid video file', 'error');
         return;
       }
-      setSourceType('video');
-      setSourceFile(file);
+      // iOS Safari sometimes needs a microtask delay to populate file metadata
+      Promise.resolve().then(() => {
+        setSourceType('video');
+        setSourceFile(file);
+      });
     };
     input.click();
   };
