@@ -207,9 +207,9 @@ export function WhySparseFrame() {
 export function KeyFeatures() {
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Key Features" kicker="Highlights" icon={<StarIcon />} />
+      <SectionHeading title="InfiniteTalk AI Key Features" kicker="Highlights" icon={<StarIcon />} />
       <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-8">
-        InfiniteTalk is designed to push the boundaries of AI-driven video dubbing. With advanced synchronization and flexible generation options, it enables creators, businesses, and developers to produce videos that feel authentic, scalable, and professional.
+        InfiniteTalk AI is designed to push the boundaries of AI-driven video dubbing. With advanced synchronization and flexible generation options, it enables creators, businesses, and developers to produce videos that feel authentic, scalable, and professional.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 text-muted-foreground text-base items-stretch">
         <div className="h-full ">
@@ -220,7 +220,7 @@ export function KeyFeatures() {
               </div>
               <div className="flex-1">
                 <h3 className="text-foreground block mb-2 font-semibold">Sparse-Frame Dubbing Technology</h3>
-                <p>Unlike traditional lip-sync tools, InfiniteTalk drives not only lip movements but also subtle head tilts, posture shifts, and facial expressions for a human-like experience.</p>
+                <p>Unlike traditional lip-sync tools, InfiniteTalk AI drives not only lip movements but also subtle head tilts, posture shifts, and facial expressions for a human-like experience.</p>
               </div>
             </div>
           </GlowCard>
@@ -272,7 +272,7 @@ export function KeyFeatures() {
               </div>
               <div className="flex-1">
                 <h3 className="text-foreground block mb-2 font-semibold">Multi-Speaker Capabilities</h3>
-                <p>With InfiniteTalk Multi, support multiple characters in one video—each with independent audio tracks and reference controls.</p>
+                <p>With InfiniteTalk AI Multi, support multiple characters in one video—each with independent audio tracks and reference controls.</p>
               </div>
             </div>
           </GlowCard>
@@ -299,7 +299,7 @@ export function HowItWorks() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="InfiniteTalk: How it works (high level)" kicker="Pipeline" icon={<CpuIcon />} />
+        <SectionHeading title="InfiniteTalk AI: How it works (high level)" kicker="Pipeline" icon={<CpuIcon />} />
         <div className="relative pl-6">
           <div className="absolute left-0 top-1 bottom-1 w-[3px] bg-gradient-to-b from-primary to-primary/30 rounded-full" />
           <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl">
@@ -314,9 +314,9 @@ export function HowItWorks() {
 export function QuickInferenceTips() {
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Technical Capabilities" kicker="Technical" icon={<LightbulbIcon />} />
+      <SectionHeading title="InfiniteTalk AI Technical Capabilities" kicker="Technical" icon={<LightbulbIcon />} />
       <p className="text-muted-foreground text-lg leading-relaxed max-w-3xl mb-8">
-        The strength of InfiniteTalk lies in its technical foundation, combining speed, accuracy, and scalability for creators at every level.
+        The strength of InfiniteTalk AI lies in its technical foundation, combining speed, accuracy, and scalability for creators at every level.
       </p>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-7 text-muted-foreground text-base items-stretch">
         {[
@@ -334,7 +334,7 @@ export function QuickInferenceTips() {
           ],
           [
             'Optimized for All Hardware',
-            'Acceleration, parameter grouping, and quantization let InfiniteTalk run efficiently on limited‑VRAM systems without compromising quality.',
+            'Acceleration, parameter grouping, and quantization let InfiniteTalk AI run efficiently on limited‑VRAM systems without compromising quality.',
           ],
         ].map(([strong, rest]) => (
           <div key={String(strong)} className="h-full">
@@ -352,7 +352,7 @@ export function QuickInferenceTips() {
 export function UseCases() { 
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Application Scenarios" kicker="Where it shines" icon={<GlobeIcon />} />
+      <SectionHeading title="InfiniteTalk AI Application Scenarios" kicker="Where it shines" icon={<GlobeIcon />} />
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-7 text-muted-foreground text-base">
         {[
           [
@@ -396,14 +396,14 @@ export function Comparisons() {
   return (
     <SectionShell>
       <GlowCard>
-        <SectionHeading title="InfiniteTalk Advantages" kicker="Why choose" icon={<ZapIcon />} />
+        <SectionHeading title="InfiniteTalk AI Advantages" kicker="Why choose" icon={<ZapIcon />} />
         <div className="overflow-x-auto">
           <table className="w-full text-sm md:text-base text-left border-collapse">
             <thead>
               <tr className="border-b border-white/10">
                 <th className="py-3 pr-4 text-foreground">Feature</th>
                 <th className="py-3 px-4 text-foreground">Traditional Digital Humans</th>
-                <th className="py-3 pl-4 text-foreground">InfiniteTalk</th>
+                <th className="py-3 pl-4 text-foreground">InfiniteTalk AI</th>
               </tr>
             </thead>
             <tbody className="text-muted-foreground">
@@ -624,7 +624,7 @@ export function VideoCases() {
 
   return (
     <SectionShell>
-      <SectionHeading title="InfiniteTalk Video Cases" kicker="Examples" icon={<VideoIcon />} />
+      <SectionHeading title="InfiniteTalk AI Video Cases" kicker="Examples" icon={<VideoIcon />} />
       <div className="columns-1 md:columns-2 lg:columns-3" style={{ columnGap: '1rem' }}>
         {videos.map((video, index) => (
           <div key={video.id} className="mb-4 break-inside-avoid">
