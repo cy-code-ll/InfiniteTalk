@@ -34,7 +34,7 @@ export default function MultiHero() {
   const [rightAudioFile, setRightAudioFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [order, setOrder] = useState<'meanwhile' | 'left_right' | 'right_left'>('meanwhile');
-  const [resolution, setResolution] = useState<'480p' | '720p'>('720p');
+  const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('720p');
   const [generationState, setGenerationState] = useState<GenerationState>({
     status: 'demo',
     progress: 0,
@@ -226,9 +226,11 @@ export default function MultiHero() {
     
     // 新规则：5秒以下固定积分，5秒以上按秒计算
     if (maxDuration <= 5) {
-      return resolution === '480p' ? 5 : 10;
+      if (resolution === '480p') return 5;
+      if (resolution === '720p') return 10;
+      return 15; // 1080p
     } else {
-      const creditsPerSecond = resolution === '480p' ? 1 : 2;
+      const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
       return maxDuration * creditsPerSecond;
     }
   };
@@ -586,24 +588,42 @@ export default function MultiHero() {
                     <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
                   </Tooltip>
                 </div>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <Button
                     type="button"
                     variant={resolution === '480p' ? 'default' : 'outline'}
                     onClick={() => setResolution('480p')}
                     size="sm"
-                    className="px-6"
+                    className="px-3"
                   >
-                    480P
+                    <div className="text-center">
+                      <div className="text-sm font-bold">480P</div>
+                   
+                    </div>
                   </Button>
                   <Button
                     type="button"
                     variant={resolution === '720p' ? 'default' : 'outline'}
                     onClick={() => setResolution('720p')}
                     size="sm"
-                    className="px-6"
+                    className="px-3"
                   >
-                    720P
+                    <div className="text-center">
+                      <div className="text-sm font-bold">720P</div>
+                     
+                    </div>
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={resolution === '1080p' ? 'default' : 'outline'}
+                    onClick={() => setResolution('1080p')}
+                    size="sm"
+                    className="px-3"
+                  >
+                    <div className="text-center">
+                      <div className="text-sm font-bold">1080P</div>
+                 
+                    </div>
                   </Button>
                 </div>
               </div>
@@ -617,14 +637,18 @@ export default function MultiHero() {
                       const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
                       // 新规则：5秒以下固定积分，5秒以上按秒计算
                       if (maxDuration <= 5) {
-                        return resolution === '480p' ? '5 Credits' : '10 Credits';
+                        if (resolution === '480p') return '5 Credits';
+                        if (resolution === '720p') return '10 Credits';
+                        return '15 Credits'; // 1080p
                       } else {
-                        const creditsPerSecond = resolution === '480p' ? 1 : 2;
+                        const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
                         return `${maxDuration * creditsPerSecond} Credits`;
                       }
                     } else {
                       // 没有音频文件时显示最低积分消耗
-                      return resolution === '480p' ? '5 Credits' : '10 Credits';
+                      if (resolution === '480p') return '5 Credits';
+                      if (resolution === '720p') return '10 Credits';
+                      return '15 Credits'; // 1080p
                     }
                   })()}
                 </div>
@@ -648,7 +672,7 @@ export default function MultiHero() {
             
     
                   <div className="text-xs text-muted-foreground/70 text-center">
-                    Every 5 seconds: 480P requires 5 credits, 720P requires 10 credits
+                    Every 5 seconds: 480P requires 5 credits, 720P requires 10 credits, 1080P requires 15 credits
                   </div>
                   {leftAudioFile && rightAudioFile && (leftAudioDuration > 0 || rightAudioDuration > 0) && (
                     <div className="text-xs text-muted-foreground/70">
@@ -656,9 +680,11 @@ export default function MultiHero() {
                         const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
                         // 新规则：5秒以下固定积分，5秒以上按秒计算
                         if (maxDuration <= 5) {
-                          return resolution === '480p' ? 5 : 10;
+                          if (resolution === '480p') return 5;
+                          if (resolution === '720p') return 10;
+                          return 15; // 1080p
                         } else {
-                          const creditsPerSecond = resolution === '480p' ? 1 : 2;
+                          const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
                           return maxDuration * creditsPerSecond;
                         }
                       })()} credits

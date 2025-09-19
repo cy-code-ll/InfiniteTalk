@@ -33,7 +33,7 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Copyright */}
           <div className="md:col-span-1">
             <Link href="/" className="flex items-center space-x-2 mb-4">
@@ -73,19 +73,30 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
               </li>
               <li>
                 <Link 
-                  href="/app"
-                  className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
-                >
-                  App Download
-                </Link>
-              </li>
-              <li>
-                <Link 
                   href="/blog"
                   className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
                 >
                   Blog
                 </Link>
+              </li>
+            </ul>
+          </div>
+
+          {/* Products */}
+          <div className="md:col-span-1">
+            <div className="font-semibold text-lg mb-4 text-foreground">
+              Products
+            </div>
+            <ul className="space-y-2">
+              <li>
+                <a 
+                  href="https://play.google.com/store/apps/details?id=com.cykj.ghiblipro2"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                >
+                  Android App (Beta)
+                </a>
               </li>
             </ul>
           </div>

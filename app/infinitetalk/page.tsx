@@ -226,7 +226,7 @@ export default function InfiniteTalkPage() {
                       <strong className="text-yellow-400">Maximum generation duration is 600 seconds.</strong>
                     </p>
                     <p className="text-slate-300 text-sm mt-2">
-                      <strong className="text-primary">Credit Cost:</strong> Every 5 seconds, 480P requires 5 credits, 720P requires 10 credits.
+                      <strong className="text-primary">Credit Cost:</strong> Every 5 seconds, 480P requires 5 credits, 720P requires 10 credits, 1080P requires 15 credits.
                     </p>
                   </div>
                 </div>

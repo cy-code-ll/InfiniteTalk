@@ -528,7 +528,7 @@ export const infiniteTalkApi = {
     right_audio: File;
     right_duration: number;
     order: 'meanwhile' | 'left_right' | 'right_left';
-    resolution: '480p' | '720p';
+    resolution: '480p' | '720p' | '1080p';
   }) => {
     const formData = new FormData();
     formData.append('image', params.image);

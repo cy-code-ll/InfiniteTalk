@@ -83,7 +83,7 @@ export default function InfiniteTalkGenerator() {
   const [selectedAudio, setSelectedAudio] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
   const [audioDuration, setAudioDuration] = useState<number>(0);
-  const [resolution, setResolution] = useState<'480p' | '720p'>('480p');
+  const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('480p');
   const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
 
   // UI state
@@ -301,11 +301,13 @@ export default function InfiniteTalkGenerator() {
     
     // 新规则：5秒以下固定积分，5秒以上按秒计算
     if (roundedDuration <= 5) {
-      // 5秒以下：480P=5积分，720P=10积分
-      return resolution === '480p' ? 5 : 10;
+      // 5秒以下：480P=5积分，720P=10积分，1080P=15积分
+      if (resolution === '480p') return 5;
+      if (resolution === '720p') return 10;
+      return 15; // 1080p
     } else {
-      // 5秒以上：480P=1积分/秒，720P=2积分/秒
-      const creditsPerSecond = resolution === '480p' ? 1 : 2;
+      // 5秒以上：480P=1积分/秒，720P=2积分/秒，1080P=3积分/秒
+      const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
       return roundedDuration * creditsPerSecond;
     }
   };
@@ -625,37 +627,50 @@ export default function InfiniteTalkGenerator() {
             {/* Resolution Selection */}
             <div className="mb-6">
                 <label className="block text-white font-medium mb-3">Resolution <span className="text-red-500">*</span></label>
-                <div className="flex gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   <button
                     type="button"
                     onClick={() => setResolution('480p')}
                     className={cn(
-                      "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
                       resolution === '480p'
                         ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                         : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                     )}
                   >
                     <div className="text-center">
-                      <div className="text-lg font-bold">480P</div>
-                 
-                      <div className="text-xs opacity-60"> 1 Credit/sec</div>
+                      <div className="text-sm font-bold">480P</div>
+                      <div className="text-xs opacity-60">1 Credit/sec</div>
                     </div>
                   </button>
                   <button
                     type="button"
                     onClick={() => setResolution('720p')}
                     className={cn(
-                      "flex-1 py-3 px-4 rounded-lg border-2 transition-all duration-200 font-medium",
+                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
                       resolution === '720p'
                         ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                         : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                     )}
                   >
                     <div className="text-center">
-                      <div className="text-lg font-bold">720P</div>
-                
-                      <div className="text-xs opacity-60"> 2 Credits/sec</div>
+                      <div className="text-sm font-bold">720P</div>
+                      <div className="text-xs opacity-60">2 Credits/sec</div>
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setResolution('1080p')}
+                    className={cn(
+                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                      resolution === '1080p'
+                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                    )}
+                  >
+                    <div className="text-center">
+                      <div className="text-sm font-bold">1080P</div>
+                      <div className="text-xs opacity-60">3 Credits/sec</div>
                     </div>
                   </button>
                 </div>
@@ -684,7 +699,7 @@ export default function InfiniteTalkGenerator() {
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
                 {audioDuration > 0 ? `${calculateCredits()} Credits` : 
-                  `${resolution === '480p' ? '5' : '10'} Credits`}
+                  `${resolution === '480p' ? '5' : resolution === '720p' ? '10' : '15'} Credits`}
               </div>
             </div>
 
