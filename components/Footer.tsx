@@ -98,6 +98,16 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
                   Android App (Beta)
                 </a>
               </li>
+              <li>
+                <a 
+                  href="https://apps.apple.com/gb/app/infinitetalkai/id6747014221"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                >
+                  IOS App (Beta)
+                </a>
+              </li>
             </ul>
           </div>
           
