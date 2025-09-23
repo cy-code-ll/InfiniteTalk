@@ -52,6 +52,7 @@ export default function MultiHero() {
   const [rightPreviewUrl, setRightPreviewUrl] = useState<string | null>(null);
   const [isLeftPlaying, setIsLeftPlaying] = useState(false);
   const [isRightPlaying, setIsRightPlaying] = useState(false);
+  const [isDragOver, setIsDragOver] = useState<string | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const leftAudioInputRef = useRef<HTMLInputElement>(null);
@@ -104,6 +105,19 @@ export default function MultiHero() {
     });
   };
 
+  const handleImageDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    checkAuthAndProceed(() => {
+      const file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        setImageFile(file);
+      } else {
+        toast.showToast('Please drop a valid image file', 'error');
+      }
+    });
+  };
+
   const handleLeftAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
@@ -125,9 +139,55 @@ export default function MultiHero() {
     });
   };
 
+  const handleLeftAudioDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    checkAuthAndProceed(async () => {
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        
+        if (!hasValidExtension) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
+        const duration = await getAudioDuration(file);
+        setLeftAudioFile(file);
+        setLeftAudioDuration(duration);
+      }
+    });
+  };
+
   const handleRightAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     checkAuthAndProceed(async () => {
       const file = event.target.files?.[0];
+      if (file) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+        
+        if (!hasValidExtension) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
+        const duration = await getAudioDuration(file);
+        setRightAudioFile(file);
+        setRightAudioDuration(duration);
+      }
+    });
+  };
+
+  const handleRightAudioDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    checkAuthAndProceed(async () => {
+      const file = event.dataTransfer.files[0];
       if (file) {
         // 检查音频格式 - 使用文件后缀名
         const fileName = file.name.toLowerCase();
@@ -462,12 +522,22 @@ export default function MultiHero() {
                     className="hidden"
                   />
                   <div 
-                    className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
+                    className={`flex items-center border rounded-lg px-3 py-2 transition-colors cursor-pointer ${
+                      isDragOver === 'left-audio' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-white/30 hover:border-primary/50'
+                    }`}
                     onClick={() => checkAuthAndProceed(() => leftAudioInputRef.current?.click())}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver('left-audio');
+                    }}
+                    onDragLeave={() => setIsDragOver(null)}
+                    onDrop={handleLeftAudioDrop}
                   >
                     <input
                       type="text"
-                      placeholder="Choose left audio file..."
+                      placeholder={isDragOver === 'left-audio' ? 'Drop audio file here...' : 'Choose left audio file...'}
                       value={leftAudioFile ? `${leftAudioFile.name} (${leftAudioDuration.toFixed(1)}s)` : ''}
                       readOnly
                       className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
@@ -516,12 +586,22 @@ export default function MultiHero() {
                     className="hidden"
                   />
                   <div 
-                    className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
+                    className={`flex items-center border rounded-lg px-3 py-2 transition-colors cursor-pointer ${
+                      isDragOver === 'right-audio' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-white/30 hover:border-primary/50'
+                    }`}
                     onClick={() => checkAuthAndProceed(() => rightAudioInputRef.current?.click())}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver('right-audio');
+                    }}
+                    onDragLeave={() => setIsDragOver(null)}
+                    onDrop={handleRightAudioDrop}
                   >
                     <input
                       type="text"
-                      placeholder="Choose right audio file..."
+                      placeholder={isDragOver === 'right-audio' ? 'Drop audio file here...' : 'Choose right audio file...'}
                       value={rightAudioFile ? `${rightAudioFile.name} (${rightAudioDuration.toFixed(1)}s)` : ''}
                       readOnly
                       className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
@@ -551,7 +631,20 @@ export default function MultiHero() {
                   </Tooltip>
                 </div>
                 {!imageFile ? (
-                  <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onClick={() => checkAuthAndProceed(() => imageInputRef.current?.click())}>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
+                      isDragOver === 'image' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-white/30 hover:border-primary/50'
+                    }`}
+                    onClick={() => checkAuthAndProceed(() => imageInputRef.current?.click())}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver('image');
+                    }}
+                    onDragLeave={() => setIsDragOver(null)}
+                    onDrop={handleImageDrop}
+                  >
                     <input
                       ref={imageInputRef}
                       id="image-upload"
@@ -561,7 +654,9 @@ export default function MultiHero() {
                       className="hidden"
                     />
                     <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                    <p className="text-sm text-muted-foreground">Click to upload image</p>
+                    <p className="text-sm text-muted-foreground">
+                      {isDragOver === 'image' ? 'Drop image here' : 'Click to upload or drag & drop image'}
+                    </p>
                   </div>
                 ) : (
                   <div className="relative">

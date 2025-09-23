@@ -41,6 +41,7 @@ export function Wans2vHero() {
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [isDragOver, setIsDragOver] = useState<string | null>(null);
 
   const imageInputRef = useRef<HTMLInputElement>(null);
   const audioInputRef = useRef<HTMLInputElement>(null);
@@ -79,8 +80,47 @@ export function Wans2vHero() {
     }
   };
 
+  const handleImageDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+    } else {
+      toast.showToast('Please drop a valid image file', 'error');
+    }
+  };
+
   const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    if (file) {
+      // 检查音频格式 - 使用文件后缀名
+      const fileName = file.name.toLowerCase();
+      const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!hasValidExtension) {
+        setIsInvalidAudioModalOpen(true);
+        return;
+      }
+      
+      const duration = await getAudioDuration(file);
+      
+      // 检查音频时长是否超过600秒
+      if (duration > 600) {
+        toast.showToast('Audio file must be 600 seconds or less', 'error');
+        return;
+      }
+      
+      setAudioFile(file);
+      setAudioDuration(duration);
+    }
+  };
+
+  const handleAudioDrop = async (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    const file = event.dataTransfer.files[0];
     if (file) {
       // 检查音频格式 - 使用文件后缀名
       const fileName = file.name.toLowerCase();
@@ -352,18 +392,33 @@ export function Wans2vHero() {
                   Upload Image
                 </Label>
                 {!imageFile ? (
-                                   <div className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer" onClick={() => imageInputRef.current?.click()}>
-                   <input
-                     ref={imageInputRef}
-                     id="image-upload"
-                     type="file"
-                     accept="image/*"
-                     onChange={handleImageUpload}
-                     className="hidden"
-                   />
-                   <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                   <p className="text-sm text-muted-foreground">Click to upload image</p>
-                 </div>
+                  <div 
+                    className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
+                      isDragOver === 'image' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-white/30 hover:border-primary/50'
+                    }`}
+                    onClick={() => imageInputRef.current?.click()}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver('image');
+                    }}
+                    onDragLeave={() => setIsDragOver(null)}
+                    onDrop={handleImageDrop}
+                  >
+                    <input
+                      ref={imageInputRef}
+                      id="image-upload"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageUpload}
+                      className="hidden"
+                    />
+                    <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                    <p className="text-sm text-muted-foreground">
+                      {isDragOver === 'image' ? 'Drop image here' : 'Click to upload image'}
+                    </p>
+                  </div>
                 ) : (
                   <div className="relative">
                                          <img
@@ -432,11 +487,23 @@ export function Wans2vHero() {
                   />
                   {!audioFile ? (
                     <div 
-                      className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                      className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors cursor-pointer ${
+                        isDragOver === 'audio' 
+                          ? 'border-primary bg-primary/10' 
+                          : 'border-white/30 hover:border-primary/50'
+                      }`}
                       onClick={() => audioInputRef.current?.click()}
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragOver('audio');
+                      }}
+                      onDragLeave={() => setIsDragOver(null)}
+                      onDrop={handleAudioDrop}
                     >
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
-                      <p className="text-sm text-muted-foreground">Click to upload audio</p>
+                      <p className="text-sm text-muted-foreground">
+                        {isDragOver === 'audio' ? 'Drop audio here' : 'Click to upload audio'}
+                      </p>
                     </div>
                   ) : (
                     <div className="relative bg-white/5 rounded-lg border border-white/20 p-4">

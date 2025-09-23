@@ -98,6 +98,7 @@ export default function InfiniteTalkGenerator() {
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
+  const [isDragOver, setIsDragOver] = useState<string | null>(null);
 
   // Preview helper: robust playback with multiple type fallbacks
   const previewSelectedAudio = useCallback(() => {
@@ -227,6 +228,17 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
+  const handleImageDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('image/')) {
+      setSelectedImage(file);
+    } else {
+      toast.error('Please drop a valid image file');
+    }
+  };
+
   // 处理视频上传
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -235,9 +247,47 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
+  const handleVideoDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    const file = event.dataTransfer.files[0];
+    if (file && file.type.startsWith('video/')) {
+      setSelectedVideo(file);
+    } else {
+      toast.error('Please drop a valid video file');
+    }
+  };
+
   // 处理音频上传
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
+    if (file) {
+      // 检查音频格式 - 使用文件后缀名
+      const fileName = file.name.toLowerCase();
+      const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+
+      if (!hasValidExtension) {
+        setIsInvalidAudioModalOpen(true);
+        return;
+      }
+      
+      setSelectedAudio(file);
+      
+      // 获取音频时长
+      const audio = new Audio();
+      audio.src = URL.createObjectURL(file);
+      audio.addEventListener('loadedmetadata', () => {
+        setAudioDuration(Math.ceil(audio.duration));
+        URL.revokeObjectURL(audio.src);
+      });
+    }
+  };
+
+  const handleAudioDrop = (event: React.DragEvent<HTMLDivElement>) => {
+    event.preventDefault();
+    setIsDragOver(null);
+    const file = event.dataTransfer.files[0];
     if (file) {
       // 检查音频格式 - 使用文件后缀名
       const fileName = file.name.toLowerCase();
@@ -524,14 +574,24 @@ export default function InfiniteTalkGenerator() {
                       </button>
                     </div>
                   ) : (
-                    <button
+                    <div
                       onClick={() => imageInputRef.current?.click()}
-                      className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragOver('image');
+                      }}
+                      onDragLeave={() => setIsDragOver(null)}
+                      onDrop={handleImageDrop}
+                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
+                        isDragOver === 'image' 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                      }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
-                      <span>Click to upload image</span>
+                      <span>{isDragOver === 'image' ? 'Drop image here' : 'Click to upload image'}</span>
                       <span className="text-sm">PNG, JPG up to 10MB</span>
-                    </button>
+                    </div>
                   )
                 ) : (
                   // Video Upload
@@ -551,14 +611,24 @@ export default function InfiniteTalkGenerator() {
                       </button>
                     </div>
                   ) : (
-                    <button
+                    <div
                       onClick={() => videoInputRef.current?.click()}
-                      className="w-full h-48 border-2 border-dashed border-slate-600 hover:border-slate-500 rounded-lg flex flex-col items-center justify-center text-slate-400 hover:text-slate-300 transition-colors"
+                      onDragOver={(e) => {
+                        e.preventDefault();
+                        setIsDragOver('video');
+                      }}
+                      onDragLeave={() => setIsDragOver(null)}
+                      onDrop={handleVideoDrop}
+                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
+                        isDragOver === 'video' 
+                          ? 'border-primary bg-primary/10 text-primary' 
+                          : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                      }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
-                      <span>Click to upload video</span>
+                      <span>{isDragOver === 'video' ? 'Drop video here' : 'Click to upload video'}</span>
                       <span className="text-sm">MP4, MOV up to 100MB</span>
-                    </button>
+                    </div>
                   )
                 )}
                 <input
@@ -642,15 +712,27 @@ export default function InfiniteTalkGenerator() {
                     </div>
                   </div>
                 ) : (
-                  <button
+                  <div
                     onClick={() => audioInputRef.current?.click()}
-                    className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50 cursor-pointer"
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      setIsDragOver('audio');
+                    }}
+                    onDragLeave={() => setIsDragOver(null)}
+                    onDrop={handleAudioDrop}
+                    className={`w-full p-4 border rounded-lg text-left transition-colors cursor-pointer ${
+                      isDragOver === 'audio' 
+                        ? 'border-primary bg-primary/10' 
+                        : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
+                    }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-slate-400">Click to select audio file</span>
-                      <FileAudio className="w-5 h-5 text-slate-500" />
+                      <span className={isDragOver === 'audio' ? 'text-primary' : 'text-slate-400'}>
+                        {isDragOver === 'audio' ? 'Drop audio file here' : 'Click to select audio file'}
+                      </span>
+                      <FileAudio className={`w-5 h-5 ${isDragOver === 'audio' ? 'text-primary' : 'text-slate-500'}`} />
                     </div>
-                  </button>
+                  </div>
                 )}
                 <input
                   ref={audioInputRef}
