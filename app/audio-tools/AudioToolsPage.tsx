@@ -7,6 +7,7 @@ import { Upload, Play, Pause, Download, ArrowLeft } from 'lucide-react';
 import { FFmpeg } from '@ffmpeg/ffmpeg';
 import { fetchFile } from '@ffmpeg/util';
 import Link from 'next/link';
+import { useAuth, useClerk } from '@clerk/nextjs';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,8 @@ function formatSeconds(totalSeconds: number): string {
 
 export default function AudioToolsPage() {
   const toast = useToast();
+  const { isSignedIn } = useAuth();
+  const { openSignIn } = useClerk();
 
   const [sourceType, setSourceType] = useState<SourceType>(null);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
@@ -53,6 +56,15 @@ export default function AudioToolsPage() {
   const getBaseName = (filename: string): string => {
     const idx = filename.lastIndexOf('.')
     return idx > 0 ? filename.slice(0, idx) : filename;
+  };
+
+  // 检查登录状态
+  const checkAuthAndProceed = (callback: () => void) => {
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+    callback();
   };
 
   const triggerDownload = (file: File) => {
@@ -433,100 +445,106 @@ export default function AudioToolsPage() {
 
   // Handle navigation with audio data
   const handleNavigateWithAudio = useCallback(async (path: string) => {
-    if (!sourceFile) {
-      toast.showToast('Please select a media file first', 'info');
-      return;
-    }
-
-    try {
-      setIsExporting(true);
-      toast.showToast('Processing audio, please wait...', 'info');
-      
-      const processedFile = await processAudio();
-      
-      if (processedFile) {
-        toast.showToast('Audio processed successfully! Redirecting...', 'success');
-        
-        // Store the processed audio file in sessionStorage for the target page to pick up
-        const reader = new FileReader();
-        reader.onload = () => {
-          const audioData = {
-            name: processedFile.name,
-            type: processedFile.type,
-            size: processedFile.size,
-            data: reader.result
-          };
-          sessionStorage.setItem('audioToolsProcessedAudio', JSON.stringify(audioData));
-          
-          // Small delay to let user see the success message
-          setTimeout(() => {
-            window.location.href = path;
-          }, 1000);
-        };
-        reader.readAsDataURL(processedFile);
+    checkAuthAndProceed(async () => {
+      if (!sourceFile) {
+        toast.showToast('Please select a media file first', 'info');
+        return;
       }
-    } catch (error) {
-      console.error('Failed to process audio for navigation:', error);
-      toast.showToast('Failed to process audio', 'error');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [sourceFile, processAudio, toast]);
+
+      try {
+        setIsExporting(true);
+        toast.showToast('Processing audio, please wait...', 'info');
+        
+        const processedFile = await processAudio();
+        
+        if (processedFile) {
+          toast.showToast('Audio processed successfully! Redirecting...', 'success');
+          
+          // Store the processed audio file in sessionStorage for the target page to pick up
+          const reader = new FileReader();
+          reader.onload = () => {
+            const audioData = {
+              name: processedFile.name,
+              type: processedFile.type,
+              size: processedFile.size,
+              data: reader.result
+            };
+            sessionStorage.setItem('audioToolsProcessedAudio', JSON.stringify(audioData));
+            
+            // Small delay to let user see the success message
+            setTimeout(() => {
+              window.location.href = path;
+            }, 1000);
+          };
+          reader.readAsDataURL(processedFile);
+        }
+      } catch (error) {
+        console.error('Failed to process audio for navigation:', error);
+        toast.showToast('Failed to process audio', 'error');
+      } finally {
+        setIsExporting(false);
+      }
+    });
+  }, [sourceFile, processAudio, toast, checkAuthAndProceed]);
 
   // Handle navigation with audio data for Multi
   const handleNavigateWithAudioMulti = useCallback(async (path: string) => {
-    if (!sourceFile) {
-      toast.showToast('Please select a media file first', 'info');
-      return;
-    }
+    checkAuthAndProceed(() => {
+      if (!sourceFile) {
+        toast.showToast('Please select a media file first', 'info');
+        return;
+      }
 
-    // Open modal to let user choose left or right audio
-    setIsMultiAudioModalOpen(true);
-  }, [sourceFile, toast]);
+      // Open modal to let user choose left or right audio
+      setIsMultiAudioModalOpen(true);
+    });
+  }, [sourceFile, toast, checkAuthAndProceed]);
 
   // Handle Multi audio selection
   const handleMultiAudioSelection = useCallback(async (audioType: 'left' | 'right') => {
-    if (!sourceFile) {
-      toast.showToast('Please select a media file first', 'info');
-      return;
-    }
-
-    try {
-      setIsExporting(true);
-      setIsMultiAudioModalOpen(false);
-      toast.showToast('Processing audio, please wait...', 'info');
-      
-      const processedFile = await processAudio();
-      
-      if (processedFile) {
-        toast.showToast('Audio processed successfully! Redirecting...', 'success');
-        
-        // Store the processed audio file in sessionStorage for the target page to pick up
-        const reader = new FileReader();
-        reader.onload = () => {
-          const audioData = {
-            name: processedFile.name,
-            type: processedFile.type,
-            size: processedFile.size,
-            data: reader.result,
-            audioType: audioType // Add audio type (left or right)
-          };
-          sessionStorage.setItem('audioToolsProcessedAudioMulti', JSON.stringify(audioData));
-          
-          // Small delay to let user see the success message
-          setTimeout(() => {
-            window.location.href = '/infinitetalk-multi';
-          }, 1000);
-        };
-        reader.readAsDataURL(processedFile);
+    checkAuthAndProceed(async () => {
+      if (!sourceFile) {
+        toast.showToast('Please select a media file first', 'info');
+        return;
       }
-    } catch (error) {
-      console.error('Failed to process audio for Multi navigation:', error);
-      toast.showToast('Failed to process audio', 'error');
-    } finally {
-      setIsExporting(false);
-    }
-  }, [sourceFile, processAudio, toast]);
+
+      try {
+        setIsExporting(true);
+        setIsMultiAudioModalOpen(false);
+        toast.showToast('Processing audio, please wait...', 'info');
+        
+        const processedFile = await processAudio();
+        
+        if (processedFile) {
+          toast.showToast('Audio processed successfully! Redirecting...', 'success');
+          
+          // Store the processed audio file in sessionStorage for the target page to pick up
+          const reader = new FileReader();
+          reader.onload = () => {
+            const audioData = {
+              name: processedFile.name,
+              type: processedFile.type,
+              size: processedFile.size,
+              data: reader.result,
+              audioType: audioType // Add audio type (left or right)
+            };
+            sessionStorage.setItem('audioToolsProcessedAudioMulti', JSON.stringify(audioData));
+            
+            // Small delay to let user see the success message
+            setTimeout(() => {
+              window.location.href = '/infinitetalk-multi';
+            }, 1000);
+          };
+          reader.readAsDataURL(processedFile);
+        }
+      } catch (error) {
+        console.error('Failed to process audio for Multi navigation:', error);
+        toast.showToast('Failed to process audio', 'error');
+      } finally {
+        setIsExporting(false);
+      }
+    });
+  }, [sourceFile, processAudio, toast, checkAuthAndProceed]);
 
   const handleExport = useCallback(async () => {
     if (!sourceFile || !sourceType || duration <= 0) {
