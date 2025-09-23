@@ -11,7 +11,6 @@ import { useAuth } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import Link from 'next/link';
 import { isMobileDevice } from '@/lib/utils';
-import AudioCutterModal from '@/components/media/AudioCutterModal';
 import {
   Dialog,
   DialogContent,
@@ -39,7 +38,6 @@ export function Wans2vHero() {
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
-  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
@@ -84,9 +82,12 @@ export function Wans2vHero() {
   const handleAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // 检查音频格式
-      const validFormats = ['audio/mp3', 'audio/wav', 'audio/m4a', 'audio/ogg', 'audio/flac', 'audio/mpeg'];
-      if (!validFormats.includes(file.type)) {
+      // 检查音频格式 - 使用文件后缀名
+      const fileName = file.name.toLowerCase();
+      const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+      
+      if (!hasValidExtension) {
         setIsInvalidAudioModalOpen(true);
         return;
       }
@@ -103,6 +104,54 @@ export function Wans2vHero() {
       setAudioDuration(duration);
     }
   };
+
+  // 删除选中的音频
+  const removeAudioFile = () => {
+    setAudioFile(null);
+    setAudioDuration(0);
+    if (audioInputRef.current) {
+      audioInputRef.current.value = '';
+    }
+  };
+
+  // 从 AudioTools 页面接收处理后的音频
+  React.useEffect(() => {
+    const checkForAudioFromTools = () => {
+      try {
+        const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudio');
+        if (audioDataStr) {
+          const audioData = JSON.parse(audioDataStr);
+          
+          // 将 base64 数据转换为 File 对象
+          fetch(audioData.data)
+            .then(res => res.blob())
+            .then(async (blob) => {
+              const file = new File([blob], audioData.name, { type: audioData.type });
+              const duration = await getAudioDuration(file);
+              
+              // 检查音频时长是否超过600秒
+              if (duration > 600) {
+                toast.showToast('Audio file must be 600 seconds or less', 'error');
+                return;
+              }
+              
+              setAudioFile(file);
+              setAudioDuration(duration);
+            })
+            .catch(error => {
+              console.error('Failed to load audio from AudioTools:', error);
+            });
+          
+          // 清除 sessionStorage 中的数据
+          sessionStorage.removeItem('audioToolsProcessedAudio');
+        }
+      } catch (error) {
+        console.error('Error processing audio from AudioTools:', error);
+      }
+    };
+
+    checkForAudioFromTools();
+  }, []);
 
   // 音频预览播放/暂停
   const previewSelectedAudio = () => {
@@ -164,9 +213,6 @@ export function Wans2vHero() {
     };
   }, [previewAudioRef.current]);
 
-  const openAudioPicker = () => {
-    setIsAudioModalOpen(true);
-  };
 
   const handleGenerate = async () => {
     // 检查用户是否登录
@@ -384,23 +430,47 @@ export function Wans2vHero() {
                     onChange={handleAudioUpload}
                     className="hidden"
                   />
-                  <div 
-                     className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={openAudioPicker}
-                   >
-                     <input
-                       type="text"
-                       placeholder="Choose audio file..."
-                       value={audioFile ? `${audioFile.name} (${audioDuration.toFixed(1)}s)` : ''}
-                       readOnly
-                       className="flex-1 text-sm text-muted-foreground bg-transparent outline-none truncate pointer-events-none"
-                       title={audioFile ? `${audioFile.name} (${audioDuration.toFixed(1)}s)` : ''}
-                     />
-                     <div className="ml-2 h-8 w-8 flex items-center justify-center">
-                       <Upload className="h-4 w-4 text-muted-foreground" />
-                     </div>
-                   </div>
+                  {!audioFile ? (
+                    <div 
+                      className="border-2 border-dashed border-white/30 rounded-lg p-4 text-center hover:border-primary/50 transition-colors cursor-pointer"
+                      onClick={() => audioInputRef.current?.click()}
+                    >
+                      <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
+                      <p className="text-sm text-muted-foreground">Click to upload audio</p>
+                    </div>
+                  ) : (
+                    <div className="relative bg-white/5 rounded-lg border border-white/20 p-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center min-w-0 flex-1">
+                          <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse mr-3 flex-shrink-0" />
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm text-white font-medium truncate" title={audioFile.name}>
+                              {audioFile.name}
+                            </div>
+                            <div className="text-xs text-muted-foreground">
+                              Duration: {audioDuration.toFixed(1)}s
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={removeAudioFile}
+                          className="h-8 w-8 p-0 bg-red-500/20 hover:bg-red-500/30 text-red-400 hover:text-red-300 rounded-full shadow-sm"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                    <p className="text-xs text-muted-foreground/70 mt-2">Maximum duration: 600 seconds</p>
+                   <p className="text-muted-foreground/70 text-xs mt-2">
+                     Need to edit your audio or extract audio from video?{' '}
+                     <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                       Use our Audio Tools
+                     </Link>
+                   </p>
                 </div>
               </div>
 
@@ -601,20 +671,6 @@ export function Wans2vHero() {
         </DialogContent>
       </Dialog>
 
-      {/* Audio Cutter Modal (Desktop only) */}
-      <AudioCutterModal
-        open={isAudioModalOpen}
-        onOpenChange={setIsAudioModalOpen}
-        onConfirm={(file, dur) => {
-          // Duration check: max 600s for this page
-          if (dur > 600) {
-            toast.showToast('Audio file must be 600 seconds or less', 'error');
-            return;
-          }
-          setAudioFile(file);
-          setAudioDuration(dur);
-        }}
-      />
     </section>
   );
 }

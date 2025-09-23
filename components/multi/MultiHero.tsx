@@ -19,7 +19,6 @@ import {
   DialogTitle,
 } from "../ui/dialog";
 import { isMobileDevice } from '@/lib/utils';
-import AudioCutterModal from '@/components/media/AudioCutterModal';
 
 interface GenerationState {
   status: 'demo' | 'loading' | 'result';
@@ -47,7 +46,6 @@ export default function MultiHero() {
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [isAudioModalOpen, setIsAudioModalOpen] = useState<false | 'left' | 'right'>(false);
   const leftPreviewRef = useRef<HTMLAudioElement | null>(null);
   const rightPreviewRef = useRef<HTMLAudioElement | null>(null);
   const [leftPreviewUrl, setLeftPreviewUrl] = useState<string | null>(null);
@@ -148,6 +146,48 @@ export default function MultiHero() {
     });
   };
 
+  // 从 AudioTools 页面接收处理后的音频 (Multi)
+  useEffect(() => {
+    const checkForAudioFromToolsMulti = () => {
+      try {
+        const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudioMulti');
+        if (audioDataStr) {
+          const audioData = JSON.parse(audioDataStr);
+          
+          // 将 base64 数据转换为 File 对象
+          fetch(audioData.data)
+            .then(res => res.blob())
+            .then(async (blob) => {
+              const file = new File([blob], audioData.name, { type: audioData.type });
+              const duration = await getAudioDuration(file);
+              
+              // 根据 audioType 设置到对应的音频位置
+              if (audioData.audioType === 'left') {
+                setLeftAudioFile(file);
+                setLeftAudioDuration(duration);
+                toast.showToast('Left audio loaded from Audio Tools', 'success');
+              } else if (audioData.audioType === 'right') {
+                setRightAudioFile(file);
+                setRightAudioDuration(duration);
+                toast.showToast('Right audio loaded from Audio Tools', 'success');
+              }
+            })
+            .catch(error => {
+              console.error('Failed to load audio from AudioTools Multi:', error);
+              toast.showToast('Failed to load audio from Audio Tools', 'error');
+            });
+          
+          // 清除 sessionStorage 中的数据
+          sessionStorage.removeItem('audioToolsProcessedAudioMulti');
+        }
+      } catch (error) {
+        console.error('Error processing audio from AudioTools Multi:', error);
+      }
+    };
+
+    checkForAudioFromToolsMulti();
+  }, [toast]);
+
   // Left preview lifecycle
   useEffect(() => {
     if (!leftAudioFile) {
@@ -210,13 +250,6 @@ export default function MultiHero() {
     if (el.paused) { el.play().catch(() => toast.showToast('Preview failed', 'error')); } else { el.pause(); }
   };
 
-  const openLeftAudioPicker = () => {
-    setIsAudioModalOpen('left');
-  };
-
-  const openRightAudioPicker = () => {
-    setIsAudioModalOpen('right');
-  };
 
   // 计算积分消耗
   const calculateCredits = (): number => {
@@ -430,7 +463,7 @@ export default function MultiHero() {
                   />
                   <div 
                     className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => checkAuthAndProceed(openLeftAudioPicker)}
+                    onClick={() => checkAuthAndProceed(() => leftAudioInputRef.current?.click())}
                   >
                     <input
                       type="text"
@@ -445,6 +478,12 @@ export default function MultiHero() {
                     </div>
                   </div>
                 </div>
+                <p className="text-muted-foreground/70 text-xs mb-3">
+                  Need to edit your audio or extract audio from video?{' '}
+                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                    Use our Audio Tools
+                  </Link>
+                </p>
               </div>
 
               {/* Right Audio Upload */}
@@ -478,7 +517,7 @@ export default function MultiHero() {
                   />
                   <div 
                     className="flex items-center border border-white/30 rounded-lg px-3 py-2 hover:border-primary/50 transition-colors cursor-pointer"
-                    onClick={() => checkAuthAndProceed(openRightAudioPicker)}
+                    onClick={() => checkAuthAndProceed(() => rightAudioInputRef.current?.click())}
                   >
                     <input
                       type="text"
@@ -493,6 +532,12 @@ export default function MultiHero() {
                     </div>
                   </div>
                 </div>
+                <p className="text-muted-foreground/70 text-xs mb-3">
+                  Need to edit your audio or extract audio from video?{' '}
+                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                    Use our Audio Tools
+                  </Link>
+                </p>
               </div>
 
               {/* Image Upload */}
@@ -828,20 +873,6 @@ export default function MultiHero() {
         </DialogContent>
       </Dialog>
 
-      {/* Audio Cutter Modal (Desktop only) */}
-      <AudioCutterModal
-        open={!!isAudioModalOpen}
-        onOpenChange={(o) => setIsAudioModalOpen(o ? (isAudioModalOpen || 'left') : false)}
-        onConfirm={(file, dur) => {
-          if (isAudioModalOpen === 'left') {
-            setLeftAudioFile(file);
-            setLeftAudioDuration(Math.ceil(dur));
-          } else if (isAudioModalOpen === 'right') {
-            setRightAudioFile(file);
-            setRightAudioDuration(Math.ceil(dur));
-          }
-        }}
-      />
     </section>
   );
 }

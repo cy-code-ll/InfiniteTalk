@@ -189,6 +189,19 @@ export default function PricingSection() {
       return;
     }
 
+    // 3. 缓存支付信息到本地存储
+    const selectedPlan = [...pricingPlans, ...subscriptionPlans].find(plan => plan.key === planKey);
+    if (selectedPlan) {
+      const paymentInfo = {
+        planKey: planKey,
+        price: selectedPlan.price,
+        credits: selectedPlan.buttonText.match(/\d+/)?.[0] || '0',
+        planTitle: selectedPlan.title,
+        timestamp: new Date().toISOString()
+      };
+      localStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+    }
+
     setLoadingPlan(planKey); // 设置当前加载的计划
     try {
       const data = await api.payment.createPaypalSession(priceId);

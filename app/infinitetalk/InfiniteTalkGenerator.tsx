@@ -18,7 +18,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import AudioCutterModal from '@/components/media/AudioCutterModal';
 
 type ViewState = 'videodemo' | 'loading' | 'result';
 type TabMode = 'image-to-video' | 'video-to-video';
@@ -96,7 +95,6 @@ export default function InfiniteTalkGenerator() {
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
-  const [isAudioModalOpen, setIsAudioModalOpen] = useState(false);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
@@ -263,9 +261,44 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
-  const openAudioPicker = () => {
-    setIsAudioModalOpen(true);
-  };
+  // 从 AudioTools 页面接收处理后的音频
+  useEffect(() => {
+    const checkForAudioFromTools = () => {
+      try {
+        const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudio');
+        if (audioDataStr) {
+          const audioData = JSON.parse(audioDataStr);
+          
+          // 将 base64 数据转换为 File 对象
+          fetch(audioData.data)
+            .then(res => res.blob())
+            .then(blob => {
+              const file = new File([blob], audioData.name, { type: audioData.type });
+              setSelectedAudio(file);
+              
+              // 获取音频时长
+              const audio = new Audio();
+              audio.src = URL.createObjectURL(file);
+              audio.addEventListener('loadedmetadata', () => {
+                setAudioDuration(Math.ceil(audio.duration));
+                URL.revokeObjectURL(audio.src);
+              });
+            })
+            .catch(error => {
+              console.error('Failed to load audio from AudioTools:', error);
+            });
+          
+          // 清除 sessionStorage 中的数据
+          sessionStorage.removeItem('audioToolsProcessedAudio');
+        }
+      } catch (error) {
+        console.error('Error processing audio from AudioTools:', error);
+      }
+    };
+
+    checkForAudioFromTools();
+  }, []);
+
 
   // 删除选中的图片
   const removeSelectedImage = () => {
@@ -583,12 +616,15 @@ export default function InfiniteTalkGenerator() {
                 </div>
               </div>
               <p className="text-slate-400 text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
+              <p className="text-slate-500 text-xs mb-3">
+                Need to edit your audio or extract audio from video?{' '}
+                <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                  Use our Audio Tools
+                </Link>
+              </p>
               <div className="relative">
-                <div
-                  onClick={openAudioPicker}
-                  className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50 cursor-pointer"
-                >
-                  {selectedAudio ? (
+                {selectedAudio ? (
+                  <div className="relative bg-slate-800/50 rounded-lg border border-slate-600 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center min-w-0 flex-1">
                         <FileAudio className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
@@ -598,22 +634,24 @@ export default function InfiniteTalkGenerator() {
                         )}
                       </div>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          removeSelectedAudio();
-                        }}
-                        className="text-red-400 hover:text-red-300"
+                        onClick={removeSelectedAudio}
+                        className="text-red-400 hover:text-red-300 p-1"
                       >
                         <X className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : (
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => audioInputRef.current?.click()}
+                    className="w-full p-4 border border-slate-600 hover:border-slate-500 rounded-lg text-left transition-colors bg-slate-800/50 cursor-pointer"
+                  >
                     <div className="flex items-center justify-between">
                       <span className="text-slate-400">Click to select audio file</span>
                       <FileAudio className="w-5 h-5 text-slate-500" />
                     </div>
-                  )}
-                </div>
+                  </button>
+                )}
                 <input
                   ref={audioInputRef}
                   type="file"
@@ -861,15 +899,6 @@ export default function InfiniteTalkGenerator() {
         </DialogContent>
       </Dialog>
 
-      {/* Audio Cutter Modal (Desktop only) */}
-      <AudioCutterModal
-        open={isAudioModalOpen}
-        onOpenChange={setIsAudioModalOpen}
-        onConfirm={(file, dur) => {
-          setSelectedAudio(file);
-          setAudioDuration(Math.ceil(dur));
-        }}
-      />
     </div>
   );
 }

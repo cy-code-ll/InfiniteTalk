@@ -34,7 +34,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/infinitetalk-multi',
     '/wan2.2-s2v',
     '/free/referral',
-    '/app'
+    '/app',
+    '/audio-tools'
   ];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];
