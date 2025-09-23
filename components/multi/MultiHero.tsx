@@ -655,7 +655,7 @@ export default function MultiHero() {
                     />
                     <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      {isDragOver === 'image' ? 'Drop image here' : 'Click to upload or drag & drop image'}
+                      {isDragOver === 'image' ? 'Drop image here' : 'click and drop upload or drag & drop image'}
                     </p>
                   </div>
                 ) : (

@@ -416,7 +416,7 @@ export function Wans2vHero() {
                     />
                     <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                     <p className="text-sm text-muted-foreground">
-                      {isDragOver === 'image' ? 'Drop image here' : 'Click to upload image'}
+                      {isDragOver === 'image' ? 'Drop image here' : 'click upload image'}
                     </p>
                   </div>
                 ) : (
@@ -502,7 +502,7 @@ export function Wans2vHero() {
                     >
                       <Upload className="mx-auto h-8 w-8 text-muted-foreground mb-2" />
                       <p className="text-sm text-muted-foreground">
-                        {isDragOver === 'audio' ? 'Drop audio here' : 'Click to upload audio'}
+                        {isDragOver === 'audio' ? 'Drop audio here' : 'click and drop upload audio'}
                       </p>
                     </div>
                   ) : (

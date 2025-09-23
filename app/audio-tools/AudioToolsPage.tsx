@@ -660,38 +660,42 @@ export default function AudioToolsPage() {
   }, [duration, selectionEnd, isPlaying]);
 
   const onPickAudio = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = '.mp3,.wav,.m4a,.ogg,.flac';
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      setSourceType('audio');
-      setSourceFile(file);
-    };
-    input.click();
+    checkAuthAndProceed(() => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = '.mp3,.wav,.m4a,.ogg,.flac';
+      input.onchange = () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        setSourceType('audio');
+        setSourceFile(file);
+      };
+      input.click();
+    });
   };
 
   const onPickVideo = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'video/*';
-    input.onchange = () => {
-      const file = input.files?.[0];
-      if (!file) return;
-      // basic validation
-      const ok = file.type.startsWith('video/');
-      if (!ok) {
-        toast.showToast('Please select a valid video file', 'error');
-        return;
-      }
-      // iOS Safari sometimes needs a microtask delay to populate file metadata
-      Promise.resolve().then(() => {
-        setSourceType('video');
-        setSourceFile(file);
-      });
-    };
-    input.click();
+    checkAuthAndProceed(() => {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'video/*';
+      input.onchange = () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        // basic validation
+        const ok = file.type.startsWith('video/');
+        if (!ok) {
+          toast.showToast('Please select a valid video file', 'error');
+          return;
+        }
+        // iOS Safari sometimes needs a microtask delay to populate file metadata
+        Promise.resolve().then(() => {
+          setSourceType('video');
+          setSourceFile(file);
+        });
+      };
+      input.click();
+    });
   };
 
   return (

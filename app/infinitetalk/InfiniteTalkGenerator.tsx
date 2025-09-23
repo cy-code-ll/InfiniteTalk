@@ -220,95 +220,116 @@ export default function InfiniteTalkGenerator() {
     };
   }, [progressInterval, abortController]);
 
+  // 检查登录状态并执行操作
+  const checkAuthAndProceed = (callback: () => void) => {
+    if (!isSignedIn) {
+      openSignIn();
+      return;
+    }
+    callback();
+  };
+
   // 处理图片上传
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setSelectedImage(file);
-    }
+    checkAuthAndProceed(() => {
+      const file = event.target.files?.[0];
+      if (file && file.type.startsWith('image/')) {
+        setSelectedImage(file);
+      }
+    });
   };
 
   const handleImageDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragOver(null);
-    const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith('image/')) {
-      setSelectedImage(file);
-    } else {
-      toast.error('Please drop a valid image file');
-    }
+    checkAuthAndProceed(() => {
+      const file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('image/')) {
+        setSelectedImage(file);
+      } else {
+        toast.error('Please drop a valid image file');
+      }
+    });
   };
 
   // 处理视频上传
   const handleVideoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type.startsWith('video/')) {
-      setSelectedVideo(file);
-    }
+    checkAuthAndProceed(() => {
+      const file = event.target.files?.[0];
+      if (file && file.type.startsWith('video/')) {
+        setSelectedVideo(file);
+      }
+    });
   };
 
   const handleVideoDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragOver(null);
-    const file = event.dataTransfer.files[0];
-    if (file && file.type.startsWith('video/')) {
-      setSelectedVideo(file);
-    } else {
-      toast.error('Please drop a valid video file');
-    }
+    checkAuthAndProceed(() => {
+      const file = event.dataTransfer.files[0];
+      if (file && file.type.startsWith('video/')) {
+        setSelectedVideo(file);
+      } else {
+        toast.error('Please drop a valid video file');
+      }
+    });
   };
 
   // 处理音频上传
   const handleAudioUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      // 检查音频格式 - 使用文件后缀名
-      const fileName = file.name.toLowerCase();
-      const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
-      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    checkAuthAndProceed(() => {
+      const file = event.target.files?.[0];
+      if (file) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
 
-      if (!hasValidExtension) {
-        setIsInvalidAudioModalOpen(true);
-        return;
+        if (!hasValidExtension) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
+        setSelectedAudio(file);
+        
+        // 获取音频时长
+        const audio = new Audio();
+        audio.src = URL.createObjectURL(file);
+        audio.addEventListener('loadedmetadata', () => {
+          setAudioDuration(Math.ceil(audio.duration));
+          URL.revokeObjectURL(audio.src);
+        });
       }
-      
-      setSelectedAudio(file);
-      
-      // 获取音频时长
-      const audio = new Audio();
-      audio.src = URL.createObjectURL(file);
-      audio.addEventListener('loadedmetadata', () => {
-        setAudioDuration(Math.ceil(audio.duration));
-        URL.revokeObjectURL(audio.src);
-      });
-    }
+    });
   };
 
   const handleAudioDrop = (event: React.DragEvent<HTMLDivElement>) => {
     event.preventDefault();
     setIsDragOver(null);
-    const file = event.dataTransfer.files[0];
-    if (file) {
-      // 检查音频格式 - 使用文件后缀名
-      const fileName = file.name.toLowerCase();
-      const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
-      const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+    checkAuthAndProceed(() => {
+      const file = event.dataTransfer.files[0];
+      if (file) {
+        // 检查音频格式 - 使用文件后缀名
+        const fileName = file.name.toLowerCase();
+        const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+        const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
 
-      if (!hasValidExtension) {
-        setIsInvalidAudioModalOpen(true);
-        return;
+        if (!hasValidExtension) {
+          setIsInvalidAudioModalOpen(true);
+          return;
+        }
+        
+        setSelectedAudio(file);
+        
+        // 获取音频时长
+        const audio = new Audio();
+        audio.src = URL.createObjectURL(file);
+        audio.addEventListener('loadedmetadata', () => {
+          setAudioDuration(Math.ceil(audio.duration));
+          URL.revokeObjectURL(audio.src);
+        });
       }
-      
-      setSelectedAudio(file);
-      
-      // 获取音频时长
-      const audio = new Audio();
-      audio.src = URL.createObjectURL(file);
-      audio.addEventListener('loadedmetadata', () => {
-        setAudioDuration(Math.ceil(audio.duration));
-        URL.revokeObjectURL(audio.src);
-      });
-    }
+    });
   };
 
   // 从 AudioTools 页面接收处理后的音频
@@ -575,7 +596,7 @@ export default function InfiniteTalkGenerator() {
                     </div>
                   ) : (
                     <div
-                      onClick={() => imageInputRef.current?.click()}
+                      onClick={() => checkAuthAndProceed(() => imageInputRef.current?.click())}
                       onDragOver={(e) => {
                         e.preventDefault();
                         setIsDragOver('image');
@@ -589,7 +610,7 @@ export default function InfiniteTalkGenerator() {
                       }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
-                      <span>{isDragOver === 'image' ? 'Drop image here' : 'Click to upload image'}</span>
+                      <span>{isDragOver === 'image' ? 'Drop image here' : 'click and drop upload image'}</span>
                       <span className="text-sm">PNG, JPG up to 10MB</span>
                     </div>
                   )
@@ -612,7 +633,7 @@ export default function InfiniteTalkGenerator() {
                     </div>
                   ) : (
                     <div
-                      onClick={() => videoInputRef.current?.click()}
+                      onClick={() => checkAuthAndProceed(() => videoInputRef.current?.click())}
                       onDragOver={(e) => {
                         e.preventDefault();
                         setIsDragOver('video');
@@ -626,7 +647,7 @@ export default function InfiniteTalkGenerator() {
                       }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
-                      <span>{isDragOver === 'video' ? 'Drop video here' : 'Click to upload video'}</span>
+                      <span>{isDragOver === 'video' ? 'Drop video here' : 'click and drop upload video'}</span>
                       <span className="text-sm">MP4, MOV up to 100MB</span>
                     </div>
                   )
@@ -659,7 +680,7 @@ export default function InfiniteTalkGenerator() {
                     variant="outline"
                       onClick={(e) => {
                         e.preventDefault();
-                        previewSelectedAudio();
+                        checkAuthAndProceed(() => previewSelectedAudio());
                       }}
                     disabled={!selectedAudio}
                   >
@@ -713,7 +734,7 @@ export default function InfiniteTalkGenerator() {
                   </div>
                 ) : (
                   <div
-                    onClick={() => audioInputRef.current?.click()}
+                    onClick={() => checkAuthAndProceed(() => audioInputRef.current?.click())}
                     onDragOver={(e) => {
                       e.preventDefault();
                       setIsDragOver('audio');
@@ -728,7 +749,7 @@ export default function InfiniteTalkGenerator() {
                   >
                     <div className="flex items-center justify-between">
                       <span className={isDragOver === 'audio' ? 'text-primary' : 'text-slate-400'}>
-                        {isDragOver === 'audio' ? 'Drop audio file here' : 'Click to select audio file'}
+                        {isDragOver === 'audio' ? 'Drop audio file here' : 'click and drop select audio file'}
                       </span>
                       <FileAudio className={`w-5 h-5 ${isDragOver === 'audio' ? 'text-primary' : 'text-slate-500'}`} />
                     </div>
