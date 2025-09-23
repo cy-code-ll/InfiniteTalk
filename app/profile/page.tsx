@@ -1506,14 +1506,27 @@ export default function ProfilePage() {
                           const modelMatch = sizeImage.match(/Model:\s*([^;]+)/);
                           return modelMatch ? modelMatch[1].trim() : null;
                         };
+                        const getResolution = (sizeImage: string) => {
+                          // 匹配 resolution: 后面的内容，直到遇到下一个字段或字符串结束
+                          const resolutionMatch = sizeImage.match(/resolution:\s*([^\s;]+)/i);
+                          return resolutionMatch ? resolutionMatch[1].trim() : null;
+                        };
                         const modelName = item.size_image ? getModelName(item.size_image) : null;
+                        const resolution = item.size_image ? getResolution(item.size_image) : null;
                         return (
                           <div key={item.id} className="bg-card rounded-xl overflow-hidden relative flex flex-col shadow-lg border border-border">
-                            {modelName && (
-                              <div className="absolute top-2 left-2 z-10 bg-primary/90 hover:bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
-                                Model: {modelName}
-                              </div>
-                            )}
+                            <div className="absolute top-2 left-2 z-10 flex flex-col gap-1">
+                              {modelName && (
+                                <div className="bg-primary/90 hover:bg-primary text-primary-foreground px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
+                                  Model: {modelName}
+                                </div>
+                              )}
+                              {resolution && (
+                                <div className="bg-emerald-500/90 hover:bg-emerald-500 text-white px-2 py-1 rounded-md text-xs font-semibold shadow-lg backdrop-blur-sm">
+                                  Resolution: {resolution}
+                                </div>
+                              )}
+                            </div>
                             {!isFailed && !isGenerating && (
                               <button
                                 className="absolute top-2 right-2 z-10 bg-black/50 hover:bg-primary p-2 rounded-full text-white transition-colors"
