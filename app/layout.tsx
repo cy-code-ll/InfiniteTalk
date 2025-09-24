@@ -26,6 +26,13 @@ export default function RootLayout({
 
   return (
     <html lang="en">
+      <head>
+        {/* Preconnect & DNS Prefetch for analytics domain */}
+        <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://v1.cnzz.com" />
+        <link rel="preconnect" href="https://c.cnzz.com" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://c.cnzz.com" />
+      </head>
       <body className="bg-background text-foreground">
         <script
           type="application/ld+json"
@@ -46,11 +53,25 @@ export default function RootLayout({
             </UserProvider>
           </ToastProvider>
         </ClerkProviderWithLocale>
-        <Script
-          id="analytics"
-          strategy="lazyOnload"
-          src="/js/cy1.js"
-        />
+        {process.env.NODE_ENV === 'production' && (
+          <>
+            {/* CNZZ init */}
+            <Script id="cnzz-init" strategy="afterInteractive">
+              {`var _czc = _czc || [];`}
+            </Script>
+            {/* CNZZ scripts - async after interactive */}
+            <Script
+              id="cnzz-1"
+              strategy="afterInteractive"
+              src="https://v1.cnzz.com/z.js?id=1281417985&async=1"
+            />
+            <Script
+              id="cnzz-2"
+              strategy="afterInteractive"
+              src="https://v1.cnzz.com/z.js?id=1281431393&async=1"
+            />
+          </>
+        )}
 
       </body>
     </html>
