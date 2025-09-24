@@ -580,7 +580,7 @@ export function VideoCases() {
     return {
       id: n,
       src: `https://cfsource.infinitetalk.net/infinitetalk/newcases/case${n}.mp4`,
-      poster: `https://cfsource.wananimate.net/zipimg/zip_case${n}.webp`,
+      poster: `https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/case${n}.webp`,
       title: `InfiniteTalk Video Case ${n}`,
     }
   })
