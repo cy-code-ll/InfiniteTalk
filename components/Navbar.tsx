@@ -4,8 +4,8 @@ import React, { useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../components/ui/button';
-import AuthButton from './auth/auth-button';
-import { Menu, Coins } from 'lucide-react';
+import { Menu } from 'lucide-react';
+import dynamic from 'next/dynamic';
 import {
   Sheet,
   SheetContent,
@@ -16,15 +16,17 @@ import {
   SheetHeader,
   SheetTitle,
 } from "../components/ui/sheet";
-import { useUser } from '@clerk/nextjs';
 import { cn } from '../lib/utils';
-import { useUserInfo } from '../lib/providers';
+
+// 将与 Clerk 相关的交互拆到独立岛屿，按需在客户端渲染，避免首屏加载 Clerk JS
+const NavAuthIsland = dynamic(() => import('./auth/nav-auth-island'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse" />,
+});
 
 export function Navbar() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { isSignedIn } = useUser();
-  const { userInfo, isLoadingUserInfo } = useUserInfo();
   const handleMobileLinkClick = (action: () => void) => {
     action();
     setIsMobileMenuOpen(false);
@@ -228,32 +230,14 @@ export function Navbar() {
 
           {/* Right Section */}
           <div className="w-[180px] 2xl:w-[200px] flex items-center justify-end gap-2">
-            {/* Desktop: Auth Button */}
+            {/* Desktop: Auth island（仅客户端加载） */}
             <div className="hidden lg:flex items-center gap-4">
-              {/* 用户积分显示 */}
-              {isSignedIn && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Coins className="h-4 w-4" />
-                  <span>
-                    {isLoadingUserInfo ? '...' : userInfo?.total_credits || '0'}
-                  </span>
-                </div>
-              )}
-              <AuthButton />
+              <NavAuthIsland variant="desktop" />
             </div>
 
-            {/* Mobile: Auth Button + Menu */}
+            {/* Mobile: Auth island + Menu */}
             <div className="flex lg:hidden items-center gap-2">
-              {/* 移动端用户积分显示 */}
-              {isSignedIn && (
-                <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                  <Coins className="h-3 w-3" />
-                  <span>
-                    {isLoadingUserInfo ? '...' : userInfo?.total_credits || '0'}
-                  </span>
-                </div>
-              )}
-              <AuthButton />
+              <NavAuthIsland variant="mobile" />
               <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-foreground hover:text-primary hover:bg-muted">
