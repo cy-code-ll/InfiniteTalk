@@ -96,8 +96,8 @@ export const serverCmsApi = {
         {
           method: 'GET',
           headers: getServerHeaders(),
-          // 使用缓存，允许静态生成
-          next: { revalidate: 60 }, // 1小时重新验证
+          // 禁用缓存，每次都获取最新数据
+          cache: 'no-store',
         }
       );
 

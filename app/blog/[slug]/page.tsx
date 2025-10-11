@@ -1,9 +1,6 @@
 import { serverCmsApi, type BlogPost } from '../../../lib/server-api';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
-import ReactMarkdown from 'react-markdown';
-import remarkGfm from 'remark-gfm';
-
 import { Footer } from '../../../components/Footer';
 import { Home, ChevronRight } from 'lucide-react';
 import { Metadata } from 'next';
@@ -64,8 +61,9 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 
     // 通过比较slug来查找对应的文章
     const post = blogResponse.list.find(p => generateSlug(p.title, p.url) === slug);
-
-    console.log('App Router: Successfully fetched blog post:', post?.title);
+    // console.log(post,'post---------------------------------------------')
+    // console.log('App Router: Successfully fetched blog post:', post?.title);
+    // console.log('App Router: Successfully fetched blog post:', post);
     return post || null;
   } catch (error) {
     console.error('App Router: Failed to fetch blog post:', error);
@@ -160,46 +158,11 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
       <div className="container mx-auto px-6 max-w-7xl">
         <article>
           <div className="prose prose-lg mx-auto max-w-7xl ">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                h1: ({ node, ...props }) => <h1 className="text-3xl font-bold mt-8 mb-6 text-foreground" {...props} />,
-                h2: ({ node, ...props }) => <h2 className="text-2xl font-bold mt-6 mb-4 text-foreground" {...props} />,
-                h3: ({ node, ...props }) => <h3 className="text-xl font-bold mt-4 mb-3 text-foreground" {...props} />,
-                h4: ({ node, ...props }) => <h4 className="text-lg font-semibold mt-4 mb-2 text-foreground" {...props} />,
-                p: ({ node, ...props }) => <p className="text-muted-foreground mb-4 leading-relaxed" {...props} />,
-                ul: ({ node, ...props }) => <ul className="list-disc pl-6 mb-4 space-y-1" {...props} />,
-                ol: ({ node, ...props }) => <ol className="list-decimal pl-6 mb-4 space-y-1" {...props} />,
-                li: ({ node, ...props }) => <li className="text-muted-foreground" {...props} />,
-                a: ({ node, ...props }) => <a className="text-primary hover:underline transition-colors" {...props} />,
-                blockquote: ({ node, ...props }) => <blockquote className="border-l-4 border-primary pl-4 py-2 my-4 italic text-muted-foreground bg-secondary/20" {...props} />,
-                code: ({ node, ...props }) => <code className="bg-secondary px-2 py-1 rounded text-sm font-mono" {...props} />,
-                pre: ({ node, ...props }) => <pre className="bg-secondary p-4 rounded-lg overflow-x-auto my-4" {...props} />,
-                hr: ({ node, ...props }) => <hr className="border-0 border-t border-gray-300 my-8" {...props} />,
-                strong: ({ node, ...props }) => <strong className="font-semibold text-foreground" {...props} />,
-                em: ({ node, ...props }) => <em className="italic" {...props} />,
-                // 表格支持
-                table: ({ node, ...props }) => <table className="w-full border-collapse border border-muted mb-6" {...props} />,
-                thead: ({ node, ...props }) => <thead className="bg-muted/50" {...props} />,
-                tbody: ({ node, ...props }) => <tbody {...props} />,
-                tr: ({ node, ...props }) => <tr className="border-b border-muted hover:bg-muted/30" {...props} />,
-                th: ({ node, ...props }) => <th className="border border-muted px-4 py-2 text-left font-semibold text-foreground" {...props} />,
-                td: ({ node, ...props }) => <td className="border border-muted px-4 py-2 text-muted-foreground" {...props} />,
-                // 图片支持
-                img: ({ node, ...props }) => (
-                  <span className="block my-8">
-                    <img
-                      {...props}
-                      className="max-w-full h-auto rounded-lg shadow-lg border border-gray-200/50 mx-auto block"
-                      loading="lazy"
-                      alt={props.alt || 'Blog image'}
-                    />
-                  </span>
-                ),
-              }}
-            >
-              {post.content}
-            </ReactMarkdown>
+            {/* 使用富文本渲染 */}
+            <div 
+              className="rich-text-content"
+              dangerouslySetInnerHTML={{ __html: post.content }}
+            />
           </div>
         </article>
       </div>
