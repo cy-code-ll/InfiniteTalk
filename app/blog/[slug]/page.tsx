@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { Footer } from '../../../components/Footer';
 import { Home, ChevronRight } from 'lucide-react';
 import { Metadata } from 'next';
+import styles from './blog-post.module.css';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -158,9 +159,9 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
       <div className="container mx-auto px-6 max-w-7xl">
         <article>
           <div className="prose prose-lg mx-auto max-w-7xl ">
-            {/* 使用富文本渲染 */}
+            {/* 使用富文本渲染 - CSS Module 按需加载 */}
             <div 
-              className="rich-text-content"
+              className={styles.richTextContent}
               dangerouslySetInnerHTML={{ __html: post.content }}
             />
           </div>
