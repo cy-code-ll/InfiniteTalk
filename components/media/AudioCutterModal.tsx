@@ -5,8 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast-provider';
 import { Upload, Play, Pause } from 'lucide-react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
 
 type SourceType = 'audio' | 'video' | null;
 
@@ -37,7 +35,7 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isExporting, setIsExporting] = useState(false);
-  const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
+  const [ffmpeg, setFfmpeg] = useState<any | null>(null);
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
@@ -354,6 +352,9 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
 
   const ensureFfmpeg = useCallback(async () => {
     if (ffmpeg && ffmpegLoaded) return ffmpeg;
+    
+    // Dynamic import FFmpeg only when needed
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const instance = ffmpeg ?? new FFmpeg();
     setFfmpeg(instance);
     if (!ffmpegLoaded) {
@@ -390,6 +391,7 @@ export default function AudioCutterModal({ open, onOpenChange, onConfirm }: Audi
       }
 
       const ff = await ensureFfmpeg();
+      const { fetchFile } = await import('@ffmpeg/util');
 
       const inName = sourceType === 'video' ? 'input.mp4' : 'input.audio';
       await ff.writeFile(inName, await fetchFile(sourceFile));

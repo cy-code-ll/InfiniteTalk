@@ -1,13 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@font-face {
-  font-family: 'HomemadeApple';
-  src: url('/font/HomemadeApple-Regular.ttf') format('truetype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
+/* Self-hosted font removed - using next/font for better performance */
+/* HomemadeApple font can be loaded via next/font/local if needed */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -135,25 +130,17 @@
     @apply bg-background text-foreground;
   }
   
-  /* 自定义字体样式 */
-  .font-playfair {
-    font-family: var(--font-playfair);
-  }
-  
-  .font-inter {
-    font-family: var(--font-inter);
-  }
-  
+  /* 自定义字体样式 - Optimized to use Poppins as primary */
   .font-poppins {
-    font-family: var(--font-poppins);
+    font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
   }
   
-  .font-baloo {
-    font-family: var(--font-baloo);
-  }
-  
-  .font-nunito {
-    font-family: var(--font-nunito);
+  /* Fallback for other font classes - use Poppins or system fonts */
+  .font-inter,
+  .font-nunito,
+  .font-baloo,
+  .font-playfair {
+    font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
   }
   
   /* UI风格 */
@@ -161,19 +148,7 @@
     box-shadow: rgba(0, 0, 0, 0.08) 0px 4px 12px;
   }
   
-  /* 覆盖默认边距，使用更大的内边距 */
-  .p-large {
-    padding: 2rem;
-  }
-  
-  /* 圆角样式 */
-  .rounded-xl {
-    border-radius: 1rem;
-  }
-  
-  .rounded-2xl {
-    border-radius: 1.5rem;
-  }
+  /* Removed unused p-large, rounded-xl, rounded-2xl - using Tailwind utilities instead */
 }
 
 @layer components {
@@ -319,61 +294,7 @@
     @apply text-sm;
   }
 
-  .disclaimer-bg {
-    @apply w-full min-h-[320px] bg-gradient-to-br from-[#f8fafc] via-[#e0e7ef] to-[#f0f4ff] flex items-center justify-center py-12 px-4;
-  }
-
-  .disclaimer-container {
-    @apply max-w-2xl w-full mx-auto;
-  }
-
-  .disclaimer-card {
-    @apply rounded-2xl shadow-2xl bg-white/80 backdrop-blur-md border border-blue-100 p-10;
-  }
-
-  .disclaimer-title {
-    @apply text-2xl font-extrabold text-blue-800 mb-5 font-sans tracking-wide text-center drop-shadow-sm;
-  }
-
-  .disclaimer-content {
-    @apply text-gray-700 text-base leading-relaxed font-sans space-y-4 text-center;
-  }
-
-  .disclaimer-note {
-    @apply text-sm text-blue-500 mt-6 italic;
-  }
-
-  .howtowork-section {
-    @apply py-16 relative;
-    background-color: #ffffff;
-    border-bottom: 1px solid #f0f0f0;
-  }
-
-  .howtowork-section::before,
-  .howtowork-section::after {
-    display: none;
-  }
-
-  .howtowork-title {
-    @apply text-3xl md:text-4xl font-bold text-center mb-10 text-foreground drop-shadow-sm;
-    font-family: var(--font-poppins);
-  }
-  .howtowork-list {
-    @apply grid grid-cols-1 md:grid-cols-3 gap-8;
-  }
-  .howtowork-step {
-    @apply bg-white/90 rounded-2xl shadow-card p-8 flex flex-col items-center text-center border border-blue-100 transition-transform hover:-translate-y-2 hover:shadow-2xl duration-200;
-  }
-  .howtowork-icon {
-    @apply text-5xl mb-4;
-  }
-  .howtowork-step-title {
-    @apply text-xl font-semibold mb-2 text-primary;
-    font-family: var(--font-poppins);
-  }
-  .howtowork-step-desc {
-    @apply text-gray-600 text-base leading-relaxed;
-  }
+  /* Removed unused disclaimer-* and howtowork-* classes - not used in codebase */
 
   .shadow-nav {
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);

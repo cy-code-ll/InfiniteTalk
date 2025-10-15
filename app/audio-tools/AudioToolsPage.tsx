@@ -4,8 +4,6 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast-provider';
 import { Upload, Play, Pause, Download, ArrowLeft } from 'lucide-react';
-import { FFmpeg } from '@ffmpeg/ffmpeg';
-import { fetchFile } from '@ffmpeg/util';
 import Link from 'next/link';
 import { useAuth, useClerk } from '@clerk/nextjs';
 import {
@@ -40,7 +38,7 @@ export default function AudioToolsPage() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   const [isExporting, setIsExporting] = useState(false);
-  const [ffmpeg, setFfmpeg] = useState<FFmpeg | null>(null);
+  const [ffmpeg, setFfmpeg] = useState<any | null>(null);
   const [ffmpegLoaded, setFfmpegLoaded] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const mediaRef = useRef<HTMLMediaElement | null>(null);
@@ -353,6 +351,9 @@ export default function AudioToolsPage() {
 
   const ensureFfmpeg = useCallback(async () => {
     if (ffmpeg && ffmpegLoaded) return ffmpeg;
+    
+    // Dynamic import FFmpeg only when needed
+    const { FFmpeg } = await import('@ffmpeg/ffmpeg');
     const instance = ffmpeg ?? new FFmpeg();
     setFfmpeg(instance);
     if (!ffmpegLoaded) {
@@ -385,6 +386,7 @@ export default function AudioToolsPage() {
       }
 
       const ff = await ensureFfmpeg();
+      const { fetchFile } = await import('@ffmpeg/util');
 
       const inName = sourceType === 'video' ? 'input.mp4' : 'input.audio';
       await ff.writeFile(inName, await fetchFile(sourceFile));
@@ -563,6 +565,7 @@ export default function AudioToolsPage() {
       }
 
       const ff = await ensureFfmpeg();
+      const { fetchFile } = await import('@ffmpeg/util');
 
       const inName = sourceType === 'video' ? 'input.mp4' : 'input.audio';
       await ff.writeFile(inName, await fetchFile(sourceFile));

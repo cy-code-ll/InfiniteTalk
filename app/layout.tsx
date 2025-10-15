@@ -8,6 +8,18 @@ import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
+import { Poppins } from 'next/font/google';
+
+// Optimized font loading - only load primary font
+// Poppins is the core brand font used 25+ times across the site
+const poppins = Poppins({
+  weight: ['400', '500', '600', '700'],
+  subsets: ['latin'],
+  variable: '--font-poppins',
+  display: 'swap',
+  preload: true,
+  fallback: ['system-ui', 'arial'],
+});
 
 // 动态导入 Clerk Provider 以减少初始包大小
 const ClerkProviderWithLocale = dynamic(() => import('@/components/auth/clerk-provider'), {
@@ -25,7 +37,7 @@ export default function RootLayout({
   const GA_TRACKING_ID = 'G-BST9KGD31X';
 
   return (
-    <html lang="en">
+    <html lang="en" className={poppins.variable}>
       <head>
         {/* Preconnect & DNS Prefetch for analytics domain */}
         <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
@@ -55,19 +67,19 @@ export default function RootLayout({
         </ClerkProviderWithLocale>
         {process.env.NODE_ENV === 'production' && (
           <>
-            {/* CNZZ init */}
-            <Script id="cnzz-init" strategy="afterInteractive">
+            {/* CNZZ init - optimized with lazyOnload */}
+            <Script id="cnzz-init" strategy="lazyOnload">
               {`var _czc = _czc || [];`}
             </Script>
-            {/* CNZZ scripts - async after interactive */}
+            {/* CNZZ scripts - lazy load on idle */}
             <Script
               id="cnzz-1"
-              strategy="afterInteractive"
+              strategy="lazyOnload"
               src="https://v1.cnzz.com/z.js?id=1281417985&async=1"
             />
             <Script
               id="cnzz-2"
-              strategy="afterInteractive"
+              strategy="lazyOnload"
               src="https://v1.cnzz.com/z.js?id=1281431393&async=1"
             />
           </>
