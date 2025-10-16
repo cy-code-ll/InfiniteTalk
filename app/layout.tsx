@@ -1,8 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
 import Script from 'next/script';
-import PaymentStatusModal from '@/components/payment-status-modal';
-import { Suspense } from 'react';
 import { Navbar } from '@/components/Navbar';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
@@ -114,9 +111,6 @@ export default function RootLayout({
                   {children}
                 </main>
               </>
-              <Suspense fallback={null}>
-                <PaymentStatusModal />
-              </Suspense>
             </UserProvider>
           </ToastProvider>
         </ClerkProviderWithLocale>
