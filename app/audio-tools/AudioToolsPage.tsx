@@ -974,6 +974,13 @@ export default function AudioToolsPage() {
     }
   };
 
+  const handleManualTimeKeyDown = (e: React.KeyboardEvent, type: 'start' | 'end') => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleManualTimeBlur(type);
+    }
+  };
+
   const adjustTime = (type: 'start' | 'end', delta: number) => {
     setIsManualInput(true);
     if (type === 'start') {
@@ -1336,6 +1343,7 @@ export default function AudioToolsPage() {
                         value={manualStartTime}
                         onChange={(e) => handleManualTimeChange(e.target.value, 'start')}
                         onBlur={() => handleManualTimeBlur('start')}
+                        onKeyDown={(e) => handleManualTimeKeyDown(e, 'start')}
                         className="w-20 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm font-bold focus:outline-none focus:border-blue-500"
                         placeholder="00:00"
                       />
@@ -1371,6 +1379,7 @@ export default function AudioToolsPage() {
                         value={manualEndTime}
                         onChange={(e) => handleManualTimeChange(e.target.value, 'end')}
                         onBlur={() => handleManualTimeBlur('end')}
+                        onKeyDown={(e) => handleManualTimeKeyDown(e, 'end')}
                         className="w-20 px-3 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white text-sm font-bold focus:outline-none focus:border-blue-500"
                         placeholder="00:00"
                       />
