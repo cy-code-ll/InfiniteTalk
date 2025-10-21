@@ -20,7 +20,7 @@ function formatSeconds(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, '0')}.${Math.floor((totalSeconds - s) * 10)}`;
+  return `${m}:${sec.toString().padStart(2, '0')}.${Math.floor(Math.round((totalSeconds - s) * 100) / 10)}`;
 }
 
 // Helper: format seconds to mm:ss format for manual input
@@ -28,16 +28,17 @@ function formatSecondsToMMSS(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${Math.floor((totalSeconds - s) * 10)}`;
+  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${Math.floor(Math.round(((totalSeconds - s) * 100) / 10))}`;
 }
 
 // Helper: parse mm:ss format to seconds
 function parseTimeToSeconds(timeString: string): number {
   const parts = timeString.split(':');
+
   if (parts.length !== 2) return 0;
 
   const minutes = parseInt(parts[0], 10) || 0;
-  const seconds = parseInt(parts[1], 10) || 0;
+  const seconds = parseFloat(parts[1]) || 0;
 
   return minutes * 60 + seconds;
 }
@@ -995,11 +996,13 @@ export default function AudioToolsPage() {
     if (type === 'start') {
       const seconds = parseTimeToSeconds(manualStartTime);
       const clampedSeconds = Math.max(0, Math.min(seconds, selectionEnd - 1));
+      console.log(clampedSeconds)
       setSelectionStart(clampedSeconds);
       setManualStartTime(formatSecondsToMMSS(clampedSeconds));
     } else {
       const seconds = parseTimeToSeconds(manualEndTime);
       const clampedSeconds = Math.max(selectionStart + 1, Math.min(seconds, effectiveDuration));
+      console.log(formatSecondsToMMSS(clampedSeconds))
       setSelectionEnd(clampedSeconds);
       setManualEndTime(formatSecondsToMMSS(clampedSeconds));
     }
