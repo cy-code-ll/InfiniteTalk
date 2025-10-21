@@ -24,7 +24,7 @@ type TabMode = 'image-to-video' | 'video-to-video';
 
 // 下载媒体文件的函数（从profile页面复制）
 async function downloadMediaWithCors(
-  mediaUrl: string, 
+  mediaUrl: string,
   filename: string,
   showToast?: (message: string, type: 'success' | 'error' | 'info') => void
 ) {
@@ -181,7 +181,7 @@ export default function InfiniteTalkGenerator() {
         }
       });
     }, 1000); // 每1秒更新一次
-    
+
     setProgressInterval(interval);
   };
 
@@ -289,9 +289,9 @@ export default function InfiniteTalkGenerator() {
           setIsInvalidAudioModalOpen(true);
           return;
         }
-        
+
         setSelectedAudio(file);
-        
+
         // 获取音频时长
         const audio = new Audio();
         audio.src = URL.createObjectURL(file);
@@ -318,9 +318,9 @@ export default function InfiniteTalkGenerator() {
           setIsInvalidAudioModalOpen(true);
           return;
         }
-        
+
         setSelectedAudio(file);
-        
+
         // 获取音频时长
         const audio = new Audio();
         audio.src = URL.createObjectURL(file);
@@ -339,14 +339,14 @@ export default function InfiniteTalkGenerator() {
         const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudio');
         if (audioDataStr) {
           const audioData = JSON.parse(audioDataStr);
-          
+
           // 将 base64 数据转换为 File 对象
           fetch(audioData.data)
             .then(res => res.blob())
             .then(blob => {
               const file = new File([blob], audioData.name, { type: audioData.type });
               setSelectedAudio(file);
-              
+
               // 获取音频时长
               const audio = new Audio();
               audio.src = URL.createObjectURL(file);
@@ -358,7 +358,7 @@ export default function InfiniteTalkGenerator() {
             .catch(error => {
               console.error('Failed to load audio from AudioTools:', error);
             });
-          
+
           // 清除 sessionStorage 中的数据
           sessionStorage.removeItem('audioToolsProcessedAudio');
         }
@@ -399,10 +399,10 @@ export default function InfiniteTalkGenerator() {
   // 计算积分消耗 - 新规则：5s以下固定积分，5s以上按秒计算
   const calculateCredits = (): number => {
     if (audioDuration === 0) return 0;
-    
+
     // 音乐时长向上取整
     const roundedDuration = Math.ceil(audioDuration);
-    
+
     // 新规则：5秒以下固定积分，5秒以上按秒计算
     if (roundedDuration <= 5) {
       // 5秒以下：480P=5积分，720P=10积分，1080P=15积分
@@ -459,17 +459,17 @@ export default function InfiniteTalkGenerator() {
     setViewState('loading');
     setProgress(0);
     setTaskCreated(false); // 重置任务创建状态
-    
+
     // 创建新的 AbortController
     const newAbortController = new AbortController();
     setAbortController(newAbortController);
-    
+
     // 启动虚假进度条
     startFakeProgress();
 
     try {
       let createResult;
-      
+
       if (tabMode === 'image-to-video') {
         // Image to Video 模式
         createResult = await api.infiniteTalk.createTask({
@@ -502,13 +502,13 @@ export default function InfiniteTalkGenerator() {
       // 轮询任务状态（不使用API进度，只检查状态）
       const result = await api.infiniteTalk.pollTaskStatus(
         taskId,
-        () => {}, // 空函数，不使用API返回的进度
+        () => { }, // 空函数，不使用API返回的进度
         newAbortController
       );
 
       // 任务完成时，完成进度条
       completeProgress();
-      
+
       // 稍等一下让用户看到100%，然后切换到结果
       setTimeout(() => {
         setResultVideoUrl(result.image_url);
@@ -519,12 +519,12 @@ export default function InfiniteTalkGenerator() {
     } catch (error) {
       console.error('Generation failed:', error);
       const errorMessage = error instanceof Error ? error.message : 'Generation failed';
-      
+
       // 如果是取消错误，不显示错误提示
       if (errorMessage !== 'Polling cancelled') {
         toast.error(errorMessage);
       }
-      
+
       stopFakeProgress();
       setViewState('videodemo');
       setTaskCreated(false); // 重置任务创建状态
@@ -543,32 +543,32 @@ export default function InfiniteTalkGenerator() {
           <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
             {/* Tab Navigation */}
             <div className="flex mb-6">
-                <button
-                  onClick={() => setTabMode('image-to-video')}
-                  className={cn(
-                    "flex-1 py-3 px-2 sm:px-4 rounded-l-lg border-2 transition-all duration-200 font-medium text-xs sm:text-sm",
-                    tabMode === 'image-to-video'
-                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                  )}
-                >
-                  <span className="hidden sm:inline">Image To Video</span>
-                  <span className="sm:hidden">Image</span>
-                </button>
-                <button
-                  onClick={() => setTabMode('video-to-video')}
-                  className={cn(
-                    "flex-1 py-3 px-2 sm:px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium text-xs sm:text-sm",
-                    tabMode === 'video-to-video'
-                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                  )}
-                >
-                  <span className="hidden sm:inline">Video To Video</span>
-                  <span className="sm:hidden">Video</span>
-                </button>
-              </div>
-            
+              <button
+                onClick={() => setTabMode('image-to-video')}
+                className={cn(
+                  "flex-1 py-3 px-2 sm:px-4 rounded-l-lg border-2 transition-all duration-200 font-medium text-xs sm:text-sm",
+                  tabMode === 'image-to-video'
+                    ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                )}
+              >
+                <span className="hidden sm:inline">Image To Video</span>
+                <span className="sm:hidden">Image</span>
+              </button>
+              <button
+                onClick={() => setTabMode('video-to-video')}
+                className={cn(
+                  "flex-1 py-3 px-2 sm:px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium text-xs sm:text-sm",
+                  tabMode === 'video-to-video'
+                    ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                    : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                )}
+              >
+                <span className="hidden sm:inline">Video To Video</span>
+                <span className="sm:hidden">Video</span>
+              </button>
+            </div>
+
             {/* Image/Video Upload */}
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">
@@ -603,11 +603,10 @@ export default function InfiniteTalkGenerator() {
                       }}
                       onDragLeave={() => setIsDragOver(null)}
                       onDrop={handleImageDrop}
-                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
-                        isDragOver === 'image' 
-                          ? 'border-primary bg-primary/10 text-primary' 
-                          : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
-                      }`}
+                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${isDragOver === 'image'
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                        }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
                       <span>{isDragOver === 'image' ? 'Drop image here' : 'click and drop upload image'}</span>
@@ -640,11 +639,10 @@ export default function InfiniteTalkGenerator() {
                       }}
                       onDragLeave={() => setIsDragOver(null)}
                       onDrop={handleVideoDrop}
-                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${
-                        isDragOver === 'video' 
-                          ? 'border-primary bg-primary/10 text-primary' 
-                          : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
-                      }`}
+                      className={`w-full h-48 border-2 border-dashed rounded-lg flex flex-col items-center justify-center transition-colors cursor-pointer ${isDragOver === 'video'
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-slate-600 hover:border-slate-500 text-slate-400 hover:text-slate-300'
+                        }`}
                     >
                       <Upload className="w-8 h-8 mb-2" />
                       <span>{isDragOver === 'video' ? 'Drop video here' : 'click and drop upload video'}</span>
@@ -671,39 +669,19 @@ export default function InfiniteTalkGenerator() {
 
             {/* Audio Upload */}
             <div className="mb-6">
-                <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <label className="block text-white font-medium">Upload Audio <span className="text-red-500">*</span></label>
                 <div>
-                  <Button
-                    type="button"
-                    size="sm"
-                    variant="outline"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        checkAuthAndProceed(() => previewSelectedAudio());
-                      }}
-                    disabled={!selectedAudio}
-                  >
-                    {isPreviewPlaying ? (
+                  {/* Hidden audio element for robust preview */}
+                  <audio ref={previewAudioRef} className="hidden" controls preload="auto">
+                    {previewAudioUrl ? (
                       <>
-                        <Pause className="w-4 h-4 mr-1" /> Pause
+                        <source src={previewAudioUrl} type={selectedAudio?.type || ''} />
+                        <source src={previewAudioUrl} type="audio/mpeg" />
+                        <source src={previewAudioUrl} type="audio/mp4" />
                       </>
-                    ) : (
-                      <>
-                        <Play className="w-4 h-4 mr-1" /> Preview
-                      </>
-                    )}
-                  </Button>
-                    {/* Hidden audio element for robust preview */}
-                    <audio ref={previewAudioRef} className="hidden" controls preload="auto">
-                      {previewAudioUrl ? (
-                        <>
-                          <source src={previewAudioUrl} type={selectedAudio?.type || ''} />
-                          <source src={previewAudioUrl} type="audio/mpeg" />
-                          <source src={previewAudioUrl} type="audio/mp4" />
-                        </>
-                      ) : null}
-                    </audio>
+                    ) : null}
+                  </audio>
                 </div>
               </div>
               <p className="text-slate-400 text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
@@ -718,6 +696,21 @@ export default function InfiniteTalkGenerator() {
                   <div className="relative bg-slate-800/50 rounded-lg border border-slate-600 p-4">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center min-w-0 flex-1">
+                        <button
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            checkAuthAndProceed(() => previewSelectedAudio());
+                          }}
+                          className="text-primary hover:text-primary/80 p-1 mr-2 flex-shrink-0"
+                          disabled={!selectedAudio}
+                        >
+                          {isPreviewPlaying ? (
+                            <Pause className="w-4 h-4" />
+                          ) : (
+                            <Play className="w-4 h-4" />
+                          )}
+                        </button>
                         <FileAudio className="w-4 h-4 text-primary mr-2 flex-shrink-0" />
                         <span className="text-white truncate" title={selectedAudio.name}>{selectedAudio.name}</span>
                         {audioDuration > 0 && (
@@ -741,11 +734,10 @@ export default function InfiniteTalkGenerator() {
                     }}
                     onDragLeave={() => setIsDragOver(null)}
                     onDrop={handleAudioDrop}
-                    className={`w-full p-4 border rounded-lg text-left transition-colors cursor-pointer ${
-                      isDragOver === 'audio' 
-                        ? 'border-primary bg-primary/10' 
-                        : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
-                    }`}
+                    className={`w-full p-4 border rounded-lg text-left transition-colors cursor-pointer ${isDragOver === 'audio'
+                      ? 'border-primary bg-primary/10'
+                      : 'border-slate-600 hover:border-slate-500 bg-slate-800/50'
+                      }`}
                   >
                     <div className="flex items-center justify-between">
                       <span className={isDragOver === 'audio' ? 'text-primary' : 'text-slate-400'}>
@@ -767,55 +759,55 @@ export default function InfiniteTalkGenerator() {
 
             {/* Resolution Selection */}
             <div className="mb-6">
-                <label className="block text-white font-medium mb-3">Resolution <span className="text-red-500">*</span></label>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setResolution('480p')}
-                    className={cn(
-                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
-                      resolution === '480p'
-                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                    )}
-                  >
-                    <div className="text-center">
-                      <div className="text-sm font-bold">480P</div>
-                      <div className="text-xs opacity-60">1 Credit/sec</div>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setResolution('720p')}
-                    className={cn(
-                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
-                      resolution === '720p'
-                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                    )}
-                  >
-                    <div className="text-center">
-                      <div className="text-sm font-bold">720P</div>
-                      <div className="text-xs opacity-60">2 Credits/sec</div>
-                    </div>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setResolution('1080p')}
-                    className={cn(
-                      "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
-                      resolution === '1080p'
-                        ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
-                        : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
-                    )}
-                  >
-                    <div className="text-center">
-                      <div className="text-sm font-bold">1080P</div>
-                      <div className="text-xs opacity-60">3 Credits/sec</div>
-                    </div>
-                  </button>
-                </div>
+              <label className="block text-white font-medium mb-3">Resolution <span className="text-red-500">*</span></label>
+              <div className="grid grid-cols-3 gap-2">
+                <button
+                  type="button"
+                  onClick={() => setResolution('480p')}
+                  className={cn(
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    resolution === '480p'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  <div className="text-center">
+                    <div className="text-sm font-bold">480P</div>
+                    <div className="text-xs opacity-60">1 Credit/sec</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setResolution('720p')}
+                  className={cn(
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    resolution === '720p'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  <div className="text-center">
+                    <div className="text-sm font-bold">720P</div>
+                    <div className="text-xs opacity-60">2 Credits/sec</div>
+                  </div>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setResolution('1080p')}
+                  className={cn(
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    resolution === '1080p'
+                      ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
+                      : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
+                  )}
+                >
+                  <div className="text-center">
+                    <div className="text-sm font-bold">1080P</div>
+                    <div className="text-xs opacity-60">3 Credits/sec</div>
+                  </div>
+                </button>
               </div>
+            </div>
 
             {/* Prompt Input */}
             <div className="mb-6">
@@ -839,7 +831,7 @@ export default function InfiniteTalkGenerator() {
               </Button>
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                {audioDuration > 0 ? `${calculateCredits()} Credits` : 
+                {audioDuration > 0 ? `${calculateCredits()} Credits` :
                   `${resolution === '480p' ? '5' : resolution === '720p' ? '10' : '15'} Credits`}
               </div>
             </div>
@@ -865,7 +857,7 @@ export default function InfiniteTalkGenerator() {
         <div className="lg:col-span-3 lg:sticky lg:top-24 lg:h-fit">
           <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
             <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
-            
+
             <div className="relative">
               {/* Video Demo State */}
               {viewState === 'videodemo' && (

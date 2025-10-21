@@ -20,7 +20,7 @@ function formatSeconds(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `${m}:${sec.toString().padStart(2, '0')}`;
+  return `${m}:${sec.toString().padStart(2, '0')}.${Math.floor((totalSeconds - s) * 10)}`;
 }
 
 // Helper: format seconds to mm:ss format for manual input
@@ -28,7 +28,7 @@ function formatSecondsToMMSS(totalSeconds: number): string {
   const s = Math.max(0, Math.floor(totalSeconds));
   const m = Math.floor(s / 60);
   const sec = s % 60;
-  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}`;
+  return `${m.toString().padStart(2, '0')}:${sec.toString().padStart(2, '0')}.${Math.floor((totalSeconds - s) * 10)}`;
 }
 
 // Helper: parse mm:ss format to seconds
@@ -85,6 +85,7 @@ export default function AudioToolsPage() {
     return idx > 0 ? filename.slice(0, idx) : filename;
   };
 
+
   // 生成音频波纹图数据
   const generateWaveformData = useCallback(async (audioBuffer: AudioBuffer): Promise<number[]> => {
     const data = audioBuffer.getChannelData(0); // 使用左声道
@@ -135,7 +136,7 @@ export default function AudioToolsPage() {
       }
       throw new Error('Failed to analyze audio');
     }
-  }, [generateWaveformData, toast, sourceType]);
+  }, [generateWaveformData, sourceType]);
 
 
 
@@ -166,31 +167,63 @@ export default function AudioToolsPage() {
     ctx.fillStyle = 'rgba(30, 41, 59, 0.6)';
     ctx.fillRect(0, 0, width, height);
 
-    // 绘制波纹条
+    // 计算选择区域位置
+    let startX = 0;
+    let endX = width;
+    if (effectiveDuration > 0) {
+      const startPercent = (selectionStart / effectiveDuration) * 100;
+      const endPercent = (selectionEnd / effectiveDuration) * 100;
+      startX = (startPercent / 100) * width;
+      endX = (endPercent / 100) * width;
+    }
+
+    // 绘制波纹条 - 先绘制半透明版本（整个区域）
     waveformData.forEach((value, index) => {
       const barHeight = Math.max(1, value * maxHeight); // 确保最小高度为1像素
       const x = index * barWidth;
       const y = centerY - barHeight / 2;
 
-      // 创建渐变
+      // 创建半透明绿色渐变
       const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
-      gradient.addColorStop(0, '#00FF8E'); // 绿色顶部
-      gradient.addColorStop(1, '#00CC70'); // 绿色底部
+      gradient.addColorStop(0, 'rgba(0, 255, 142, 0.1)'); // 半透明绿色顶部
+      gradient.addColorStop(1, 'rgba(0, 204, 112, 0.1)'); // 半透明绿色底部
 
       ctx.fillStyle = gradient;
       ctx.fillRect(x, y, Math.max(1, barWidth - 1), barHeight);
     });
 
-    // 绘制选择区域
+    // 绘制选择区域背景
     if (effectiveDuration > 0) {
-      const startPercent = (selectionStart / effectiveDuration) * 100;
-      const endPercent = (selectionEnd / effectiveDuration) * 100;
-      const startX = (startPercent / 100) * width;
-      const endX = (endPercent / 100) * width;
-
-      // 选择区域背景
       ctx.fillStyle = 'rgba(0, 255, 142, 0.3)';
       ctx.fillRect(startX, 0, endX - startX, height);
+    }
+
+    // 绘制选择区域内的亮色波纹条
+    if (effectiveDuration > 0) {
+      waveformData.forEach((value, index) => {
+        const barHeight = Math.max(1, value * maxHeight);
+        const x = index * barWidth;
+        const y = centerY - barHeight / 2;
+
+        // 检查这个波纹条是否在选择区域内
+        const barEndX = x + Math.max(1, barWidth - 1);
+        if (x < endX && barEndX > startX) {
+          // 计算在选择区域内的部分
+          const clipStartX = Math.max(x, startX);
+          const clipEndX = Math.min(barEndX, endX);
+          const clipWidth = clipEndX - clipStartX;
+
+          if (clipWidth > 0) {
+            // 创建亮色渐变
+            const gradient = ctx.createLinearGradient(0, y, 0, y + barHeight);
+            gradient.addColorStop(0, '#00FF8E'); // 绿色顶部
+            gradient.addColorStop(1, '#00CC70'); // 绿色底部
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(clipStartX, y, clipWidth, barHeight);
+          }
+        }
+      });
 
       // 选择区域边框
       ctx.strokeStyle = '#00FF8E';
@@ -336,7 +369,7 @@ export default function AudioToolsPage() {
       mediaEl.removeEventListener('error', onError);
       cleanup();
     };
-  }, [sourceFile, sourceType, toast, analyzeAudio]);
+  }, [sourceFile, sourceType, analyzeAudio]);
 
   // Manage preview object URL lifecycle
   useEffect(() => {
@@ -576,7 +609,6 @@ export default function AudioToolsPage() {
   };
 
   const onTouchEnd = () => {
-    console.log(111)
     // 如果没有拖拽操作符，且没有发生移动，则设置播放位置
     if (draggingEdge === null && !hasMoved && mediaRef.current) {
       mediaRef.current.currentTime = initialClickTime;
@@ -765,7 +797,7 @@ export default function AudioToolsPage() {
       toast.showToast('Audio processing failed', 'error');
       return null;
     }
-  }, [duration, ensureFfmpeg, isFullSelection, selectionEnd, selectionStart, sourceFile, sourceType, toast]);
+  }, [duration, ensureFfmpeg, isFullSelection, selectionEnd, selectionStart, sourceFile, sourceType]);
 
   // Handle navigation with audio data
   const handleNavigateWithAudio = useCallback(async (path: string) => {
@@ -774,7 +806,6 @@ export default function AudioToolsPage() {
         toast.showToast('Please select a media file first', 'info');
         return;
       }
-
       try {
         setIsExporting(true);
         toast.showToast('Processing audio, please wait...', 'info');
@@ -809,7 +840,7 @@ export default function AudioToolsPage() {
         setIsExporting(false);
       }
     });
-  }, [sourceFile, processAudio, toast, checkAuthAndProceed]);
+  }, [sourceFile, processAudio, checkAuthAndProceed]);
 
   // Handle navigation with audio data for Multi
   const handleNavigateWithAudioMulti = useCallback(async (path: string) => {
@@ -822,7 +853,7 @@ export default function AudioToolsPage() {
       // Open modal to let user choose left or right audio
       setIsMultiAudioModalOpen(true);
     });
-  }, [sourceFile, toast, checkAuthAndProceed]);
+  }, [sourceFile, checkAuthAndProceed]);
 
   // Handle Multi audio selection
   const handleMultiAudioSelection = useCallback(async (audioType: 'left' | 'right') => {
@@ -868,7 +899,7 @@ export default function AudioToolsPage() {
         setIsExporting(false);
       }
     });
-  }, [sourceFile, processAudio, toast, checkAuthAndProceed]);
+  }, [sourceFile, processAudio, checkAuthAndProceed]);
 
   const handleExport = useCallback(async () => {
     if (!sourceFile || !sourceType || duration <= 0) {
@@ -947,7 +978,7 @@ export default function AudioToolsPage() {
     } finally {
       setIsExporting(false);
     }
-  }, [duration, ensureFfmpeg, isFullSelection, selectionEnd, selectionStart, sourceFile, sourceType, toast]);
+  }, [duration, ensureFfmpeg, isFullSelection, selectionEnd, selectionStart, sourceFile, sourceType]);
 
   // 手动时间输入处理函数
   const handleManualTimeChange = (value: string, type: 'start' | 'end') => {
@@ -1035,7 +1066,7 @@ export default function AudioToolsPage() {
       try { el.pause(); } catch { /* no-op */ }
       setIsPlaying(false);
     }
-  }, [effectiveDuration, isPlaying, previewUrl, currentTime, selectionStart, selectionEnd, hasAudioTrack, toast]);
+  }, [effectiveDuration, isPlaying, previewUrl, currentTime, selectionStart, selectionEnd, hasAudioTrack]);
 
   // 键盘事件监听 - 空格键播放/暂停
   useEffect(() => {
@@ -1124,7 +1155,7 @@ export default function AudioToolsPage() {
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(59,130,246,0.1),transparent_50%)] pointer-events-none" />
 
-      <div className="container mx-auto px-4 py-20 relative z-10">
+      <div className="max-w-[98%] mx-auto px-4 py-20 relative z-10">
         {/* Header */}
         <div className="mb-12">
           {/* Back to Previous Page - Left aligned */}
@@ -1153,7 +1184,7 @@ export default function AudioToolsPage() {
         </div>
 
         {/* Main Content */}
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-full mx-auto">
           <div className="bg-gradient-to-b from-slate-800/80 to-slate-900/80 rounded-3xl border border-slate-700/50 backdrop-blur-xl p-8 shadow-2xl">
 
             {/* Top controls */}
@@ -1182,7 +1213,7 @@ export default function AudioToolsPage() {
             {sourceFile && (<div className="relative mb-8">
               <div
                 ref={containerRef}
-                className="relative w-full h-36 bg-gradient-to-b from-slate-800/60 to-slate-900/60  border-slate-600/50 overflow-hidden select-none shadow-inner"
+                className="relative w-full h-36 bg-gradient-to-b from-slate-800/60 to-slate-900/60  border-slate-600/50 select-none shadow-inner"
                 onMouseDown={onMouseDown}
                 onTouchStart={onTouchStart}
                 onTouchMove={onTouchMove}
@@ -1202,7 +1233,7 @@ export default function AudioToolsPage() {
                   <>
                     {/* 开始时间手柄 */}
                     <div
-                      className="absolute top-0 bottom-0 w-3 sm:w-2 bg-gradient-to-b from-blue-400 to-blue-600 cursor-ew-resize z-30 -translate-x-1/2 rounded-full shadow-lg border border-blue-300 flex flex-col items-center justify-center"
+                      className="absolute top-0 bottom-0 w-3 sm:w-3 bg-gradient-to-b from-blue-400 to-blue-600 cursor-ew-resize z-30 -translate-x-1/2 rounded-full shadow-lg border border-blue-300 flex flex-col items-center justify-center"
                       style={{ left: `${timeToPercent(selectionStart)}%` }}
                     >
                       {/* 操作符圆点 */}
@@ -1216,7 +1247,7 @@ export default function AudioToolsPage() {
 
                     {/* 结束时间手柄 */}
                     <div
-                      className="absolute top-0 bottom-0 w-3 sm:w-2 bg-gradient-to-b from-blue-400 to-blue-600 cursor-ew-resize z-30 -translate-x-1/2 rounded-full shadow-lg border border-blue-300 flex flex-col items-center justify-center"
+                      className="absolute top-0 bottom-0 w-3 sm:w-3 bg-gradient-to-b from-blue-400 to-blue-600 cursor-ew-resize z-30 -translate-x-1/2 rounded-full shadow-lg border border-blue-300 flex flex-col items-center justify-center"
                       style={{ left: `${timeToPercent(selectionEnd)}%` }}
 
                     >
@@ -1288,7 +1319,7 @@ export default function AudioToolsPage() {
               <div className="text-center mb-6">
                 <div className="inline-block bg-slate-700/50 rounded-lg px-4 py-2 border border-slate-600/30">
                   <span className="text-slate-300 font-medium">
-                    duration: {formatSeconds(Math.max(0, Math.floor(selectionEnd - selectionStart)))}
+                    duration: {formatSeconds(Math.max(0, selectionEnd - selectionStart))}
                   </span>
                 </div>
               </div>
@@ -1304,7 +1335,7 @@ export default function AudioToolsPage() {
             </div>
 
             {/* Play + Select All + Preview in one row */}
-            <div className="flex flex-col sm:flex-row items-center gap-4 mb-8">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
               {sourceType === 'audio' ? (
                 <audio
                   ref={(el) => { mediaRef.current = el as unknown as HTMLMediaElement; }}
@@ -1454,192 +1485,193 @@ export default function AudioToolsPage() {
             </div>
           </div>
         </div>
+        <div className='max-w-7xl mx-auto'>
+          {/* Features Description */}
+          <div className="mt-16 max-w-8xl mx-auto">
+            <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-xl p-8">
+              <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
+                Audio Tools Features
+              </h2>
 
-        {/* Features Description */}
-        <div className="mt-16 max-w-8xl mx-auto">
-          <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-xl p-8">
-            <h2 className="text-3xl font-bold mb-8 text-center bg-gradient-to-r from-white via-blue-100 to-white bg-clip-text text-transparent">
-              Audio Tools Features
-            </h2>
+              <div className="flex flex-col lg:flex-row gap-8">
+                {/* Left Column */}
+                <div className="flex-1 space-y-6">
+                  <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
+                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
+                        <Upload className="w-4 h-4 text-blue-400" />
+                      </div>
+                      File Upload & Processing
+                    </h3>
+                    <ul className="space-y-3 text-slate-300">
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Audio Files:</strong> Upload MP3, WAV, M4A, OGG, FLAC formats</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Video Files:</strong> Extract audio from any video format</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Drag & Drop:</strong> Visual waveform display for precise selection</span>
+                      </li>
+                    </ul>
+                  </div>
 
-            <div className="flex flex-col lg:flex-row gap-8">
-              {/* Left Column */}
-              <div className="flex-1 space-y-6">
-                <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-blue-500/20 rounded-lg flex items-center justify-center">
-                      <Upload className="w-4 h-4 text-blue-400" />
-                    </div>
-                    File Upload & Processing
-                  </h3>
-                  <ul className="space-y-3 text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Audio Files:</strong> Upload MP3, WAV, M4A, OGG, FLAC formats</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Video Files:</strong> Extract audio from any video format</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Drag & Drop:</strong> Visual waveform display for precise selection</span>
-                    </li>
-                  </ul>
+                  <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
+                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
+                        <Play className="w-4 h-4 text-green-400" />
+                      </div>
+                      Audio Editing Features
+                    </h3>
+                    <ul className="space-y-3 text-slate-300">
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Precise Cutting:</strong> Drag handles to select exact start/end points</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Preview:</strong> Play selected portion before processing</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Select All:</strong> Quick button to use entire audio</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
 
-                <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-green-500/20 rounded-lg flex items-center justify-center">
-                      <Play className="w-4 h-4 text-green-400" />
-                    </div>
-                    Audio Editing Features
-                  </h3>
-                  <ul className="space-y-3 text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Precise Cutting:</strong> Drag handles to select exact start/end points</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Preview:</strong> Play selected portion before processing</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Select All:</strong> Quick button to use entire audio</span>
-                    </li>
-                  </ul>
+                {/* Right Column */}
+                <div className="flex-1 space-y-6">
+                  <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
+                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
+                        <Download className="w-4 h-4 text-purple-400" />
+                      </div>
+                      Export Formats
+                    </h3>
+                    <ul className="space-y-3 text-slate-300">
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>MP3:</strong> High-quality audio with 192kbps bitrate</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>M4A:</strong> Fast copy mode for original quality</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Auto Format:</strong> Optimized based on source file type</span>
+                      </li>
+                    </ul>
+                  </div>
+
+                  <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
+                    <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                      <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
+                        <ArrowLeft className="w-4 h-4 text-orange-400" />
+                      </div>
+                      Direct Integration
+                    </h3>
+                    <ul className="space-y-3 text-slate-300">
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>InfiniteTalk:</strong> Single character video generation</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>WAN2.2 S2V:</strong> Image-to-video with audio</span>
+                      </li>
+                      <li className="flex items-start gap-2">
+                        <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
+                        <span><strong>Multi Mode:</strong> Choose Left/Right audio for conversations</span>
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
 
-              {/* Right Column */}
-              <div className="flex-1 space-y-6">
-                <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-purple-500/20 rounded-lg flex items-center justify-center">
-                      <Download className="w-4 h-4 text-purple-400" />
+              {/* Button Actions */}
+              <div className="mt-8 bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
+                <h3 className="text-xl font-semibold text-white mb-4 text-center">Button Actions</h3>
+                <div className="grid md:grid-cols-4 gap-4">
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <Download className="w-6 h-6 text-blue-400" />
                     </div>
-                    Export Formats
-                  </h3>
-                  <ul className="space-y-3 text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>MP3:</strong> High-quality audio with 192kbps bitrate</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>M4A:</strong> Fast copy mode for original quality</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Auto Format:</strong> Optimized based on source file type</span>
-                    </li>
-                  </ul>
-                </div>
-
-                <div className="bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
-                  <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
-                    <div className="w-8 h-8 bg-orange-500/20 rounded-lg flex items-center justify-center">
-                      <ArrowLeft className="w-4 h-4 text-orange-400" />
+                    <h4 className="font-semibold text-white mb-2">Export Audio</h4>
+                    <p className="text-sm text-slate-400">Download processed audio file to your device</p>
+                  </div>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-purple-400 font-bold">IT</span>
                     </div>
-                    Direct Integration
-                  </h3>
-                  <ul className="space-y-3 text-slate-300">
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>InfiniteTalk:</strong> Single character video generation</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>WAN2.2 S2V:</strong> Image-to-video with audio</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <div className="w-1.5 h-1.5 bg-orange-400 rounded-full mt-2 flex-shrink-0" />
-                      <span><strong>Multi Mode:</strong> Choose Left/Right audio for conversations</span>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-
-            {/* Button Actions */}
-            <div className="mt-8 bg-slate-800/40 rounded-xl p-6 border border-slate-600/30">
-              <h3 className="text-xl font-semibold text-white mb-4 text-center">Button Actions</h3>
-              <div className="grid md:grid-cols-4 gap-4">
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-blue-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <Download className="w-6 h-6 text-blue-400" />
+                    <h4 className="font-semibold text-white mb-2">Use in InfiniteTalk</h4>
+                    <p className="text-sm text-slate-400">Directly use audio in single character video generation</p>
                   </div>
-                  <h4 className="font-semibold text-white mb-2">Export Audio</h4>
-                  <p className="text-sm text-slate-400">Download processed audio file to your device</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-purple-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <span className="text-purple-400 font-bold">IT</span>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-emerald-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-emerald-400 font-bold">S2V</span>
+                    </div>
+                    <h4 className="font-semibold text-white mb-2">Use in WAN2.2 S2V</h4>
+                    <p className="text-sm text-slate-400">Use audio for image-to-video generation</p>
                   </div>
-                  <h4 className="font-semibold text-white mb-2">Use in InfiniteTalk</h4>
-                  <p className="text-sm text-slate-400">Directly use audio in single character video generation</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-emerald-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <span className="text-emerald-400 font-bold">S2V</span>
+                  <div className="text-center">
+                    <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
+                      <span className="text-orange-400 font-bold">M</span>
+                    </div>
+                    <h4 className="font-semibold text-white mb-2">Use in Multi</h4>
+                    <p className="text-sm text-slate-400">Choose Left/Right position for multi-character videos</p>
                   </div>
-                  <h4 className="font-semibold text-white mb-2">Use in WAN2.2 S2V</h4>
-                  <p className="text-sm text-slate-400">Use audio for image-to-video generation</p>
-                </div>
-                <div className="text-center">
-                  <div className="w-12 h-12 bg-orange-600/20 rounded-lg flex items-center justify-center mx-auto mb-3">
-                    <span className="text-orange-400 font-bold">M</span>
-                  </div>
-                  <h4 className="font-semibold text-white mb-2">Use in Multi</h4>
-                  <p className="text-sm text-slate-400">Choose Left/Right position for multi-character videos</p>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Multi Audio Selection Modal */}
-      <Dialog open={isMultiAudioModalOpen} onOpenChange={setIsMultiAudioModalOpen}>
-        <DialogContent className="max-w-md mx-auto">
-          <DialogHeader>
-            <DialogTitle className="text-center">Select Audio Position</DialogTitle>
-          </DialogHeader>
-          <div className="text-center py-6">
-            <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
-              <Upload className="w-8 h-8 text-orange-600" />
-            </div>
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              Choose Audio Position
-            </h3>
-            <p className="text-muted-foreground mb-6">
-              Select whether this audio should be used as Left Audio or Right Audio in InfiniteTalk Multi.
-            </p>
-            <div className="flex gap-3 justify-center">
+        {/* Multi Audio Selection Modal */}
+        <Dialog open={isMultiAudioModalOpen} onOpenChange={setIsMultiAudioModalOpen}>
+          <DialogContent className="max-w-md mx-auto">
+            <DialogHeader>
+              <DialogTitle className="text-center">Select Audio Position</DialogTitle>
+            </DialogHeader>
+            <div className="text-center py-6">
+              <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
+                <Upload className="w-8 h-8 text-orange-600" />
+              </div>
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                Choose Audio Position
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Select whether this audio should be used as Left Audio or Right Audio in InfiniteTalk Multi.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <Button
+                  onClick={() => handleMultiAudioSelection('left')}
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3"
+                >
+                  Left Audio
+                </Button>
+                <Button
+                  onClick={() => handleMultiAudioSelection('right')}
+                  className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3"
+                >
+                  Right Audio
+                </Button>
+              </div>
               <Button
-                onClick={() => handleMultiAudioSelection('left')}
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-6 py-3"
+                variant="outline"
+                onClick={() => setIsMultiAudioModalOpen(false)}
+                className="mt-4 w-full"
               >
-                Left Audio
-              </Button>
-              <Button
-                onClick={() => handleMultiAudioSelection('right')}
-                className="bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white px-6 py-3"
-              >
-                Right Audio
+                Cancel
               </Button>
             </div>
-            <Button
-              variant="outline"
-              onClick={() => setIsMultiAudioModalOpen(false)}
-              className="mt-4 w-full"
-            >
-              Cancel
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      </div>
     </div>
   );
 }
