@@ -1,41 +1,34 @@
-// import { Navbar } from '../components/Navbar'; // Navbar is now in root layout
-
-import { serverCmsApi, FriendLink } from '../lib/server-api';
 import { GoogleOneTapAuth } from '../components/auth';
-import { Hero, KeyFeatures, QuickInferenceTips, UseCases, Comparisons, TechHighlights, GettingStarted, FAQs, CallToAction } from '../components/home';
+import { Footer } from '../components/Footer';
+import { CTA } from '../components/CTA';
+import { 
+  Hero, 
+  KeyFeatures, 
+  QuickInferenceTips, 
+  UseCases, 
+  Comparisons, 
+  TechHighlights, 
+  GettingStarted,
+  FAQs,
+  VideoCases,
+} from '../components/home/server';
 import dynamic from 'next/dynamic';
-
-// 动态导入非关键组件
-const PricingSection = dynamic(() => import('../components/home/PricingSection'), {
-  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
-});
-const Footer = dynamic(() => import('../components/Footer').then(mod => ({ default: mod.Footer })), {
-  loading: () => <div className="h-32 animate-pulse bg-gray-100" />,
-});
-const CTA = dynamic(() => import('../components/CTA'), {
-  loading: () => <div className="h-48 animate-pulse bg-gray-100 rounded-lg" />,
-});
-const VideoCases = dynamic(() => import('../components/home').then(mod => ({ default: mod.VideoCases })), {
-  loading: () => <div className="h-96 animate-pulse bg-gray-100 rounded-lg" />,
-});
 import Script from 'next/script';
 import { schemaData } from '../lib/seo-config';
-// 启用ISR，每小时重新验证数据
+
+// Client island - dynamically imported for code splitting
+const PricingSection = dynamic(() => import('../components/home/client').then(m => ({ default: m.PricingSection })), {
+  loading: () => <div className="h-96 animate-pulse bg-gray-100/5 rounded-lg" />,
+});
+
+// Enable ISR - revalidate every 20 minutes
 export const revalidate = 1200;
 
-
 export default async function Home() {
-  // 获取友情链接数据，如果为空则使用默认数据
-  let friendlyLinks = await serverCmsApi.getFriendLinkList();
-
-  // 如果API返回空数据或失败，使用默认数据
-  if (!friendlyLinks || friendlyLinks.length === 0) {
-    console.log('Using default friend links as fallback');
-    friendlyLinks = [];
-  }
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* JSON-LD structured data */}
       <Script id="ld-json-site" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaData) }}
       />
@@ -150,31 +143,44 @@ export default async function Home() {
           ]
         }) }}
       />
-      {/* Google One Tap 组件 - 只在用户未登录时显示 */}
+      
+      {/* Google One Tap Auth - only shown when user is not signed in */}
       <GoogleOneTapAuth
         cancelOnTapOutside={true}
         signInForceRedirectUrl="/"
         signUpForceRedirectUrl="/"
       />
+      
       <main className="flex-grow relative">
         {/* Fixed background gradient with project's primary color */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-background via-primary/10 via-primary/20 via-primary/15 to-slate-950 -z-10" />
         {/* Additional gradient overlay for more depth */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
+        
+        {/* Server Components - rendered on server */}
         <Hero />
         <GettingStarted />
         <VideoCases />
         <KeyFeatures />
+        {/* Server Components */}
+        {/* <WhatIsIt />
+        <WhySparseFrame /> */}
+      
+        {/* <HowItWorks /> */}
         <QuickInferenceTips />
         <UseCases />
         <Comparisons />
         <TechHighlights />
+        
+        {/* Client island: PricingSection - uses Clerk hooks */}
         <PricingSection />
+        
+        {/* Server Components */}
         <FAQs />
         <CTA />
-        
-        {/* <CallToAction /> */}
       </main>
+      
+      {/* Server Component: Footer */}
       <Footer />
     </div>
   );

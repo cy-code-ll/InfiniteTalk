@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { siteUrl } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
-import { Footer } from '@/components/Footer';
+import {Footer} from '@/components/Footer';
 
 const PromotionClient = dynamic(() => import('./PromotionClient'), { ssr: true });
 

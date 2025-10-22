@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { GraduationCap, ShoppingCart, Music, Film } from 'lucide-react';
 
@@ -43,12 +41,6 @@ export function Wans2vUseCases() {
     },
   ];
 
-  const scrollToHero = () => {
-    const heroSection = document.querySelector('section');
-    if (heroSection) {
-      heroSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
 
   return (
     <section className="py-28 relative">
@@ -113,15 +105,15 @@ export function Wans2vUseCases() {
              <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-foreground">
                Ready to Explore Your Creative Potential?
              </h3>
-             <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
-               Start creating professional videos in any of these categories with Wan-S2V's powerful AI technology
-             </p>
-             <button 
-               onClick={scrollToHero}
-               className="bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors duration-200"
-             >
-               Start Creating Now
-             </button>
+            <p className="text-lg sm:text-xl text-muted-foreground max-w-2xl mx-auto mb-6">
+              Start creating professional videos in any of these categories with Wan-S2V's powerful AI technology
+            </p>
+            <a 
+              href="#wans2v-hero"
+              className="inline-block bg-primary text-primary-foreground px-8 py-3 rounded-xl font-semibold hover:bg-primary/90 transition-colors duration-200"
+            >
+              Start Creating Now
+            </a>
            </div>
          </div>
       </div>

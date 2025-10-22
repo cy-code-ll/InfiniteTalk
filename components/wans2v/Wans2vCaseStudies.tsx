@@ -1,11 +1,6 @@
-'use client';
-
-import React, { useRef, useState } from 'react';
+import React from 'react';
 
 export function Wans2vCaseStudies() {
-  const videoRefs = useRef<(HTMLVideoElement | null)[]>([]);
-  const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
-
   const caseStudies = [
     {
       id: 1,
@@ -33,27 +28,6 @@ export function Wans2vCaseStudies() {
     },
   ];
 
-  const handleMouseEnter = (index: number) => {
-    setHoveredIndex(index);
-    const video = videoRefs.current[index];
-    if (video) {
-      video.play();
-    }
-  };
-
-  const handleMouseLeave = (index: number) => {
-    setHoveredIndex(null);
-    const video = videoRefs.current[index];
-    if (video) {
-      video.pause();
-      video.currentTime = 0; // Reset to beginning
-    }
-  };
-
-  const setVideoRef = (el: HTMLVideoElement | null, index: number) => {
-    videoRefs.current[index] = el;
-  };
-
   return (
     <section className="py-28 relative">
       <div className="container mx-auto px-6 max-w-7xl relative">
@@ -70,20 +44,17 @@ export function Wans2vCaseStudies() {
         {/* Videos Grid */}
         <div className="grid grid-cols-1 gap-8 lg:gap-12">
           {/* Wide Videos (a1 and a2) - Full Width */}
-          {caseStudies.filter(cs => cs.isWide).map((caseStudy, index) => (
+          {caseStudies.filter(cs => cs.isWide).map((caseStudy) => (
             <div
               key={caseStudy.id}
               className="relative aspect-[32/9] bg-gray-100 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-              onMouseEnter={() => handleMouseEnter(index)}
-              onMouseLeave={() => handleMouseLeave(index)}
             >
               <video
-                ref={(el) => setVideoRef(el, index)}
                 src={caseStudy.videoSrc}
                 poster={caseStudy.poster}
                 className="w-full h-full object-cover"
-                
-                preload="metadata"
+                controls
+                preload="none"
                 playsInline
                 loop
               />
@@ -92,20 +63,17 @@ export function Wans2vCaseStudies() {
 
           {/* Standard Videos (132 and asd) - Two Columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-            {caseStudies.filter(cs => !cs.isWide).map((caseStudy, index) => (
+            {caseStudies.filter(cs => !cs.isWide).map((caseStudy) => (
               <div
                 key={caseStudy.id}
                 className="relative aspect-video bg-gray-100 rounded-2xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-2"
-                onMouseEnter={() => handleMouseEnter(index + 2)}
-                onMouseLeave={() => handleMouseLeave(index + 2)}
               >
                 <video
-                  ref={(el) => setVideoRef(el, index + 2)}
                   src={caseStudy.videoSrc}
                   poster={caseStudy.poster}
                   className="w-full h-full object-cover"
-                  
-                  preload="metadata"
+                  controls
+                  preload="none"
                   playsInline
                   loop
                 />

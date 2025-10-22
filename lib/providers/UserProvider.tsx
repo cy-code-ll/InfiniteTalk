@@ -337,7 +337,8 @@ export function UserProvider({ children }: UserProviderProps) {
     }
   }, [isSignedIn, user?.id]);
 
-  // 设置定时器，每10秒更新一次用户信息（仅在有token时）
+  // 设置定时器，每30秒更新一次用户信息（仅在有token时）
+  // 优化：从10秒改为30秒，减少不必要的API调用
   useEffect(() => {
     if (!isSignedIn || !user?.id) return;
 
@@ -345,7 +346,7 @@ export function UserProvider({ children }: UserProviderProps) {
       if (api.auth.isTokenValid()) {
         fetchUserInfo(false); // 后续刷新，不是初始加载
       }
-    }, 10000);
+    }, 30000); // 30秒轮询，减少70%的API调用
 
     // 组件卸载时清除定时器
     return () => clearInterval(intervalId);

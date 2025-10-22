@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
-import { Footer } from '../../components/Footer';
+import { Footer } from '@/components/Footer';
 import InfiniteTalkGenerator from './InfiniteTalkGenerator';
 import CTASection from '@/app/infinitetalk/CTASection';
 

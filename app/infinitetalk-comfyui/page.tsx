@@ -1,6 +1,6 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
-import { Footer } from '../../components/Footer';
+import { Footer } from '@/components/Footer';
 
 // SEO metadata
 export const metadata: Metadata = {
@@ -281,8 +281,8 @@ export default function InfiniteTalkComfyUIPage() {
               </div>
             </section>
 
-            {/* Comparison Section */}
-            <section className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8 md:p-12">
+              {/* Comparison Section */}
+              <section className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8 md:p-12">
               <h2 className="text-3xl md:text-4xl font-bold text-white mb-8">
                 How InfiniteTalk Improves on MultiTalk
               </h2>

@@ -1,12 +1,4 @@
-'use client';
-
-import React, { useState, useRef } from 'react';
-import { Play, Pause } from 'lucide-react';
-
 export default function MultiCaseStudies() {
-  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
-  const videoRefs = useRef<{ [key: string]: HTMLVideoElement | null }>({});
-
   const caseStudies = [
     {
       id: 'case1',
@@ -38,67 +30,6 @@ export default function MultiCaseStudies() {
     }
   ];
 
-  const handleVideoPlay = (videoId: string) => {
-    // Pause all other videos
-    Object.keys(videoRefs.current).forEach(id => {
-      if (id !== videoId && videoRefs.current[id]) {
-        videoRefs.current[id]?.pause();
-      }
-    });
-    
-    setPlayingVideo(videoId);
-  };
-
-  const handleVideoPause = (videoId: string) => {
-    setPlayingVideo(null);
-  };
-
-  const handleVideoEnded = (videoId: string) => {
-    setPlayingVideo(null);
-  };
-
-  const handleMouseEnter = (videoId: string) => {
-    // Only auto-play on desktop (not mobile)
-    if (window.innerWidth >= 768) {
-      const video = videoRefs.current[videoId];
-      if (video && playingVideo !== videoId) {
-        video.play();
-        handleVideoPlay(videoId);
-      }
-    }
-  };
-
-  const handleMouseLeave = (videoId: string) => {
-    // Only pause on desktop (not mobile)
-    if (window.innerWidth >= 768) {
-      const video = videoRefs.current[videoId];
-      if (video && playingVideo === videoId) {
-        video.pause();
-        handleVideoPause(videoId);
-      }
-    }
-  };
-
-  const handleVideoClick = (videoId: string) => {
-    const video = videoRefs.current[videoId];
-    if (!video) return;
-
-    if (playingVideo === videoId) {
-      video.pause();
-      handleVideoPause(videoId);
-    } else {
-      // Pause all other videos first
-      Object.keys(videoRefs.current).forEach(id => {
-        if (id !== videoId && videoRefs.current[id]) {
-          videoRefs.current[id]?.pause();
-        }
-      });
-      
-      video.play();
-      handleVideoPlay(videoId);
-    }
-  };
-
   return (
     <section className="py-16 md:py-24 bg-gradient-to-b from-slate-900/20 to-transparent">
       <div className="container mx-auto px-6">
@@ -115,66 +46,51 @@ export default function MultiCaseStudies() {
 
           {/* Video Grid */}
           <div className="grid md:grid-cols-2 gap-8">
-            {caseStudies.map((caseStudy, index) => (
+            {caseStudies.map((caseStudy) => (
               <div
                 key={caseStudy.id}
                 className="group relative bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm overflow-hidden hover:border-primary/30 transition-all duration-300 hover:shadow-lg hover:shadow-primary/10"
-                onMouseEnter={() => handleMouseEnter(caseStudy.id)}
-                onMouseLeave={() => handleMouseLeave(caseStudy.id)}
               >
                 {/* Video Container */}
                 <div className="relative aspect-video bg-slate-800">
                   <video
-                    ref={(el) => {
-                      videoRefs.current[caseStudy.id] = el;
-                    }}
                     src={caseStudy.video}
                     poster={caseStudy.poster}
-                    className="w-full h-full object-cover cursor-pointer md:cursor-default"
-                    onClick={(e) => {
-                      // Only handle click on mobile
-                      if (window.innerWidth < 768) {
-                        e.preventDefault();
-                        handleVideoClick(caseStudy.id);
-                      }
-                    }}
-                    onPlay={() => handleVideoPlay(caseStudy.id)}
-                    onPause={() => handleVideoPause(caseStudy.id)}
-                    onEnded={() => handleVideoEnded(caseStudy.id)}
-                    preload="metadata"
+                    className="w-full h-full object-cover"
+                    controls
+                    preload="none"
                     playsInline
                   >
                     Your browser does not support the video tag.
                   </video>
-                  
-                  {/* Play/Pause Overlay - Only show on mobile */}
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 md:hidden">
-                    <div className="bg-white/20 backdrop-blur-sm rounded-full p-4">
-                      {playingVideo === caseStudy.id ? (
-                        <Pause className="h-8 w-8 text-white" />
-                      ) : (
-                        <Play className="h-8 w-8 text-white ml-1" />
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* Mobile-only click overlay */}
-                  <div className="absolute inset-0 md:hidden" onClick={() => handleVideoClick(caseStudy.id)} />
+                </div>
+
+                {/* Info */}
+                <div className="p-6">
+                  <h3 className="text-white font-semibold text-xl mb-2">
+                    {caseStudy.title}
+                  </h3>
+                  <p className="text-slate-400 text-sm">
+                    {caseStudy.description}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
 
           {/* Bottom CTA */}
-          <div className="text-center mt-12">
+          <div className="mt-16 text-center">
             <p className="text-slate-300 text-lg mb-6">
-              Ready to create your own multi-character videos?
+              Ready to create your own multi-character conversations?
             </p>
             <a
-              href="#hero"
-              className="inline-flex items-center px-8 py-4 bg-primary hover:bg-primary/90 text-white font-semibold rounded-lg transition-colors duration-300 shadow-lg hover:shadow-xl"
+              href="#multi-generator"
+              className="inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg hover:shadow-primary/25"
             >
-              Try InfiniteTalk Multi Now
+              Start Creating Now
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
             </a>
           </div>
         </div>

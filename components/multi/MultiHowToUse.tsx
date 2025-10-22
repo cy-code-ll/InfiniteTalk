@@ -1,8 +1,3 @@
-'use client';
-
-import { HelpCircle } from 'lucide-react';
-import { Tooltip } from '../ui/tooltip';
-
 export default function MultiHowToUse() {
   return (
     <section id="how-it-works" className="py-16 md:py-24 bg-gradient-to-b from-transparent to-slate-900/20">

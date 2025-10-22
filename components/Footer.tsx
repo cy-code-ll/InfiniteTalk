@@ -1,5 +1,3 @@
-'use client';
-
 import Link from 'next/link';
 import { FriendLink } from '../lib/server-api';
 
@@ -41,9 +39,9 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
                 InfiniteTalk AI
               </span>
             </Link>
-                          <p className="mt-4 text-sm text-muted-foreground">
-                © 2025 InfiniteTalk AI. All rights reserved.
-              </p>
+            <p className="mt-4 text-sm text-muted-foreground">
+              © 2025 InfiniteTalk AI. All rights reserved.
+            </p>
             <div className="mt-4">
               <a 
                 href="mailto:support@infinitetalk.net" 
@@ -136,9 +134,8 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
             </ul>
           </div>
         </div>
-        
-  
       </div>
     </footer>
   );
-} 
+}
+

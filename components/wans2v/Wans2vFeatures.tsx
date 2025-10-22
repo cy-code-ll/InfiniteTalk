@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Mic, Users, Palette, Monitor, Clock, Camera } from 'lucide-react';
 

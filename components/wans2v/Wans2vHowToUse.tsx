@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Upload, Zap, Share2, Camera } from 'lucide-react';
 

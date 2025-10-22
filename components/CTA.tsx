@@ -1,10 +1,8 @@
-'use client';
-
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { ArrowRight } from 'lucide-react';
 
-export default function CTA() {
+export function CTA() {
   return (
     <section className="py-20 px-4 bg-gradient-to-b from-slate-900/30 to-slate-950/50">
       <div className="max-w-5xl mx-auto text-center">

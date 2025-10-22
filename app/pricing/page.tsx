@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
 import { Footer } from '../../components/Footer';
-import CTA from '../../components/CTA';
+import { CTA } from '../../components/CTA';
 import PricingSection from './PricingSection';
 import PricingFAQ from './PricingFAQ';
 

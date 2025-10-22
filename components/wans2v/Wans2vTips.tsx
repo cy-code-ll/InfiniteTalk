@@ -1,5 +1,3 @@
-'use client';
-
 import React from 'react';
 import { Lightbulb, Camera, Mic, Edit3, Clock, Download } from 'lucide-react';
 

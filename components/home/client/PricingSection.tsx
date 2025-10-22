@@ -1,6 +1,6 @@
 'use client';
 
-import { Button } from '../ui/button';
+import { Button } from '@/components/ui/button';
 import { Check, Loader2 } from 'lucide-react';
 import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';

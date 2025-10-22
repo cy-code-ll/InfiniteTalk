@@ -1,17 +1,8 @@
-'use client';
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
 export function Wans2vCTA() {
-  const scrollToHero = () => {
-    const heroSection = document.querySelector('section');
-    if (heroSection) {
-      heroSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
   return (
     <section className="py-28 relative">
       <div className="container mx-auto px-6 max-w-4xl relative text-center">
@@ -21,14 +12,15 @@ export function Wans2vCTA() {
              Bring your stories to life using Wan-S2V.
             </h2>
             
-            <Button
-              onClick={scrollToHero}
-              size="lg"
-              className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
-            >
-              👉 Start Creating with Wan-S2V Today
-              <ArrowRight className="ml-2 h-5 w-5" />
-            </Button>
+            <a href="#wans2v-hero">
+              <Button
+                size="lg"
+                className="bg-primary text-primary-foreground hover:bg-primary/90 px-8 py-4 text-lg font-semibold rounded-xl transition-all duration-200 hover:scale-105 shadow-lg"
+              >
+                👉 Start Creating with Wan-S2V Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </a>
             
             <p className="text-muted-foreground text-sm mt-6">
               Join thousands of creators who already use Wan-S2V

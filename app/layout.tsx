@@ -18,9 +18,9 @@ const poppins = Poppins({
   fallback: ['system-ui', 'arial'],
 });
 
-// 动态导入 Clerk Provider 以减少初始包大小
+// Dynamically import Clerk Provider to reduce initial bundle size
 const ClerkProviderWithLocale = dynamic(() => import('@/components/auth/clerk-provider'), {
-  ssr: true, // 保持 SSR 以确保认证状态正确
+  ssr: true,
   loading: () => <div className="min-h-screen" />,
 });
 
