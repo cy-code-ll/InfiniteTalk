@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '../components/ui/button';
@@ -24,115 +24,14 @@ const NavAuthIsland = dynamic(() => import('./auth/nav-auth-island'), {
   loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse" />,
 });
 
-export function Navbar() {
-  const pathname = usePathname();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const handleMobileLinkClick = (action: () => void) => {
-    action();
-    setIsMobileMenuOpen(false);
-  };
-
-  const renderNavLinks = (isMobile = false) => {
-    if (isMobile) {
-      return (
-        <>
-          <SheetClose asChild>
-            <Link
-              href="/"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              Home
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/infinitetalk"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              Infinitetalk
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/infinitetalk-multi"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/infinitetalk-multi' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              InfiniteTalk Multi
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/wan2.2-s2v"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/wan2.2-s2v' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              WAN2.2 S2V
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/infinitetalk-comfyui"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              ComfyUI Guide
-            </Link>
-          </SheetClose>
-
-          <SheetClose asChild>
-            <Link
-              href="/pricing"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              Price
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/free/referral"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/free/referral' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              Referral
-            </Link>
-          </SheetClose>
-          <SheetClose asChild>
-            <Link
-              href="/app"
-              className={cn(
-                'nav-link-item px-4 py-2 rounded-md transition-colors',
-                pathname === '/app' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
-              )}
-            >
-              App
-            </Link>
-          </SheetClose>
-        </>
-      );
-    }
-    
-    return (
-      <>
+// Mobile Links Component - Memoized to avoid re-renders when drawer opens/closes
+const MobileLinks = memo(({ pathname }: { pathname: string }) => {
+  return (
+    <>
+      <SheetClose asChild>
         <Link
           href="/"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -140,8 +39,11 @@ export function Navbar() {
         >
           Home
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/infinitetalk"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -149,8 +51,11 @@ export function Navbar() {
         >
           Infinitetalk
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/infinitetalk-multi"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/infinitetalk-multi' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -158,8 +63,11 @@ export function Navbar() {
         >
           InfiniteTalk Multi
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/wan2.2-s2v"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/wan2.2-s2v' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -167,8 +75,11 @@ export function Navbar() {
         >
           WAN2.2 S2V
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/infinitetalk-comfyui"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -176,9 +87,12 @@ export function Navbar() {
         >
           ComfyUI Guide
         </Link>
- 
+      </SheetClose>
+
+      <SheetClose asChild>
         <Link
           href="/pricing"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -186,8 +100,11 @@ export function Navbar() {
         >
           Price
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/free/referral"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/free/referral' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -195,8 +112,11 @@ export function Navbar() {
         >
           Referral
         </Link>
+      </SheetClose>
+      <SheetClose asChild>
         <Link
           href="/app"
+          prefetch={false}
           className={cn(
             'nav-link-item px-4 py-2 rounded-md transition-colors',
             pathname === '/app' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
@@ -204,9 +124,15 @@ export function Navbar() {
         >
           App
         </Link>
-      </>
-    );
-  };
+      </SheetClose>
+    </>
+  );
+});
+MobileLinks.displayName = 'MobileLinks';
+
+export function Navbar() {
+  const pathname = usePathname();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-lg border-b border-primary/20 shadow-xl">
@@ -224,7 +150,78 @@ export function Navbar() {
           {/* Middle: Desktop Nav Links */}
           <div className="hidden lg:flex items-center justify-center flex-1 ">
             <div className="flex items-center space-x-1">
-              {renderNavLinks(false)}
+              <Link
+                href="/"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                Home
+              </Link>
+              <Link
+                href="/infinitetalk"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/infinitetalk' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                Infinitetalk
+              </Link>
+              <Link
+                href="/infinitetalk-multi"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/infinitetalk-multi' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                InfiniteTalk Multi
+              </Link>
+              <Link
+                href="/wan2.2-s2v"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/wan2.2-s2v' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                WAN2.2 S2V
+              </Link>
+              <Link
+                href="/infinitetalk-comfyui"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                ComfyUI Guide
+              </Link>
+              <Link
+                href="/pricing"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                Price
+              </Link>
+              <Link
+                href="/free/referral"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/free/referral' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                Referral
+              </Link>
+              <Link
+                href="/app"
+                className={cn(
+                  'nav-link-item px-4 py-2 rounded-md transition-colors',
+                  pathname === '/app' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+                )}
+              >
+                App
+              </Link>
             </div>
           </div>
 
@@ -238,19 +235,24 @@ export function Navbar() {
             {/* Mobile: Auth island + Menu */}
             <div className="flex lg:hidden items-center gap-2">
               <NavAuthIsland variant="mobile" />
-              <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
+              <Sheet modal={false} open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon" className="text-foreground hover:text-primary hover:bg-muted">
                     <Menu className="h-6 w-6" />
                     <span className="sr-only">Open menu</span>
                   </Button>
                 </SheetTrigger>
-                <SheetContent side="right" className="w-[300px] sm:w-[340px] px-6 pt-12 pb-8 bg-background">
+                <SheetContent 
+                  side="right" 
+                  onOpenAutoFocus={(e) => e.preventDefault()}
+                  onCloseAutoFocus={(e) => e.preventDefault()}
+                  className="w-[300px] sm:w-[340px] px-6 pt-12 pb-8 bg-background [will-change:transform]"
+                >
                   <SheetHeader className="mb-4 text-left">
                     <SheetTitle className="text-lg font-semibold">Menu</SheetTitle>
                   </SheetHeader>
                   <nav className="flex flex-col space-y-4">
-                    {renderNavLinks(true)}
+                    <MobileLinks pathname={pathname} />
                   </nav>
                 </SheetContent>
               </Sheet>
