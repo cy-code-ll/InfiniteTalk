@@ -2,7 +2,7 @@
 
 import { useUser } from '@clerk/nextjs';
 import { usePathname } from 'next/navigation';
-import { lazy, Suspense } from 'react';
+import { lazy, Suspense, useEffect, useState } from 'react';
 
 // 懒加载 GoogleOneTap 组件
 const GoogleOneTap = lazy(() => import('@clerk/nextjs').then(mod => ({ default: mod.GoogleOneTap })));
@@ -29,9 +29,20 @@ export default function GoogleOneTapAuth({
 }: GoogleOneTapAuthProps) {
   const { isSignedIn, user } = useUser();
   const pathname = usePathname();
+  const [isMounted, setIsMounted] = useState(false);
+
+  // 防止 Hydration 不匹配：只在客户端挂载后渲染
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 如果用户已登录，不显示Google One Tap
   if (isSignedIn) {
+    return null;
+  }
+
+  // 防止 Hydration 不匹配：服务端渲染时返回 null
+  if (!isMounted) {
     return null;
   }
 
