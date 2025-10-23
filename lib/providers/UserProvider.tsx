@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
 import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { api } from '../api';
 import { useToast } from '@/components/ui/toast-provider';
@@ -28,6 +28,7 @@ interface UserContextType {
   userInfo: UserInfo | null;
   isLoadingUserInfo: boolean;
   refreshUserInfo: () => Promise<void>;
+  clearUserState: () => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -356,6 +357,17 @@ export function UserProvider({ children }: UserProviderProps) {
     userInfo,
     isLoadingUserInfo,
     refreshUserInfo,
+    clearUserState: useCallback(() => {
+      try {
+        api.auth.clearTokens();
+      } catch (e) {
+        console.warn('clearUserState: failed to clear tokens');
+      }
+      setUserInfo(null);
+      if (user?.id) {
+        delete globalSyncStatus[user.id];
+      }
+    }, [user?.id])
   };
 
   return (

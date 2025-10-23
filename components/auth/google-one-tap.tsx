@@ -1,7 +1,6 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import { usePathname } from 'next/navigation';
 import { lazy, Suspense, useEffect, useState } from 'react';
 
 // 懒加载 GoogleOneTap 组件
@@ -27,15 +26,33 @@ export default function GoogleOneTapAuth({
   signInForceRedirectUrl,
   signUpForceRedirectUrl,
 }: GoogleOneTapAuthProps) {
-  const { isSignedIn, user } = useUser();
-  const pathname = usePathname();
+  // 所有 Hooks 必须在条件渲染之前调用
+  const { isSignedIn } = useUser();
   const [isMounted, setIsMounted] = useState(false);
+  const [show, setShow] = useState(false);
 
   // 防止 Hydration 不匹配：只在客户端挂载后渲染
   useEffect(() => {
     setIsMounted(true);
   }, []);
 
+  // 空闲时加载 GoogleOneTap
+  useEffect(() => {
+    if (!isSignedIn && isMounted) {
+      const loadGoogleOneTap = () => {
+        setShow(true);
+      };
+
+      // 使用 requestIdleCallback，无则 setTimeout 兜底
+      if (typeof requestIdleCallback !== 'undefined') {
+        requestIdleCallback(loadGoogleOneTap, { timeout: 1500 });
+      } else {
+        setTimeout(loadGoogleOneTap, 1500);
+      }
+    }
+  }, [isSignedIn, isMounted]);
+
+  // 条件渲染逻辑放在所有 Hooks 之后
   // 如果用户已登录，不显示Google One Tap
   if (isSignedIn) {
     return null;
@@ -46,15 +63,12 @@ export default function GoogleOneTapAuth({
     return null;
   }
 
-  console.log('GoogleOneTapAuth: 当前路径和重定向设置', {
-    pathname,
-    signInForceRedirectUrl,
-    signUpForceRedirectUrl,
-    windowLocation: typeof window !== 'undefined' ? window.location.href : 'SSR'
-  });
+  // 只有在 show 为 true 时才渲染
+  if (!show) {
+    return null;
+  }
 
   // 根据Clerk文档，如果不设置forceRedirectUrl，应该默认回到启动认证的页面
-  // 让我们尝试只在明确指定时才传递重定向URL，否则让Clerk使用默认行为
   const googleOneTapProps: any = {
     cancelOnTapOutside,
     itpSupport, 
@@ -74,4 +88,4 @@ export default function GoogleOneTapAuth({
       <GoogleOneTap {...googleOneTapProps} />
     </Suspense>
   );
-} 
+}

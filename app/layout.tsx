@@ -90,10 +90,13 @@ export default function RootLayout({
           }
         `}} />
         {/* Preconnect & DNS Prefetch for analytics domain */}
-        <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
+        {/* <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://v1.cnzz.com" />
         <link rel="preconnect" href="https://c.cnzz.com" crossOrigin="" />
-        <link rel="dns-prefetch" href="https://c.cnzz.com" />
+        <link rel="dns-prefetch" href="https://c.cnzz.com" /> */}
+        {/* Preconnect to Clerk domain for faster authentication */}
+        <link rel="preconnect" href="https://clerk.infinitetalk.net" crossOrigin="" />
+        <link rel="dns-prefetch" href="https://clerk.infinitetalk.net" />
         {/* Non-critical CSS will be loaded by Next.js automatically */}
         {/* Critical styles are inlined above for instant render */}
       </head>
