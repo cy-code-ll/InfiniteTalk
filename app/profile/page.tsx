@@ -5,7 +5,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Footer } from '../../components/Footer';
 import Image from 'next/image';
 import { Progress } from '../../components/ui/progress';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -314,7 +314,7 @@ export default function ProfilePage() {
   const [totalHistoryCount, setTotalHistoryCount] = useState(0);
   const historyPageSize = 16;
   const [isDownloading, setIsDownloading] = useState<number | null>(null); // 跟踪正在下载的图片ID
-  const [autoRefreshInterval, setAutoRefreshInterval] = useState<NodeJS.Timeout | null>(null);
+  const autoRefreshRef = useRef<NodeJS.Timeout | null>(null);
 
   // 积分记录状态
   const [timesLogList, setTimesLogList] = useState<TimesLogItem[]>([]);
@@ -766,7 +766,8 @@ export default function ProfilePage() {
     if (!isLoaded || !userId) return;
 
     const startAutoRefresh = () => {
-      const interval = setInterval(() => {
+      if (autoRefreshRef.current) return; // 已存在则不重复创建
+      autoRefreshRef.current = setInterval(() => {
         // 静默刷新，不显示loading状态
         const fetchGenerationHistory = async (page: number) => {
           try {
@@ -782,18 +783,30 @@ export default function ProfilePage() {
         };
         fetchGenerationHistory(currentPage);
       }, 30000); // 30秒
+    };
 
-      setAutoRefreshInterval(interval);
+    const stopAutoRefresh = () => {
+      if (autoRefreshRef.current) {
+        clearInterval(autoRefreshRef.current);
+        autoRefreshRef.current = null;
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        stopAutoRefresh();
+      } else {
+        startAutoRefresh();
+      }
     };
 
     startAutoRefresh();
+    document.addEventListener('visibilitychange', handleVisibilityChange);
 
-    // 清理定时器
+    // 清理：页面卸载或路由变更时停止轮询并移除监听
     return () => {
-      if (autoRefreshInterval) {
-        clearInterval(autoRefreshInterval);
-        setAutoRefreshInterval(null);
-      }
+      stopAutoRefresh();
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
   }, [isLoaded, userId, currentPage]);
 

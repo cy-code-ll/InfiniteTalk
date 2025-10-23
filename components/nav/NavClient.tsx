@@ -10,7 +10,13 @@ import { cn } from '../../lib/utils';
 // Lazy load auth island
 const NavAuthIsland = dynamic(() => import('../auth/nav-auth-island'), {
   ssr: false,
-  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full animate-pulse" />,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full" />, // 移除 animate-pulse
+});
+
+// Lazy load mobile auth island with intersection observer
+const AuthIslandVisible = dynamic(() => import('./AuthIslandVisible'), {
+  ssr: false,
+  loading: () => <div className="w-24 h-10 bg-gray-200 rounded-full" />, // 静态占位
 });
 
 // Inline Menu SVG Icon - no lucide dependency
@@ -172,7 +178,7 @@ export function NavClient() {
 
         {/* Mobile: Auth island + Menu */}
         <div className="flex lg:hidden items-center gap-2">
-          <NavAuthIsland variant="mobile" />
+          <AuthIslandVisible />
           
           {/* Menu Button */}
           <button
