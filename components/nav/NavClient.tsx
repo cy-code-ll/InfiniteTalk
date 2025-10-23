@@ -1,10 +1,11 @@
 'use client';
 
-import React, { useState, useCallback, memo } from 'react';
+import React, { useState, useCallback, memo, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { LiteDrawer, LiteDrawerClose } from './LiteDrawer';
+import SmartLink from './SmartLink';
 import { cn } from '../../lib/utils';
 
 // Loading spinner component
@@ -56,8 +57,8 @@ const MenuIcon = () => (
   </svg>
 );
 
-// Mobile Links - Memoized
-const MobileLinks = memo(({ pathname, onClose }: { pathname: string; onClose: () => void }) => {
+// Mobile Links - Optimized for INP
+const MobileLinks = memo(({ pathname }: { pathname: string }) => {
   const links = [
     { href: '/', label: 'Home' },
     { href: '/infinitetalk', label: 'Infinitetalk' },
@@ -72,20 +73,24 @@ const MobileLinks = memo(({ pathname, onClose }: { pathname: string; onClose: ()
   return (
     <>
       {links.map((link) => (
-        <LiteDrawerClose key={link.href} onClose={onClose}>
-          <Link
-            href={link.href}
-            prefetch={false}
-            className={cn(
-              'block px-4 py-2 rounded-md transition-colors',
-              pathname === link.href
-                ? 'text-primary font-medium bg-primary/20'
-                : 'text-white/90 hover:text-primary hover:bg-slate-800'
-            )}
-          >
-            {link.label}
-          </Link>
-        </LiteDrawerClose>
+        <SmartLink
+          key={link.href}
+          href={link.href}
+          className={cn(
+            'block px-4 py-2 rounded-md transition-colors',
+            pathname === link.href
+              ? 'text-primary font-medium bg-primary/20'
+              : 'text-white/90 hover:text-primary hover:bg-slate-800'
+          )}
+          onClosed={() => {
+            // 第3帧清除焦点/滚动锁之类
+            if (document.activeElement instanceof HTMLElement) {
+              document.activeElement.blur();
+            }
+          }}
+        >
+          {link.label}
+        </SmartLink>
       ))}
     </>
   );
@@ -95,6 +100,13 @@ MobileLinks.displayName = 'MobileLinks';
 export function NavClient() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+  // 监听 SmartLink 的关闭事件
+  useEffect(() => {
+    const close = () => setIsMobileMenuOpen(false);
+    window.addEventListener('drawer-close', close as any, { once: true });
+    return () => window.removeEventListener('drawer-close', close as any);
+  }, [isMobileMenuOpen]); // 当抽屉打开时，监听一次
 
   // Use RAF for opening to defer heavy work
   const handleOpenMenu = useCallback(() => {
@@ -215,8 +227,8 @@ export function NavClient() {
             className="w-[300px] sm:w-[340px]"
           >
             <div className="flex flex-col h-full px-6 pt-[env(safe-area-inset-top,0)] pb-[env(safe-area-inset-bottom,0)] text-white">
-              {/* Header */}
-              <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-4 bg-slate-900/95 backdrop-blur supports-[backdrop-filter]:bg-slate-900/80 flex items-center justify-between border-b border-white/10">
+              {/* Header - 移除 backdrop-blur 优化性能 */}
+              <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-4 bg-slate-900/95 flex items-center justify-between border-b border-white/10">
                 <h2 className="text-lg font-semibold">Menu</h2>
                 <button
                   type="button"
@@ -234,7 +246,7 @@ export function NavClient() {
 
               {/* Links */}
               <nav className="flex flex-col space-y-4 mt-6 pb-10">
-                <MobileLinks pathname={pathname} onClose={handleCloseMenu} />
+                <MobileLinks pathname={pathname} />
               </nav>
             </div>
           </LiteDrawer>
