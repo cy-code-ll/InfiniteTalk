@@ -140,53 +140,53 @@ export const userApi = {
 
     return handleApiError(response);
   },
-    // 获取推广链接
-    getPromotionLink: async () => {
-      const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_link`, {
+  // 获取推广链接
+  getPromotionLink: async () => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_link`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 获取推广统计数据
+  getPromotionStatistics: async () => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_statistics`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 获取推广收益明细
+  getPromotionScoreLog: async (page: number = 1, pageSize: number = 10, status?: number) => {
+    let url = `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_score_log?page=${page}&page_size=${pageSize}`;
+    if (status !== undefined) {
+      url += `&status=${status}`;
+    }
+
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 获取推广用户列表
+  getPromotionUsers: async (page: number = 1, pageSize: number = 10) => {
+    const response = await fetch(
+      `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_users?page=${page}&page_size=${pageSize}`,
+      {
         method: 'GET',
         headers: getHeaders(),
-      });
-  
-      return handleApiError(response);
-    },
-  
-    // 获取推广统计数据
-    getPromotionStatistics: async () => {
-      const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_statistics`, {
-        method: 'GET',
-        headers: getHeaders(),
-      });
-  
-      return handleApiError(response);
-    },
-  
-    // 获取推广收益明细
-    getPromotionScoreLog: async (page: number = 1, pageSize: number = 10, status?: number) => {
-      let url = `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_score_log?page=${page}&page_size=${pageSize}`;
-      if (status !== undefined) {
-        url += `&status=${status}`;
       }
-      
-      const response = await fetch(url, {
-        method: 'GET',
-        headers: getHeaders(),
-      });
-  
-      return handleApiError(response);
-    },
-  
-    // 获取推广用户列表
-    getPromotionUsers: async (page: number = 1, pageSize: number = 10) => {
-      const response = await fetch(
-        `${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_users?page=${page}&page_size=${pageSize}`,
-        {
-          method: 'GET',
-          headers: getHeaders(),
-        }
-      );
-  
-      return handleApiError(response);
-    },
+    );
+
+    return handleApiError(response);
+  },
 };
 
 // 支付相关接口
@@ -374,6 +374,7 @@ export const infiniteTalkApi = {
     prompt: string;
     duration: number;
     resolution: string;
+    mask?: string;
   }) => {
     const formData = new FormData();
     formData.append('image', params.image);
@@ -381,6 +382,11 @@ export const infiniteTalkApi = {
     formData.append('prompt', params.prompt);
     formData.append('duration', params.duration.toString());
     formData.append('resolution', params.resolution);
+
+    // 如果有遮罩图，添加到FormData中
+    if (params.mask) {
+      formData.append('mask_image', params.mask);
+    }
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
     const token = localStorage.getItem('access_token');

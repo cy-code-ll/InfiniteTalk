@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Progress } from '../../components/ui/progress';
@@ -99,6 +99,32 @@ export default function InfiniteTalkGenerator() {
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [isDragOver, setIsDragOver] = useState<string | null>(null);
+
+  // Mask drawing state
+  const [isMaskModalOpen, setIsMaskModalOpen] = useState(false);
+  const [maskImageData, setMaskImageData] = useState<string | null>(null);
+  const [brushSize, setBrushSize] = useState(30);
+  const [isDrawing, setIsDrawing] = useState(false);
+  const [canvasHistory, setCanvasHistory] = useState<ImageData[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
+  const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+
+  // 缓存图片 URL，避免频繁创建 blob 链接
+  const imageUrl = useMemo(() => {
+    if (selectedImage) {
+      return URL.createObjectURL(selectedImage);
+    }
+    return null;
+  }, [selectedImage]);
+
+  // 清理 blob URL
+  useEffect(() => {
+    return () => {
+      if (imageUrl) {
+        URL.revokeObjectURL(imageUrl);
+      }
+    };
+  }, [imageUrl]);
 
   // Preview helper: robust playback with multiple type fallbacks
   const previewSelectedAudio = useCallback(() => {
@@ -205,6 +231,7 @@ export default function InfiniteTalkGenerator() {
   const audioInputRef = useRef<HTMLInputElement>(null);
   const demoVideoRef = useRef<HTMLVideoElement>(null);
   const resultVideoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
 
 
 
@@ -235,6 +262,7 @@ export default function InfiniteTalkGenerator() {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
+        setMaskImageData(null);
       }
     });
   };
@@ -246,6 +274,7 @@ export default function InfiniteTalkGenerator() {
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
+        setMaskImageData(null);
       } else {
         toast.error('Please drop a valid image file');
       }
@@ -370,6 +399,16 @@ export default function InfiniteTalkGenerator() {
     checkForAudioFromTools();
   }, []);
 
+  // 初始化画布
+  useEffect(() => {
+    if (isMaskModalOpen && selectedImage) {
+      // 延迟初始化，确保DOM已渲染
+      setTimeout(() => {
+        initializeCanvas();
+      }, 100);
+    }
+  }, [isMaskModalOpen, selectedImage]);
+
 
   // 删除选中的图片
   const removeSelectedImage = () => {
@@ -394,6 +433,236 @@ export default function InfiniteTalkGenerator() {
     if (audioInputRef.current) {
       audioInputRef.current.value = '';
     }
+  };
+
+  // 遮罩绘制相关函数
+  const initializeCanvas = useCallback(() => {
+    if (!canvasRef.current || !selectedImage) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // 设置画布尺寸为显示区域尺寸
+    const container = canvas.parentElement;
+    if (!container) return;
+
+    const rect = container.getBoundingClientRect();
+    canvas.width = rect.width;
+    canvas.height = rect.height;
+
+    // 填充透明背景（让原图透过）
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // 保存初始状态
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    setCanvasHistory([imageData]);
+    setHistoryIndex(0);
+  }, [selectedImage]);
+
+  const saveCanvasState = () => {
+    if (!canvasRef.current) return;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const newHistory = canvasHistory.slice(0, historyIndex + 1);
+    newHistory.push(imageData);
+    setCanvasHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  const undoCanvas = () => {
+    if (historyIndex > 0) {
+      const newIndex = historyIndex - 1;
+      setHistoryIndex(newIndex);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.putImageData(canvasHistory[newIndex], 0, 0);
+        }
+      }
+    }
+  };
+
+  const redoCanvas = () => {
+    if (historyIndex < canvasHistory.length - 1) {
+      const newIndex = historyIndex + 1;
+      setHistoryIndex(newIndex);
+      if (canvasRef.current) {
+        const ctx = canvasRef.current.getContext('2d');
+        if (ctx) {
+          ctx.putImageData(canvasHistory[newIndex], 0, 0);
+        }
+      }
+    }
+  };
+
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    setIsDrawing(true);
+    draw(e);
+  };
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // 检查是否在画布范围内
+    if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
+      return;
+    }
+
+    // 使用半透明白色绘制，让用户看到绘制效果
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+    ctx.beginPath();
+    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.fill();
+  };
+
+  const stopDrawing = () => {
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveCanvasState();
+    }
+  };
+
+  // 处理鼠标移动事件，即使不在画布上也能继续绘制
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    // 检查是否在画布范围内
+    const isInCanvas = x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height;
+
+    // 只有在画布范围内才更新鼠标位置，避免不必要的状态更新
+    if (isInCanvas) {
+      setMousePosition({ x, y });
+    } else {
+      // 如果不在画布范围内，清除鼠标位置
+      setMousePosition(null);
+    }
+
+    // 如果正在绘制且在画布范围内
+    if (isDrawing && isInCanvas) {
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+
+      // 使用半透明白色绘制，让用户看到绘制效果
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.beginPath();
+      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  }, [isDrawing, brushSize]);
+
+  // 处理鼠标释放事件
+  const handleMouseUp = useCallback(() => {
+    if (isDrawing) {
+      setIsDrawing(false);
+      saveCanvasState();
+    }
+    // 清除鼠标位置
+    setMousePosition(null);
+  }, [isDrawing]);
+
+  // 添加全局鼠标事件监听器
+  useEffect(() => {
+    if (isMaskModalOpen) {
+      // 添加全局鼠标移动和释放事件监听器
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+
+      return () => {
+        // 清理事件监听器
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isMaskModalOpen, handleMouseMove, handleMouseUp]);
+
+  const generateMaskImage = (): string => {
+    if (!canvasRef.current) return '';
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return '';
+
+    // 创建一个新的画布来生成最终的遮罩图
+    const maskCanvas = document.createElement('canvas');
+    const maskCtx = maskCanvas.getContext('2d');
+    if (!maskCtx) return '';
+
+    maskCanvas.width = canvas.width;
+    maskCanvas.height = canvas.height;
+
+    // 填充黑色背景
+    maskCtx.fillStyle = 'black';
+    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+    // 将原画布的内容复制到新画布，但将半透明白色转换为纯白色
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    for (let i = 0; i < data.length; i += 4) {
+      const alpha = data[i + 3];
+      if (alpha > 0) {
+        // 如果有绘制内容，设置为白色
+        data[i] = 255;     // R
+        data[i + 1] = 255; // G
+        data[i + 2] = 255; // B
+        data[i + 3] = 255; // A
+      } else {
+        // 如果没有绘制内容，确保是黑色
+        data[i] = 0;       // R
+        data[i + 1] = 0;   // G
+        data[i + 2] = 0;   // B
+        data[i + 3] = 255; // A
+      }
+    }
+
+    maskCtx.putImageData(imageData, 0, 0);
+    return maskCanvas.toDataURL('image/png');
+  };
+
+  const handleUseMask = () => {
+    const maskData = generateMaskImage();
+    setMaskImageData(maskData);
+    setIsMaskModalOpen(false);
+    toast.showToast('Mask created successfully!', 'success');
+    setMousePosition(null);
+  };
+
+  const handleCancelMask = () => {
+    setIsMaskModalOpen(false);
+    // 重置画布为透明
+    if (canvasRef.current) {
+      const ctx = canvasRef.current.getContext('2d');
+      if (ctx) {
+        ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+      }
+    }
+    setCanvasHistory([]);
+    setHistoryIndex(-1);
+    setMousePosition(null);
+  };
+
+  const removeMask = () => {
+    setMaskImageData(null);
+    toast.showToast('Mask removed', 'info');
   };
 
   // 计算积分消耗 - 新规则：5s以下固定积分，5s以上按秒计算
@@ -478,6 +747,7 @@ export default function InfiniteTalkGenerator() {
           prompt: prompt.trim(),
           duration: audioDuration,
           resolution: resolution,
+          mask: maskImageData || undefined, // 添加遮罩图
         });
       } else {
         // Video to Video 模式
@@ -571,28 +841,60 @@ export default function InfiniteTalkGenerator() {
 
             {/* Image/Video Upload */}
             <div className="mb-6">
-              <label className="block text-white font-medium mb-3">
-                {tabMode === 'image-to-video' ? 'Upload Image' : 'Upload Video'} <span className="text-red-500">*</span>
-              </label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-white font-medium">
+                  {tabMode === 'image-to-video' ? 'Upload Image' : 'Upload Video'} <span className="text-red-500">*</span>
+                </label>
+                {tabMode === 'image-to-video' && selectedImage && (
+                  <button
+                    onClick={() => setIsMaskModalOpen(true)}
+                    className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary/90 text-sm font-medium rounded-lg transition-all duration-200"
+                    title="Optional mask image to specify the person in the image to animate."
+                  >
+                    Select Speaker
+                  </button>
+                )}
+              </div>
               <div className="relative">
                 {tabMode === 'image-to-video' ? (
                   // Image Upload
                   selectedImage ? (
                     <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
                       <Image
-                        src={URL.createObjectURL(selectedImage)}
+                        src={imageUrl!}
                         alt="Selected image"
                         width={400}
                         height={300}
                         className="w-full h-48 object-contain"
                         unoptimized
                       />
+                      {maskImageData && (
+                        <div className="absolute inset-0 pointer-events-none">
+                          <Image
+                            src={maskImageData}
+                            alt="Mask overlay"
+                            width={400}
+                            height={300}
+                            className="w-full h-48 object-contain opacity-50"
+                            unoptimized
+                          />
+                        </div>
+                      )}
                       <button
                         onClick={removeSelectedImage}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
+                      {maskImageData && (
+                        <button
+                          onClick={removeMask}
+                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
+                          title="Remove mask"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -990,6 +1292,115 @@ export default function InfiniteTalkGenerator() {
                 OK
               </Button>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Select Speaker Mask Modal */}
+      <Dialog open={isMaskModalOpen} onOpenChange={setIsMaskModalOpen}>
+        <DialogContent className="max-w-7xl mx-auto w-[95vw]">
+          <DialogHeader>
+            <DialogTitle className="text-center">Select Speaker</DialogTitle>
+          </DialogHeader>
+          <div className="py-6">
+            {selectedImage && (
+              <div className="space-y-4">
+                {/* Combined Image and Canvas */}
+                <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
+                  {/* Background Image */}
+                  <Image
+                    src={imageUrl!}
+                    alt="Original image"
+                    width={1200}
+                    height={800}
+                    className="w-full h-[500px] object-contain"
+                    unoptimized
+                  />
+
+                  {/* Canvas overlay for drawing mask */}
+                  <canvas
+                    ref={canvasRef}
+                    className="absolute inset-0 w-full h-[500px] cursor-none"
+                    onMouseDown={startDrawing}
+                    style={{ imageRendering: 'pixelated' }}
+                  />
+
+                  {/* Mouse cursor circle */}
+                  {mousePosition && (
+                    <div
+                      className="absolute pointer-events-none border-2 border-white rounded-full opacity-70"
+                      style={{
+                        left: 0,
+                        top: 0,
+                        width: brushSize,
+                        height: brushSize,
+                        transform: `translate(${mousePosition.x - brushSize / 2}px, ${mousePosition.y - brushSize / 2}px)`,
+                      }}
+                    />
+                  )}
+                </div>
+
+                {/* Controls */}
+                <div className="flex items-center justify-between bg-slate-700/50 rounded-lg p-6">
+                  <div className="flex items-center space-x-8">
+                    <div className="flex items-center space-x-3">
+                      <label className="text-white text-sm font-medium w-20">Brush Size:</label>
+                      <input
+                        type="range"
+                        min="5"
+                        max="50"
+                        value={brushSize}
+                        onChange={(e) => setBrushSize(Number(e.target.value))}
+                        className="w-32"
+                      />
+                      <span className="text-white text-sm w-10">{brushSize}px</span>
+                    </div>
+
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={undoCanvas}
+                        disabled={historyIndex <= 0}
+                        className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Undo"
+                      >
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                        </svg>
+                      </button>
+                      <button
+                        onClick={redoCanvas}
+                        disabled={historyIndex >= canvasHistory.length - 1}
+                        className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                        title="Redo"
+                      >
+                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+                        </svg>
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center space-x-4">
+                    <button
+                      onClick={handleCancelMask}
+                      className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleUseMask}
+                      className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
+                    >
+                      Use Mask
+                    </button>
+                  </div>
+                </div>
+
+                <div className="text-center text-slate-400 text-sm">
+                  <p>Draw on the image to create a mask. </p>
+                </div>
+              </div>
+            )}
           </div>
         </DialogContent>
       </Dialog>
