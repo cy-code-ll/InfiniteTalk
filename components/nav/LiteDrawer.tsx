@@ -18,6 +18,28 @@ export const LiteDrawer: React.FC<LiteDrawerProps> = ({
   const drawerRef = useRef<HTMLDivElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
+  // 使用 rAF 批量更新样式，避免多次重排
+  const updateStyles = useCallback(() => {
+    if (open) {
+      const isMobile = window.innerWidth < 768;
+      
+      requestAnimationFrame(() => {
+        document.body.style.overflow = 'hidden';
+        if (!isMobile) {
+          const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+          document.body.style.paddingRight = `${scrollbarWidth}px`;
+        } else {
+          document.body.style.paddingRight = '0px';
+        }
+      });
+    } else {
+      requestAnimationFrame(() => {
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+      });
+    }
+  }, [open]);
+
   // Close on Escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -34,15 +56,8 @@ export const LiteDrawer: React.FC<LiteDrawerProps> = ({
 
   // Prevent body scroll when drawer is open
   useEffect(() => {
-    if (open) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.body.style.overflow = 'hidden';
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
-    } else {
-      document.body.style.overflow = '';
-      document.body.style.paddingRight = '';
-    }
-  }, [open]);
+    updateStyles();
+  }, [updateStyles]);
 
   const handleOverlayClick = useCallback(() => {
     requestAnimationFrame(() => {
