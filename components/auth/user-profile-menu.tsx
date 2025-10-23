@@ -18,6 +18,7 @@ export default function UserProfileMenu({ user }: UserProfileMenuProps) {
   const { signOut } = useClerk();
   const { clearUserState } = useUserInfo();
   const [pathname, setPathname] = useState('');
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
 
@@ -27,17 +28,25 @@ export default function UserProfileMenu({ user }: UserProfileMenuProps) {
     }
   }, []);
 
-  const handleSignOut = () => {
-    // 清理本地状态与token，参考强制退出流程
-    queueMicrotask(() => {
-      try {
-        api.auth.clearTokens();
-      } catch {}
-      try {
-        clearUserState();
-      } catch {}
+  const handleSignOut = (close: () => void) => {
+    if (isSigningOut) return;
+    setIsSigningOut(true);
+    // 先关闭菜单，保证视觉反馈先绘制
+    close();
+    // 两帧后再做清理与跳转，避免阻塞点击帧
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        // 轻量任务放到微任务，尽快生效但不阻塞绘制
+        queueMicrotask(() => {
+          try { api.auth.clearTokens(); } catch {}
+          try { clearUserState(); } catch {}
+        });
+        // 跳转/signOut 放到下一轮任务队列，防止卡顿
+        setTimeout(() => {
+          try { signOut(); } finally { setIsSigningOut(false); }
+        }, 0);
+      });
     });
-    signOut();
   };
 
   // 预热函数：供触发器 pointer 事件使用
@@ -97,10 +106,8 @@ export default function UserProfileMenu({ user }: UserProfileMenuProps) {
           <div className="h-px bg-border my-1" />
           <button
             className="flex w-full items-center px-2 py-2 text-sm rounded-md hover:bg-muted"
-            onClick={() => {
-              handleSignOut();
-              close();
-            }}
+            disabled={isSigningOut}
+            onClick={() => handleSignOut(close)}
           >
             Sign Out
           </button>
