@@ -499,12 +499,13 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
-  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const startDrawing = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    e.preventDefault();
     setIsDrawing(true);
     draw(e);
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !canvasRef.current) return;
 
     const canvas = canvasRef.current;
@@ -512,8 +513,20 @@ export default function InfiniteTalkGenerator() {
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    let x: number, y: number;
+
+    // 处理触摸事件和鼠标事件
+    if ('touches' in e && e.touches.length > 0) {
+      // 触摸事件
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else if ('clientX' in e) {
+      // 鼠标事件
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    } else {
+      return;
+    }
 
     // 检查是否在画布范围内
     if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
@@ -535,14 +548,26 @@ export default function InfiniteTalkGenerator() {
     }
   };
 
-  // 处理鼠标移动事件，即使不在画布上也能继续绘制
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+  // 处理鼠标和触摸移动事件，即使不在画布上也能继续绘制
+  const handleMouseMove = useCallback((e: MouseEvent | TouchEvent) => {
     if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
+    let x: number, y: number;
+
+    // 处理触摸事件和鼠标事件
+    if ('touches' in e && e.touches.length > 0) {
+      // 触摸事件
+      x = e.touches[0].clientX - rect.left;
+      y = e.touches[0].clientY - rect.top;
+    } else if ('clientX' in e) {
+      // 鼠标事件
+      x = e.clientX - rect.left;
+      y = e.clientY - rect.top;
+    } else {
+      return;
+    }
 
     // 检查是否在画布范围内
     const isInCanvas = x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height;
@@ -579,17 +604,21 @@ export default function InfiniteTalkGenerator() {
     setMousePosition(null);
   }, [isDrawing]);
 
-  // 添加全局鼠标事件监听器
+  // 添加全局鼠标和触摸事件监听器
   useEffect(() => {
     if (isMaskModalOpen) {
-      // 添加全局鼠标移动和释放事件监听器
+      // 添加全局鼠标和触摸事件监听器
       document.addEventListener('mousemove', handleMouseMove);
       document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleMouseMove, { passive: false });
+      document.addEventListener('touchend', handleMouseUp);
 
       return () => {
         // 清理事件监听器
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', handleMouseUp);
+        document.removeEventListener('touchmove', handleMouseMove);
+        document.removeEventListener('touchend', handleMouseUp);
       };
     }
   }, [isMaskModalOpen, handleMouseMove, handleMouseUp]);
@@ -1298,11 +1327,11 @@ export default function InfiniteTalkGenerator() {
 
       {/* Select Speaker Mask Modal */}
       <Dialog open={isMaskModalOpen} onOpenChange={setIsMaskModalOpen}>
-        <DialogContent className="max-w-7xl mx-auto w-[95vw]">
+        <DialogContent className="max-w-[98vw] mx-auto w-[98vw] sm:max-w-[700px] sm:w-auto max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="text-center">Select Speaker</DialogTitle>
           </DialogHeader>
-          <div className="py-6">
+          <div className="py-3 sm:py-6 px-2 sm:px-0">
             {selectedImage && (
               <div className="space-y-4">
                 {/* Combined Image and Canvas */}
@@ -1313,16 +1342,23 @@ export default function InfiniteTalkGenerator() {
                     alt="Original image"
                     width={1200}
                     height={800}
-                    className="w-full h-[500px] object-contain"
+                    className="w-full h-[300px] sm:h-[500px] object-contain"
                     unoptimized
                   />
 
                   {/* Canvas overlay for drawing mask */}
                   <canvas
                     ref={canvasRef}
-                    className="absolute inset-0 w-full h-[500px] cursor-none"
+                    className="absolute inset-0 w-full h-[300px] sm:h-[500px] cursor-none"
                     onMouseDown={startDrawing}
-                    style={{ imageRendering: 'pixelated' }}
+                    onTouchStart={startDrawing}
+                    onTouchMove={(e) => {
+                      e.preventDefault();
+                      if (isDrawing) {
+                        draw(e);
+                      }
+                    }}
+                    style={{ imageRendering: 'pixelated', touchAction: 'none' }}
                   />
 
                   {/* Mouse cursor circle */}
@@ -1341,22 +1377,27 @@ export default function InfiniteTalkGenerator() {
                 </div>
 
                 {/* Controls */}
-                <div className="flex items-center justify-between bg-slate-700/50 rounded-lg p-6">
-                  <div className="flex items-center space-x-8">
-                    <div className="flex items-center space-x-3">
-                      <label className="text-white text-sm font-medium w-20">Brush Size:</label>
-                      <input
-                        type="range"
-                        min="5"
-                        max="50"
-                        value={brushSize}
-                        onChange={(e) => setBrushSize(Number(e.target.value))}
-                        className="w-32"
-                      />
-                      <span className="text-white text-sm w-10">{brushSize}px</span>
+                <div className="bg-slate-700/50 rounded-lg p-3 sm:p-6">
+                  {/* Mobile Layout */}
+                  <div className="block sm:hidden space-y-4">
+                    {/* Brush Size Control */}
+                    <div className="flex items-center justify-between">
+                      <label className="text-white text-sm font-medium">Brush Size:</label>
+                      <div className="flex items-center space-x-2">
+                        <input
+                          type="range"
+                          min="5"
+                          max="50"
+                          value={brushSize}
+                          onChange={(e) => setBrushSize(Number(e.target.value))}
+                          className="w-24"
+                        />
+                        <span className="text-white text-sm w-8">{brushSize}px</span>
+                      </div>
                     </div>
 
-                    <div className="flex items-center space-x-3">
+                    {/* Undo/Redo Buttons */}
+                    <div className="flex items-center justify-center space-x-4">
                       <button
                         onClick={undoCanvas}
                         disabled={historyIndex <= 0}
@@ -1378,21 +1419,78 @@ export default function InfiniteTalkGenerator() {
                         </svg>
                       </button>
                     </div>
+
+                    {/* Action Buttons */}
+                    <div className="flex items-center space-x-3">
+                      <button
+                        onClick={handleCancelMask}
+                        className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleUseMask}
+                        className="flex-1 py-2 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Use Mask
+                      </button>
+                    </div>
                   </div>
 
-                  <div className="flex items-center space-x-4">
-                    <button
-                      onClick={handleCancelMask}
-                      className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      onClick={handleUseMask}
-                      className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
-                    >
-                      Use Mask
-                    </button>
+                  {/* Desktop Layout */}
+                  <div className="hidden sm:flex items-center justify-between">
+                    <div className="flex items-center space-x-8">
+                      <div className="flex items-center space-x-3">
+                        <label className="text-white text-sm font-medium w-20">Brush Size:</label>
+                        <input
+                          type="range"
+                          min="5"
+                          max="50"
+                          value={brushSize}
+                          onChange={(e) => setBrushSize(Number(e.target.value))}
+                          className="w-32"
+                        />
+                        <span className="text-white text-sm w-10">{brushSize}px</span>
+                      </div>
+
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={undoCanvas}
+                          disabled={historyIndex <= 0}
+                          className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Undo"
+                        >
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                          </svg>
+                        </button>
+                        <button
+                          onClick={redoCanvas}
+                          disabled={historyIndex >= canvasHistory.length - 1}
+                          className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                          title="Redo"
+                        >
+                          <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+                          </svg>
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <button
+                        onClick={handleCancelMask}
+                        className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleUseMask}
+                        className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
+                      >
+                        Use Mask
+                      </button>
+                    </div>
                   </div>
                 </div>
 
