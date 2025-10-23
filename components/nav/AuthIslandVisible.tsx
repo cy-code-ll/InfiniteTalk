@@ -25,8 +25,8 @@ const CoinsIcon = ({ className }: { className: string }) => (
 // 静态占位骨架
 const AuthSkeleton = () => (
   <div className="flex items-center gap-2">
-    <div className="w-6 h-6 bg-gray-200 rounded-full" />
-    <div className="w-16 h-4 bg-gray-200 rounded" />
+    {/* <div className="w-6 h-6 bg-gray-200 rounded-full" />
+    <div className="w-16 h-4 bg-gray-200 rounded" /> */}
   </div>
 );
 

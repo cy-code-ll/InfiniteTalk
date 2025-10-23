@@ -62,10 +62,12 @@ export default function AuthButton() {
     }
   }, [isSignedIn]);
 
-  // 加载状态 - 静态占位骨架（无动画）
+  // 加载状态 - 优雅的骨架屏
   if (!isLoaded) {
     return (
-      <div className="w-24 h-10 bg-gray-200 rounded-full" />
+      <div className="w-24 h-10 bg-gradient-to-r from-gray-200 via-gray-100 to-gray-200 rounded-full animate-pulse">
+        <div className="w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent rounded-full animate-shimmer" />
+      </div>
     );
   }
 
