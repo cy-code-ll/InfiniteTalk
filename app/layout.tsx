@@ -37,7 +37,8 @@ export default function RootLayout({
     <html lang="en" className={poppins.variable}>
       <head>
         {/* Critical CSS - Inlined for instant render (Complete CSS Variables) */}
-        <style dangerouslySetInnerHTML={{__html: `
+        <style dangerouslySetInnerHTML={{
+          __html: `
           :root {
             --radius: 0.625rem;
             --background: #000000;
@@ -90,10 +91,10 @@ export default function RootLayout({
           }
         `}} />
         {/* Preconnect & DNS Prefetch for analytics domain */}
-        {/* <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
+        <link rel="preconnect" href="https://v1.cnzz.com" crossOrigin="" />
         <link rel="dns-prefetch" href="https://v1.cnzz.com" />
         <link rel="preconnect" href="https://c.cnzz.com" crossOrigin="" />
-        <link rel="dns-prefetch" href="https://c.cnzz.com" /> */}
+        <link rel="dns-prefetch" href="https://c.cnzz.com" />
         {/* Preconnect to Clerk domain for faster authentication */}
         <link rel="preconnect" href="https://clerk.infinitetalk.net" crossOrigin="" />
         <link rel="dns-prefetch" href="https://clerk.infinitetalk.net" />
@@ -117,25 +118,23 @@ export default function RootLayout({
             </UserProvider>
           </ToastProvider>
         </ClerkProviderWithLocale>
-        {process.env.NODE_ENV === 'production' && (
-          <>
-            {/* CNZZ init - optimized with lazyOnload */}
-            <Script id="cnzz-init" strategy="lazyOnload">
-              {`var _czc = _czc || [];`}
-            </Script>
-            {/* CNZZ scripts - lazy load on idle */}
-            <Script
-              id="cnzz-1"
-              strategy="lazyOnload"
-              src="https://v1.cnzz.com/z.js?id=1281417985&async=1"
-            />
-            <Script
-              id="cnzz-2"
-              strategy="lazyOnload"
-              src="https://v1.cnzz.com/z.js?id=1281431393&async=1"
-            />
-          </>
-        )}
+
+        {/* CNZZ init - optimized with lazyOnload */}
+        <Script id="cnzz-init" strategy="lazyOnload">
+          {`var _czc = _czc || []; _czc.push(["_setAccount", 1281431393]);`}
+        </Script>
+        {/* CNZZ scripts - lazy load on idle */}
+        <Script
+          id="cnzz-1"
+          strategy="lazyOnload"
+          src="https://v1.cnzz.com/z.js?id=1281417985&async=1"
+        />
+        <Script
+          id="cnzz-2"
+          strategy="lazyOnload"
+          src="https://v1.cnzz.com/z.js?id=1281431393&async=1"
+        />
+
 
       </body>
     </html>

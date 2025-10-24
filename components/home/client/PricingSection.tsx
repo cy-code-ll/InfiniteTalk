@@ -200,6 +200,11 @@ export default function PricingSection() {
         timestamp: new Date().toISOString()
       };
       localStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+      
+      // CNZZ 事件追踪 - 点击购买积分
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        (window as any)._czc.push(['_trackEvent', '用户操作', '点击购买积分', '/', selectedPlan.price, '']);
+      }
     }
 
     setLoadingPlan(planKey); // 设置当前加载的计划
