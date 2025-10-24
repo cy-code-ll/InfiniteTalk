@@ -65,7 +65,7 @@ const MobileLinks = memo(({ pathname }: { pathname: string }) => {
     { href: '/infinitetalk-multi', label: 'InfiniteTalk Multi' },
     { href: '/wan2.2-s2v', label: 'WAN2.2 S2V' },
     { href: '/infinitetalk-comfyui', label: 'ComfyUI Guide' },
-    { href: '/pricing', label: 'Price' },
+    { href: '/pricing', label: 'Pricing' },
     { href: '/free/referral', label: 'Referral' },
     { href: '/app', label: 'App' },
   ];
@@ -176,7 +176,7 @@ export function NavClient() {
               pathname === '/pricing' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
             )}
           >
-            Price
+            Pricing
           </Link>
           <Link
             href="/free/referral"

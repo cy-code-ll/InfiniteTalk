@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '../../components/ui/button';
-import { Check, Loader2 } from 'lucide-react';
+import { Check, Loader2, DollarSign, Shield, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { cn } from '@/lib/utils';
@@ -417,8 +417,46 @@ export default function PricingSection() {
             })}
           </div>
 
+          {/* Trust Badges */}
+          <div className="mt-16 mb-12">
+            <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
+              {/* 7-Day Refund Guarantee */}
+              <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl backdrop-blur-sm">
+                <div className="flex-shrink-0 w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
+                  <DollarSign className="w-5 h-5 text-green-400" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-semibold">7‑Day Refund</div>
+                  <div className="text-slate-400 text-sm">Money-back guarantee</div>
+                </div>
+              </div>
+
+              {/* Secure Payment by Stripe */}
+              <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl backdrop-blur-sm">
+                <div className="flex-shrink-0 w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
+                  <Shield className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-semibold">Secure Payment</div>
+                  <div className="text-slate-400 text-sm">Powered by Stripe</div>
+                </div>
+              </div>
+
+              {/* 24/7 Support */}
+              <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl backdrop-blur-sm">
+                <div className="flex-shrink-0 w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
+                  <MessageCircle className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-semibold">24/7 Support</div>
+                  <div className="text-slate-400 text-sm">Always here to help</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Additional pricing info */}
-          <div className="mt-16 text-center">
+          <div className="mt-8 text-center">
             <p className="text-white mb-4 ">
               Choose one-time credits or subscription • Flexible billing options
             </p>

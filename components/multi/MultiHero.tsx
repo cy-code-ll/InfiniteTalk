@@ -529,7 +529,12 @@ export default function MultiHero() {
                     </audio>
                   </div>
                 </div>
-                <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="text-muted-foreground">MP3,WAV,M4A,OGG,FLAC</span>
+                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                    Audio Cut
+                  </Link>
+                </div>
                 <div className="relative">
                   <input
                     ref={leftAudioInputRef}
@@ -566,12 +571,6 @@ export default function MultiHero() {
                     </div>
                   </div>
                 </div>
-                <p className="text-muted-foreground/70 text-xs mb-3">
-                  Need to edit your audio or extract audio from video?{' '}
-                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
-                    Use our Audio Tools
-                  </Link>
-                </p>
               </div>
 
               {/* Right Audio Upload */}
@@ -593,7 +592,12 @@ export default function MultiHero() {
                     </audio>
                   </div>
                 </div>
-                <p className="text-muted-foreground text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
+                <div className="flex justify-between items-center text-sm mb-3">
+                  <span className="text-muted-foreground">MP3,WAV,M4A,OGG,FLAC</span>
+                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                    Audio Cut
+                  </Link>
+                </div>
                 <div className="relative">
                   <input
                     ref={rightAudioInputRef}
@@ -630,12 +634,6 @@ export default function MultiHero() {
                     </div>
                   </div>
                 </div>
-                <p className="text-muted-foreground/70 text-xs mb-3">
-                  Need to edit your audio or extract audio from video?{' '}
-                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
-                    Use our Audio Tools
-                  </Link>
-                </p>
               </div>
 
               {/* Image Upload */}

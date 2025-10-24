@@ -1033,13 +1033,12 @@ export default function InfiniteTalkGenerator() {
                   </audio>
                 </div>
               </div>
-              <p className="text-slate-400 text-sm mb-3">Supported formats: mp3, wav, m4a, ogg, flac</p>
-              <p className="text-slate-500 text-xs mb-3">
-                Need to edit your audio or extract audio from video?{' '}
+              <div className="flex justify-between items-center text-sm mb-3">
+                <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
                 <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
-                  Use our Audio Tools
+                  Audio Cut
                 </Link>
-              </p>
+              </div>
               <div className="relative">
                 {selectedAudio ? (
                   <div className="relative bg-slate-800/50 rounded-lg border border-slate-600 p-4">
