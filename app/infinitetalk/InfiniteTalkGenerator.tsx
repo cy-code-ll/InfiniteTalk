@@ -12,6 +12,7 @@ import { api } from '@/lib/api';
 import { cn, isMobileDevice } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
+import { saveToIndexedDB, getFromIndexedDB, deleteFromIndexedDB } from '@/lib/indexedDB';
 import {
   Dialog,
   DialogContent,
@@ -75,6 +76,10 @@ export default function InfiniteTalkGenerator() {
   const { openSignIn } = useClerk();
   const toast = useToast();
   const { userInfo } = useUserInfo();
+
+  // IndexedDB 缓存键名
+  const CACHE_KEY = 'infinitetalk-form-cache';
+  const SESSION_KEY = 'infinitetalk-session-active';
 
   // Form state
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
@@ -256,6 +261,109 @@ export default function InfiniteTalkGenerator() {
     callback();
   };
 
+  // 💾 保存表单到 IndexedDB
+  const saveFormCache = async () => {
+    try {
+      await saveToIndexedDB(CACHE_KEY, {
+        // 文件
+        image: selectedImage,
+        video: selectedVideo,
+        audio: selectedAudio,
+        maskImageData: maskImageData,
+        
+        // 表单数据
+        prompt: prompt,
+        resolution: resolution,
+        tabMode: tabMode,
+        audioDuration: audioDuration,
+      });
+      console.log('✅ Form cached to IndexedDB');
+    } catch (error) {
+      console.error('❌ Failed to cache form:', error);
+    }
+  };
+
+  // 🗑️ 清除缓存
+  const clearFormCache = async () => {
+    try {
+      await deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('✅ Cache cleared');
+    } catch (error) {
+      console.error('❌ Failed to clear cache:', error);
+    }
+  };
+
+  // 📥 恢复缓存数据
+  const restoreFormCache = async () => {
+    try {
+      // 1️⃣ 检查是否是同一会话
+      const isActiveSession = sessionStorage.getItem(SESSION_KEY);
+      
+      if (!isActiveSession) {
+        // 新会话，清除旧缓存
+        console.log('🆕 New session detected, clearing old cache...');
+        await deleteFromIndexedDB(CACHE_KEY);
+        // 设置会话标记
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        return;
+      }
+
+      // 2️⃣ 检查是否有 AudioTools 返回的音频
+      const audioToolsData = sessionStorage.getItem('audioToolsProcessedAudio');
+      const hasNewAudio = !!audioToolsData;
+
+      // 3️⃣ 从 IndexedDB 恢复数据
+      const cache = await getFromIndexedDB(CACHE_KEY);
+
+      if (cache) {
+        console.log('📥 Restoring form data from cache...');
+
+        // 恢复文件
+        if (cache.image) {
+          setSelectedImage(cache.image);
+          console.log('✅ Image restored');
+        }
+        
+        if (cache.video) {
+          setSelectedVideo(cache.video);
+          console.log('✅ Video restored');
+        }
+
+        // 恢复音频 - 只有在没有新音频时才恢复
+        if (cache.audio && !hasNewAudio) {
+          setSelectedAudio(cache.audio);
+          setAudioDuration(cache.audioDuration || 0);
+          console.log('✅ Audio restored from cache');
+        }
+
+        if (cache.maskImageData) {
+          setMaskImageData(cache.maskImageData);
+          console.log('✅ Mask restored');
+        }
+
+        // 恢复表单数据
+        if (cache.prompt) setPrompt(cache.prompt);
+        if (cache.resolution) setResolution(cache.resolution);
+        if (cache.tabMode) setTabMode(cache.tabMode);
+
+        toast.success('Form data restored!');
+      }
+
+      // 4️⃣ 处理 AudioTools 返回的新音频（这会在下面的 useEffect 中执行）
+      // 这里不需要处理，保持原有的 useEffect 逻辑
+
+    } catch (error) {
+      console.error('❌ Failed to restore cache:', error);
+    }
+  };
+
+  // 📤 跳转 AudioTools 前保存
+  const handleAudioToolsClick = () => {
+    console.log('💾 Saving before navigating to AudioTools...');
+    saveFormCache();
+  };
+
   // 处理图片上传
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     checkAuthAndProceed(() => {
@@ -361,6 +469,21 @@ export default function InfiniteTalkGenerator() {
     });
   };
 
+  // 📥 页面加载时恢复缓存数据
+  useEffect(() => {
+    const initCache = async () => {
+      // 设置会话标记（如果不存在）
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+      }
+      
+      // 恢复缓存数据
+      await restoreFormCache();
+    };
+    
+    initCache();
+  }, []); // 只在组件挂载时执行
+
   // 从 AudioTools 页面接收处理后的音频
   useEffect(() => {
     const checkForAudioFromTools = () => {
@@ -397,6 +520,56 @@ export default function InfiniteTalkGenerator() {
     };
 
     checkForAudioFromTools();
+  }, []);
+
+  // 🔄 自动保存（防抖）
+  useEffect(() => {
+    // 只有在有数据时才保存
+    if (!selectedImage && !selectedVideo && !selectedAudio && !prompt) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      saveFormCache();
+    }, 2000); // 2秒防抖
+
+    return () => clearTimeout(timer);
+  }, [selectedImage, selectedVideo, selectedAudio, prompt, resolution, tabMode, maskImageData, audioDuration]);
+
+  // 🗑️ 生成成功后清除缓存
+  useEffect(() => {
+    if (viewState === 'result' && resultVideoUrl) {
+      console.log('🎬 Generation successful, clearing cache...');
+      clearFormCache();
+    }
+  }, [viewState, resultVideoUrl]);
+
+  // ❌ 关闭标签页或离开页面时清除缓存
+  useEffect(() => {
+    const handlePageHide = () => {
+      // 使用 sendBeacon 发送异步清除请求（更可靠）
+      // 或直接标记为需要清除，下次打开时清除
+      console.log('❌ Page closing, clearing cache...');
+      
+      // 尝试同步清除（可能来不及完成）
+      deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    };
+
+    const handleBeforeUnload = () => {
+      // 标记需要清除
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('⚠️ Session key removed, cache will be cleared on next load');
+    };
+
+    // pagehide 比 beforeunload 更可靠，特别是在移动设备上
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   // 初始化画布
@@ -1035,7 +1208,11 @@ export default function InfiniteTalkGenerator() {
               </div>
               <div className="flex justify-between items-center text-sm mb-3">
                 <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
-                <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                <Link 
+                  href="/audio-tools" 
+                  className="text-primary hover:text-primary/80 underline"
+                  onClick={handleAudioToolsClick}
+                >
                   Audio Cut
                 </Link>
               </div>

@@ -12,6 +12,7 @@ import { useAuth, useClerk } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
+import { saveToIndexedDB, getFromIndexedDB, deleteFromIndexedDB } from '@/lib/indexedDB';
 import {
   Dialog,
   DialogContent,
@@ -28,6 +29,10 @@ interface GenerationState {
 }
 
 export default function MultiHero() {
+  // IndexedDB 缓存键名
+  const CACHE_KEY = 'infinitetalk-multi-form-cache';
+  const SESSION_KEY = 'infinitetalk-multi-session-active';
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [leftAudioFile, setLeftAudioFile] = useState<File | null>(null);
   const [rightAudioFile, setRightAudioFile] = useState<File | null>(null);
@@ -78,6 +83,106 @@ export default function MultiHero() {
       return;
     }
     callback();
+  };
+
+  // 💾 保存表单到 IndexedDB
+  const saveFormCache = async () => {
+    try {
+      await saveToIndexedDB(CACHE_KEY, {
+        // 文件
+        imageFile: imageFile,
+        leftAudioFile: leftAudioFile,
+        rightAudioFile: rightAudioFile,
+        
+        // 表单数据
+        prompt: prompt,
+        order: order,
+        resolution: resolution,
+        leftAudioDuration: leftAudioDuration,
+        rightAudioDuration: rightAudioDuration,
+      });
+      console.log('✅ Multi form cached to IndexedDB');
+    } catch (error) {
+      console.error('❌ Failed to cache multi form:', error);
+    }
+  };
+
+  // 🗑️ 清除缓存
+  const clearFormCache = async () => {
+    try {
+      await deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('✅ Multi cache cleared');
+    } catch (error) {
+      console.error('❌ Failed to clear multi cache:', error);
+    }
+  };
+
+  // 📥 恢复缓存数据
+  const restoreFormCache = async () => {
+    try {
+      // 1️⃣ 检查是否是同一会话
+      const isActiveSession = sessionStorage.getItem(SESSION_KEY);
+      
+      if (!isActiveSession) {
+        // 新会话，清除旧缓存
+        console.log('🆕 New session detected, clearing old multi cache...');
+        await deleteFromIndexedDB(CACHE_KEY);
+        // 设置会话标记
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        return;
+      }
+
+      // 2️⃣ 检查是否有 AudioTools 返回的音频
+      const audioToolsData = sessionStorage.getItem('audioToolsProcessedAudioMulti');
+      const hasNewAudio = !!audioToolsData;
+
+      // 3️⃣ 从 IndexedDB 恢复数据
+      const cache = await getFromIndexedDB(CACHE_KEY);
+
+      if (cache) {
+        console.log('📥 Restoring multi form data from cache...');
+
+        // 恢复文件
+        if (cache.imageFile) {
+          setImageFile(cache.imageFile);
+          console.log('✅ Image restored');
+        }
+
+        // 恢复音频 - 只有在没有新音频时才恢复
+        if (!hasNewAudio) {
+          if (cache.leftAudioFile) {
+            setLeftAudioFile(cache.leftAudioFile);
+            setLeftAudioDuration(cache.leftAudioDuration || 0);
+            console.log('✅ Left audio restored from cache');
+          }
+          
+          if (cache.rightAudioFile) {
+            setRightAudioFile(cache.rightAudioFile);
+            setRightAudioDuration(cache.rightAudioDuration || 0);
+            console.log('✅ Right audio restored from cache');
+          }
+        }
+
+        // 恢复表单数据
+        if (cache.prompt) setPrompt(cache.prompt);
+        if (cache.order) setOrder(cache.order);
+        if (cache.resolution) setResolution(cache.resolution);
+
+        toast.showToast('Form data restored!', 'success');
+      }
+
+      // 4️⃣ 处理 AudioTools 返回的新音频（这会在下面的 useEffect 中执行）
+
+    } catch (error) {
+      console.error('❌ Failed to restore multi cache:', error);
+    }
+  };
+
+  // 📤 跳转 AudioTools 前保存
+  const handleAudioToolsClick = () => {
+    console.log('💾 Saving multi form before navigating to AudioTools...');
+    saveFormCache();
   };
 
   // 获取音频时长 - 向上取整
@@ -206,6 +311,21 @@ export default function MultiHero() {
     });
   };
 
+  // 📥 页面加载时恢复缓存数据
+  useEffect(() => {
+    const initCache = async () => {
+      // 设置会话标记（如果不存在）
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+      }
+      
+      // 恢复缓存数据
+      await restoreFormCache();
+    };
+    
+    initCache();
+  }, []); // 只在组件挂载时执行
+
   // 从 AudioTools 页面接收处理后的音频 (Multi)
   useEffect(() => {
     const checkForAudioFromToolsMulti = () => {
@@ -247,6 +367,50 @@ export default function MultiHero() {
 
     checkForAudioFromToolsMulti();
   }, [toast]);
+
+  // 🔄 自动保存（防抖）
+  useEffect(() => {
+    // 只有在有数据时才保存
+    if (!imageFile && !leftAudioFile && !rightAudioFile && !prompt) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      saveFormCache();
+    }, 2000); // 2秒防抖
+
+    return () => clearTimeout(timer);
+  }, [imageFile, leftAudioFile, rightAudioFile, prompt, order, resolution, leftAudioDuration, rightAudioDuration]);
+
+  // 🗑️ 生成成功后清除缓存
+  useEffect(() => {
+    if (generationState.status === 'result' && generationState.videoUrl) {
+      console.log('🎬 Multi generation successful, clearing cache...');
+      clearFormCache();
+    }
+  }, [generationState.status, generationState.videoUrl]);
+
+  // ❌ 关闭标签页或离开页面时清除缓存
+  useEffect(() => {
+    const handlePageHide = () => {
+      console.log('❌ Multi page closing, clearing cache...');
+      deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    };
+
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('⚠️ Multi session key removed, cache will be cleared on next load');
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   // Left preview lifecycle
   useEffect(() => {
@@ -531,7 +695,11 @@ export default function MultiHero() {
                 </div>
                 <div className="flex justify-between items-center text-sm mb-3">
                   <span className="text-muted-foreground">MP3,WAV,M4A,OGG,FLAC</span>
-                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                  <Link 
+                    href="/audio-tools" 
+                    className="text-primary hover:text-primary/80 underline"
+                    onClick={handleAudioToolsClick}
+                  >
                     Audio Cut
                   </Link>
                 </div>
@@ -594,7 +762,11 @@ export default function MultiHero() {
                 </div>
                 <div className="flex justify-between items-center text-sm mb-3">
                   <span className="text-muted-foreground">MP3,WAV,M4A,OGG,FLAC</span>
-                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                  <Link 
+                    href="/audio-tools" 
+                    className="text-primary hover:text-primary/80 underline"
+                    onClick={handleAudioToolsClick}
+                  >
                     Audio Cut
                   </Link>
                 </div>

@@ -11,6 +11,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import Link from 'next/link';
 import { isMobileDevice } from '@/lib/utils';
+import { saveToIndexedDB, getFromIndexedDB, deleteFromIndexedDB } from '@/lib/indexedDB';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +27,10 @@ interface GenerationState {
 }
 
 export function Wans2vHero() {
+  // IndexedDB 缓存键名
+  const CACHE_KEY = 'wans2v-form-cache';
+  const SESSION_KEY = 'wans2v-session-active';
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [resolution, setResolution] = useState<'480P' | '720P'>('720P');
@@ -69,6 +74,92 @@ export function Wans2vHero() {
     
     const creditsPerSecond = resolution === '480P' ? 3 : 5;
     return Math.ceil(audioDuration * creditsPerSecond);
+  };
+
+  // 💾 保存表单到 IndexedDB
+  const saveFormCache = async () => {
+    try {
+      await saveToIndexedDB(CACHE_KEY, {
+        // 文件
+        imageFile: imageFile,
+        audioFile: audioFile,
+        
+        // 表单数据
+        resolution: resolution,
+        audioDuration: audioDuration,
+      });
+      console.log('✅ Wans2v form cached to IndexedDB');
+    } catch (error) {
+      console.error('❌ Failed to cache wans2v form:', error);
+    }
+  };
+
+  // 🗑️ 清除缓存
+  const clearFormCache = async () => {
+    try {
+      await deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('✅ Wans2v cache cleared');
+    } catch (error) {
+      console.error('❌ Failed to clear wans2v cache:', error);
+    }
+  };
+
+  // 📥 恢复缓存数据
+  const restoreFormCache = async () => {
+    try {
+      // 1️⃣ 检查是否是同一会话
+      const isActiveSession = sessionStorage.getItem(SESSION_KEY);
+      
+      if (!isActiveSession) {
+        // 新会话，清除旧缓存
+        console.log('🆕 New session detected, clearing old wans2v cache...');
+        await deleteFromIndexedDB(CACHE_KEY);
+        // 设置会话标记
+        sessionStorage.setItem(SESSION_KEY, 'true');
+        return;
+      }
+
+      // 2️⃣ 检查是否有 AudioTools 返回的音频
+      const audioToolsData = sessionStorage.getItem('audioToolsProcessedAudio');
+      const hasNewAudio = !!audioToolsData;
+
+      // 3️⃣ 从 IndexedDB 恢复数据
+      const cache = await getFromIndexedDB(CACHE_KEY);
+
+      if (cache) {
+        console.log('📥 Restoring wans2v form data from cache...');
+
+        // 恢复文件
+        if (cache.imageFile) {
+          setImageFile(cache.imageFile);
+          console.log('✅ Image restored');
+        }
+
+        // 恢复音频 - 只有在没有新音频时才恢复
+        if (cache.audioFile && !hasNewAudio) {
+          setAudioFile(cache.audioFile);
+          setAudioDuration(cache.audioDuration || 0);
+          console.log('✅ Audio restored from cache');
+        }
+
+        // 恢复表单数据
+        if (cache.resolution) setResolution(cache.resolution);
+
+        toast.showToast('Form data restored!', 'success');
+      }
+
+      // 4️⃣ 处理 AudioTools 返回的新音频（这会在下面的 useEffect 中执行）
+
+    } catch (error) {
+      console.error('❌ Failed to restore wans2v cache:', error);
+    }
+  };
+
+  // 📤 跳转 AudioTools 前保存
+  const handleAudioToolsClick = () => {
+    console.log('💾 Saving wans2v form before navigating to AudioTools...');
+    saveFormCache();
   };
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -154,6 +245,21 @@ export function Wans2vHero() {
     }
   };
 
+  // 📥 页面加载时恢复缓存数据
+  React.useEffect(() => {
+    const initCache = async () => {
+      // 设置会话标记（如果不存在）
+      if (!sessionStorage.getItem(SESSION_KEY)) {
+        sessionStorage.setItem(SESSION_KEY, 'true');
+      }
+      
+      // 恢复缓存数据
+      await restoreFormCache();
+    };
+    
+    initCache();
+  }, []); // 只在组件挂载时执行
+
   // 从 AudioTools 页面接收处理后的音频
   React.useEffect(() => {
     const checkForAudioFromTools = () => {
@@ -191,6 +297,50 @@ export function Wans2vHero() {
     };
 
     checkForAudioFromTools();
+  }, []);
+
+  // 🔄 自动保存（防抖）
+  React.useEffect(() => {
+    // 只有在有数据时才保存
+    if (!imageFile && !audioFile) {
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      saveFormCache();
+    }, 2000); // 2秒防抖
+
+    return () => clearTimeout(timer);
+  }, [imageFile, audioFile, resolution, audioDuration]);
+
+  // 🗑️ 生成成功后清除缓存
+  React.useEffect(() => {
+    if (generationState.status === 'result' && generationState.videoUrl) {
+      console.log('🎬 Wans2v generation successful, clearing cache...');
+      clearFormCache();
+    }
+  }, [generationState.status, generationState.videoUrl]);
+
+  // ❌ 关闭标签页或离开页面时清除缓存
+  React.useEffect(() => {
+    const handlePageHide = () => {
+      console.log('❌ Wans2v page closing, clearing cache...');
+      deleteFromIndexedDB(CACHE_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+    };
+
+    const handleBeforeUnload = () => {
+      sessionStorage.removeItem(SESSION_KEY);
+      console.log('⚠️ Wans2v session key removed, cache will be cleared on next load');
+    };
+
+    window.addEventListener('pagehide', handlePageHide);
+    window.addEventListener('beforeunload', handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener('pagehide', handlePageHide);
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
   }, []);
 
   // 音频预览播放/暂停
@@ -495,7 +645,11 @@ export function Wans2vHero() {
                 </div>
                 <div className="flex justify-between items-center text-sm mb-3">
                   <span className="text-muted-foreground">MP3,WAV,M4A,OGG,FLAC</span>
-                  <Link href="/audio-tools" className="text-primary hover:text-primary/80 underline">
+                  <Link 
+                    href="/audio-tools" 
+                    className="text-primary hover:text-primary/80 underline"
+                    onClick={handleAudioToolsClick}
+                  >
                     Audio Cut
                   </Link>
                 </div>
