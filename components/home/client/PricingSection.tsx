@@ -14,6 +14,7 @@ interface PricingPlan {
   popular: boolean;
   title: string;
   price: string;
+  priceAmount: number; // 数字类型的金额，用于统计
   features: string[];
   buttonText: string;
 }
@@ -31,6 +32,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Starter',
       price: '$9.9',
+      priceAmount: 9.9,
       buttonText: 'Get 90 Credits',
       features: [
         '90 Credits included',
@@ -47,6 +49,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Pro',
       price: '$29.9',
+      priceAmount: 29.9,
       buttonText: 'Get 400 Credits',
       features: [
         '400 Credits included',
@@ -64,6 +67,7 @@ export default function PricingSection() {
       popular: true,
       title: 'Ultimate',
       price: '$49.9',
+      priceAmount: 49.9,
       buttonText: 'Get 800 Credits',
       features: [
         '800 Credits included',
@@ -82,6 +86,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Enterprise',
       price: '$99.9',
+      priceAmount: 99.9,
       buttonText: 'Get 1800 Credits',
       features: [
         '1800 Credits included',
@@ -105,6 +110,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Starter',
       price: '$9.9',
+      priceAmount: 9.9,
       buttonText: 'Subscribe 100 Credits',
       features: [
         '100 Credits included',
@@ -121,6 +127,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Pro',
       price: '$29.9',
+      priceAmount: 29.9,
       buttonText: 'Subscribe 480 Credits',
       features: [
         '480 Credits included',
@@ -138,6 +145,7 @@ export default function PricingSection() {
       popular: true,
       title: 'Ultimate',
       price: '$49.9',
+      priceAmount: 49.9,
       buttonText: 'Subscribe 990 Credits',
       features: [
         '990 Credits included',
@@ -156,6 +164,7 @@ export default function PricingSection() {
       popular: false,
       title: 'Enterprise',
       price: '$99.9',
+      priceAmount: 99.9,
       buttonText: 'Subscribe 2200 Credits',
       features: [
         '2200 Credits included',
@@ -203,7 +212,21 @@ export default function PricingSection() {
       
       // CNZZ 事件追踪 - 点击购买积分
       if (typeof window !== 'undefined' && (window as any)._czc) {
-        (window as any)._czc.push(['_trackEvent', '用户操作', '点击购买积分', '/', selectedPlan.price, '']);
+        // 判断是一次性购买还是订阅
+        const isSubscription = planKey.startsWith('sub-');
+        const planType = isSubscription ? '订阅套餐' : '一次性套餐';
+        const trackData = ['_trackEvent', '用户操作', '购买积分套餐', planType, selectedPlan.priceAmount, ''];
+        (window as any)._czc.push(trackData);
+        console.log('✅ CNZZ 事件追踪成功:', {
+          事件类别: '用户操作',
+          事件动作: '购买积分套餐',
+          套餐类型: planType,
+          价格: selectedPlan.priceAmount,
+          套餐名称: selectedPlan.title,
+          完整数据: trackData
+        });
+      } else {
+        console.warn('⚠️ CNZZ 未初始化，无法追踪事件');
       }
     }
 

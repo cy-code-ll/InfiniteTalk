@@ -329,6 +329,19 @@ export default function MultiHero() {
   };
 
   const handleGenerate = async () => {
+    // CNZZ 事件追踪 - 点击生成按钮
+    if (typeof window !== 'undefined' && (window as any)._czc) {
+      (window as any)._czc.push(['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk-multi', '1', '']);
+      console.log('✅ CNZZ 事件追踪成功:', {
+        事件类别: '用户操作',
+        事件动作: '点击生成按钮',
+        页面路径: '/infinitetalk-multi',
+        完整数据: ['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk-multi', '1', '']
+      });
+    } else {
+      console.warn('⚠️ CNZZ 未初始化，无法追踪事件');
+    }
+
     // 检查用户是否登录
     if (!isSignedIn) {
       openSignIn();
@@ -354,6 +367,11 @@ export default function MultiHero() {
     const requiredCredits = calculateCredits();
     if (userInfo.total_credits < requiredCredits) {
       setIsInsufficientCreditsModalOpen(true);
+      // CNZZ 事件追踪 - 积分不足弹窗出现
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        (window as any)._czc.push(['_trackEvent', '系统弹窗', '积分不足弹窗', '/infinitetalk-multi', 1, '']);
+        console.log('✅ CNZZ 事件追踪成功: 积分不足弹窗出现');
+      }
       return;
     }
 
@@ -923,12 +941,24 @@ export default function MultiHero() {
             <div className="flex gap-3 justify-center">
               <Button
                 variant="outline"
-                onClick={() => setIsInsufficientCreditsModalOpen(false)}
+                onClick={() => {
+                  // CNZZ 事件追踪 - 关闭积分不足弹窗
+                  if (typeof window !== 'undefined' && (window as any)._czc) {
+                    (window as any)._czc.push(['_trackEvent', '用户操作', '积分不足-关闭弹窗', '/infinitetalk-multi', 1, '']);
+                    console.log('✅ CNZZ 事件追踪成功: 积分不足-关闭弹窗');
+                  }
+                  setIsInsufficientCreditsModalOpen(false);
+                }}
               >
                 Cancel
               </Button>
               <Button
                 onClick={() => {
+                  // CNZZ 事件追踪 - 积分不足购买积分
+                  if (typeof window !== 'undefined' && (window as any)._czc) {
+                    (window as any)._czc.push(['_trackEvent', '用户操作', '积分不足-购买积分', '/infinitetalk-multi', 1, '']);
+                    console.log('✅ CNZZ 事件追踪成功: 积分不足-购买积分');
+                  }
                   setIsInsufficientCreditsModalOpen(false);
                   window.open('/pricing', '_blank');
                 }}
