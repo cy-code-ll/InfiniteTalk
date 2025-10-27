@@ -33,6 +33,7 @@ export function Wans2vHero() {
 
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [audioFile, setAudioFile] = useState<File | null>(null);
+  const [prompt, setPrompt] = useState<string>('');
   const [resolution, setResolution] = useState<'480P' | '720P'>('720P');
   const [generationState, setGenerationState] = useState<GenerationState>({
     status: 'demo',
@@ -85,6 +86,7 @@ export function Wans2vHero() {
         audioFile: audioFile,
         
         // 表单数据
+        prompt: prompt,
         resolution: resolution,
         audioDuration: audioDuration,
       });
@@ -144,6 +146,7 @@ export function Wans2vHero() {
         }
 
         // 恢复表单数据
+        if (cache.prompt) setPrompt(cache.prompt);
         if (cache.resolution) setResolution(cache.resolution);
 
         toast.showToast('Form data restored!', 'success');
@@ -302,7 +305,7 @@ export function Wans2vHero() {
   // 🔄 自动保存（防抖）
   React.useEffect(() => {
     // 只有在有数据时才保存
-    if (!imageFile && !audioFile) {
+    if (!imageFile && !audioFile && !prompt) {
       return;
     }
 
@@ -311,7 +314,7 @@ export function Wans2vHero() {
     }, 2000); // 2秒防抖
 
     return () => clearTimeout(timer);
-  }, [imageFile, audioFile, resolution, audioDuration]);
+  }, [imageFile, audioFile, prompt, resolution, audioDuration]);
 
   // 🗑️ 生成成功后清除缓存
   React.useEffect(() => {
@@ -471,6 +474,7 @@ export function Wans2vHero() {
       const createResult = await api.video.infiniteTalk({
         image: imageFile,
         audio: audioFile,
+        prompt: prompt,
         resolution: resolution,
         duration: Math.ceil(audioDuration), 
       });
@@ -710,6 +714,21 @@ export function Wans2vHero() {
                   )}
                    <p className="text-xs text-muted-foreground/70 mt-2">Maximum duration: 600 seconds</p>
                 </div>
+              </div>
+
+              {/* Prompt Input */}
+              <div>
+                <Label htmlFor="prompt-input" className="text-base font-semibold text-foreground mb-3 block">
+                  Prompt
+                </Label>
+                <textarea
+                  id="prompt-input"
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Enter your prompt here..."
+                  className="w-full min-h-[100px] px-4 py-3 rounded-lg border border-white/20 bg-white/5 text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
+                  rows={4}
+                />
               </div>
 
               {/* Resolution Selection */}

@@ -266,12 +266,14 @@ export const videoApi = {
     audio: File;
     resolution: string;
     duration: number;
+    prompt: string;
   }) => {
     const formData = new FormData();
     formData.append('image', params.image);
     formData.append('audio', params.audio);
     formData.append('resolution', params.resolution);
     formData.append('duration', params.duration.toString());
+    formData.append('prompt', params.prompt);
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
     const token = localStorage.getItem('access_token');
@@ -283,7 +285,7 @@ export const videoApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/infinitetalk/wan`, {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/wan`, {
       method: 'POST',
       headers: headers,
       body: formData,
