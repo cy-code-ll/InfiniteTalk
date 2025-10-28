@@ -17,17 +17,31 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
     };
   }
 
+  // 使用原始图片作为缩略图，如果不是图片则使用默认分享图
+  const getThumbnailUrl = () => {
+    // 检查 origin_image 是否是图片格式
+    if (opusDetail.origin_image && opusDetail.origin_image.match(/\.(jpg|jpeg|png|webp|gif)$/i)) {
+      return opusDetail.origin_image;
+    }
+    // 如果没有合适的图片，使用默认品牌分享图
+    return `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share-img.png`;
+  };
+
+  const thumbnailUrl = getThumbnailUrl();
+
+  const description = 'Check out this amazing AI-generated video! Create your own at https://www.infinitetalk.net';
+
   return {
     title: 'Amazing Video Created with InfiniteTalk',
-    description: opusDetail.prompt || 'Check out this amazing AI-generated video!',
+    description: description,
     openGraph: {
       title: 'Amazing Video Created with InfiniteTalk',
-      description: opusDetail.prompt || 'Check out this amazing AI-generated video!',
+      description: description,
       type: 'video.other',
       url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share/${id}`,
       images: [
         {
-          url: opusDetail.generate_image,
+          url: thumbnailUrl,
           width: 1200,
           height: 630,
           alt: 'Video preview',
@@ -41,13 +55,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       ],
     },
     twitter: {
-      card: 'player',
+      card: 'player',  // 视频播放器卡片
       title: 'Amazing Video Created with InfiniteTalk',
-      description: opusDetail.prompt || 'Check out this amazing AI-generated video!',
-      images: [opusDetail.generate_image],
+      description: description,
+      images: [thumbnailUrl],  // 缩略图（origin_image）
       players: {
-        playerUrl: opusDetail.generate_image,
-        streamUrl: opusDetail.generate_image,
+        playerUrl: opusDetail.generate_image,  // 视频 URL
+        streamUrl: opusDetail.generate_image,  // 视频流 URL
         width: 1280,
         height: 720,
       },
