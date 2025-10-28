@@ -53,6 +53,24 @@ export interface BlogListResponse {
   total_page: number;
 }
 
+// 作品详情数据类型定义
+export interface OpusDetail {
+  id: number;
+  user_id: number;
+  task_id: string;
+  origin_image: string;
+  size_image: string;
+  other_image: string;
+  generate_image: string;
+  quality_image: string;
+  status: number;
+  status_msg: string;
+  generation_time: number;
+  prompt: string;
+  created_at: number;
+  updated_at: number;
+}
+
 // 通用错误处理
 const handleServerApiError = async (response: Response) => {
   if (!response.ok) {
@@ -132,6 +150,34 @@ export const serverCmsApi = {
         total: 0,
         total_page: 1
       };
+    }
+  },
+
+  // 获取作品详情（公开接口，服务端专用）
+  getOpusDetail: async (taskId: string): Promise<OpusDetail | null> => {
+    try {
+      const response = await fetch(
+        `${SERVER_API_CONFIG.VIDOR_AI_BASE}/api/opus/info?task_id=${taskId}`,
+        {
+          method: 'GET',
+          headers: getServerHeaders(),
+          // 短期缓存，5分钟重新验证
+          next: { revalidate: 300 },
+        }
+      );
+
+      const result = await handleServerApiError(response);
+      
+      if (result.code === 200 && result.data) {
+        console.log(`Server API: Successfully fetched opus detail for task_id: ${taskId}`);
+        return result.data;
+      }
+      
+      console.warn('Server API: Invalid opus detail response format', result);
+      return null;
+    } catch (error) {
+      console.error('Server API: Failed to fetch opus detail:', error);
+      return null;
     }
   },
 }; 
