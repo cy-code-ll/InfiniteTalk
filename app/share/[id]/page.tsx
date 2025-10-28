@@ -182,7 +182,9 @@ export default async function ShareVideoPage({ params }: { params: Promise<{ id:
               {opusDetail.prompt && (
                 <div className="bg-muted/50 rounded-lg p-3">
                   <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Prompt</h3>
-                  <p className="text-card-foreground text-sm whitespace-pre-wrap">{opusDetail.prompt}</p>
+                  <div className="max-h-32 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full">
+                    <p className="text-card-foreground text-sm whitespace-pre-wrap">{opusDetail.prompt}</p>
+                  </div>
                 </div>
               )}
 
