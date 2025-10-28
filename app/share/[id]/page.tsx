@@ -7,8 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/Footer';
 
 // 生成页面元数据（用于 Open Graph 标签）
-export async function generateMetadata({ params }: { params: { id: string } }): Promise<Metadata> {
-  const opusDetail = await serverCmsApi.getOpusDetail(params.id);
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const opusDetail = await serverCmsApi.getOpusDetail(id);
   
   if (!opusDetail) {
     return {
@@ -23,7 +24,7 @@ export async function generateMetadata({ params }: { params: { id: string } }): 
       title: 'Amazing Video Created with InfiniteTalk',
       description: opusDetail.prompt || 'Check out this amazing AI-generated video!',
       type: 'video.other',
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share/${params.id}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share/${id}`,
       images: [
         {
           url: opusDetail.generate_image,
@@ -76,9 +77,10 @@ const parseAudioUrls = (audioString: string): string[] => {
   return audioString.split('|').filter(url => url.trim());
 };
 
-export default async function ShareVideoPage({ params }: { params: { id: string } }) {
+export default async function ShareVideoPage({ params }: { params: Promise<{ id: string }> }) {
   // 获取视频详情
-  const opusDetail = await serverCmsApi.getOpusDetail(params.id);
+  const { id } = await params;
+  const opusDetail = await serverCmsApi.getOpusDetail(id);
 
   // 如果视频不存在或状态不正确，显示 404
   if (!opusDetail || opusDetail.status !== 1) {
