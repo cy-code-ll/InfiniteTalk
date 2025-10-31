@@ -131,6 +131,14 @@ export function Footer({ friendlyLinks = [] }: FooterProps) {
                   Privacy Policy
                 </Link>
               </li>
+              <li>
+                <Link 
+                  href="/refund"
+                  className="text-muted-foreground hover:text-primary transition-colors duration-200 text-sm"
+                >
+                  Refund Policy
+                </Link>
+              </li>
             </ul>
           </div>
         </div>

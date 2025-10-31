@@ -35,7 +35,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     '/wan2.2-s2v',
     '/free/referral',
     '/app',
-    '/audio-tools'
+    '/audio-tools',
+    '/refund'
   ];
 
   const sitemapEntries: MetadataRoute.Sitemap = [];

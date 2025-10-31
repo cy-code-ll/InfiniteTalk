@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useUser, useClerk } from '@clerk/nextjs';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
+import Link from 'next/link';
 
 // 定义 Plan 结构
 interface PricingPlan {
@@ -421,7 +422,7 @@ export default function PricingSection() {
           <div className="mt-16 mb-12">
             <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
               {/* 7-Day Refund Guarantee */}
-              <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl backdrop-blur-sm">
+              <Link href="/refund" aria-label="Refund Policy" className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl backdrop-blur-sm hover:border-green-400/40 transition-colors">
                 <div className="flex-shrink-0 w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-green-400" />
                 </div>
@@ -429,7 +430,7 @@ export default function PricingSection() {
                   <div className="text-white font-semibold">7‑Day Refund</div>
                   <div className="text-slate-400 text-sm">Money-back guarantee</div>
                 </div>
-              </div>
+              </Link>
 
               {/* Secure Payment by Stripe */}
               <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl backdrop-blur-sm">

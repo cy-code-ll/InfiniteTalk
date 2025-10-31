@@ -6,6 +6,7 @@ import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
 import { Poppins } from 'next/font/google';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 // Optimized font loading - only load primary font
 // Poppins is the core brand font used 25+ times across the site
@@ -135,6 +136,7 @@ export default function RootLayout({
           src="https://v1.cnzz.com/z.js?id=1281431393&async=1"
         />
 
+        <SpeedInsights />
 
       </body>
     </html>
