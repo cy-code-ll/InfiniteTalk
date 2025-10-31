@@ -569,11 +569,20 @@ export default function ProfilePage() {
       'price_1S0bzt2LCxiz8WFQXQ5Foe8K': '$49.9', // Ultimate 800 credits
       'price_1S3sev2LCxiz8WFQana9TXxD': '$99.9', // Enterprise 1800 credits
 
-      // InfiniteTalk subscription plans
-      'price_1S6QPW2LCxiz8WFQit6OMKPr': '$9.9',  // sub-starter 100 credits
-      'price_1S6QPh2LCxiz8WFQZ3HexZwV': '$29.9', // sub-pro 480 credits
-      'price_1S6QQX2LCxiz8WFQIegCJKHt': '$49.9', // sub-ultimate 990 credits
-      'price_1S6QQq2LCxiz8WFQD3mpyy0O': '$99.9', // sub-enterprise 2200 credits
+      
+      // InfiniteTalk subscription plans (updated)
+      'price_1SOBEv2LCxiz8WFQL3g9wyoE': '$9.9',  // sub-starter 100 credits
+      'price_1SOBFm2LCxiz8WFQMOiwvH65': '$29.9', // sub-pro 480 credits
+      'price_1SOBGA2LCxiz8WFQnTEEHxXH': '$49.9', // sub-ultimate 990 credits
+      'price_1SOBGa2LCxiz8WFQllMRPdsp': '$99.9', // sub-enterprise 2200 credits
+
+      // InfiniteTalk subscription plans (legacy ids for compatibility)
+      'price_1S6QPW2LCxiz8WFQit6OMKPr': '$9.9',  // legacy sub-starter 100 credits
+      'price_1S6QPh2LCxiz8WFQZ3HexZwV': '$29.9', // legacy sub-pro 480 credits
+      'price_1S6QQX2LCxiz8WFQIegCJKHt': '$49.9', // legacy sub-ultimate 990 credits
+      'price_1S6QQq2LCxiz8WFQD3mpyy0O': '$99.9', // legacy sub-enterprise 2200 credits
+      
+
     };
     return priceMap[priceId] || '-';
   };

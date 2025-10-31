@@ -107,7 +107,7 @@ export default function PricingSection() {
   const subscriptionPlans: PricingPlan[] = [
     {
       key: 'sub-starter',
-      priceId: 'price_1S6QPW2LCxiz8WFQit6OMKPr',
+      priceId: 'price_1SOBEv2LCxiz8WFQL3g9wyoE',
       popular: false,
       title: 'Starter',
       price: '$9.9',
@@ -124,7 +124,7 @@ export default function PricingSection() {
     },
     {
       key: 'sub-pro',
-      priceId: 'price_1S6QPh2LCxiz8WFQZ3HexZwV',
+      priceId: 'price_1SOBFm2LCxiz8WFQMOiwvH65',
       popular: false,
       title: 'Pro',
       price: '$29.9',
@@ -142,7 +142,7 @@ export default function PricingSection() {
     },
     {
       key: 'sub-ultimate',
-      priceId: 'price_1S6QQX2LCxiz8WFQIegCJKHt',
+      priceId: 'price_1SOBGA2LCxiz8WFQnTEEHxXH',
       popular: true,
       title: 'Ultimate',
       price: '$49.9',
@@ -161,7 +161,7 @@ export default function PricingSection() {
     },
     {
       key: 'sub-enterprise',
-      priceId: 'price_1S6QQq2LCxiz8WFQD3mpyy0O',
+      priceId: 'price_1SOBGa2LCxiz8WFQllMRPdsp',
       popular: false,
       title: 'Enterprise',
       price: '$99.9',
