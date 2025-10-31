@@ -9,7 +9,7 @@ export default function RefundPolicyPage() {
         <p className="text-slate-400 mb-8">Effective Date: October 14, 2025</p>
 
         <p className="text-slate-300 mb-6">
-          Thank you for using the AI services provided by WanAI. We hope you're satisfied with our products and services. If you'd like to request a refund, please review the following policy carefully.
+          Thank you for using the AI services provided by InfiniteTalk. We hope you're satisfied with our products and services. If you'd like to request a refund, please review the following policy carefully.
         </p>
 
         <h2 className="text-2xl font-semibold text-white mb-3">1. Eligibility for Refunds</h2>
