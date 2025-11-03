@@ -229,7 +229,7 @@ export function NavClient() {
             <div className="flex flex-col h-full px-6 pt-[env(safe-area-inset-top,0)] pb-[env(safe-area-inset-bottom,0)] text-white">
               {/* Header - 移除 backdrop-blur 优化性能 */}
               <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-4 bg-slate-900/95 flex items-center justify-between border-b border-white/10">
-                <h2 className="text-lg font-semibold">Menu</h2>
+                <div className="text-lg font-semibold">Menu</div>
                 <button
                   type="button"
                   aria-label="Close menu"
