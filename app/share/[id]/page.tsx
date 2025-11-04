@@ -1,7 +1,6 @@
 import { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { serverCmsApi } from '@/lib/server-api';
-import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Footer } from '@/components/Footer';
@@ -69,45 +68,16 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   };
 }
 
-// 格式化时间戳
-const formatTimestamp = (timestamp: number): string => {
-  if (!timestamp) return 'N/A';
-  try {
-    return new Intl.DateTimeFormat('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    }).format(new Date(timestamp * 1000));
-  } catch (e) {
-    return new Date(timestamp * 1000).toLocaleDateString();
-  }
-};
-
-// 解析音频URL字符串（用 | 分割）
-const parseAudioUrls = (audioString: string): string[] => {
-  if (!audioString) return [];
-  return audioString.split('|').filter(url => url.trim());
-};
 
 export default async function ShareVideoPage({ params }: { params: Promise<{ id: string }> }) {
   // 获取视频详情
   const { id } = await params;
   const opusDetail = await serverCmsApi.getOpusDetail(id);
-
+  // console.log(opusDetail);
   // 如果视频不存在或状态不正确，显示 404
   if (!opusDetail || opusDetail.status !== 1) {
     notFound();
   }
-
-  // 解析 resolution
-  const getResolution = (sizeImage: string) => {
-    const resolutionMatch = sizeImage.match(/resolution:\s*([^\s;]+)/i);
-    return resolutionMatch ? resolutionMatch[1].trim() : 'N/A';
-  };
-
-  const resolution = opusDetail.size_image ? getResolution(opusDetail.size_image) : 'N/A';
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
@@ -134,10 +104,9 @@ export default async function ShareVideoPage({ params }: { params: Promise<{ id:
             </p>
           </div>
 
-          {/* Video and Details */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 bg-card rounded-2xl border border-border shadow-xl p-6">
-            {/* Left: Video Player */}
-            <div className="flex flex-col justify-center space-y-4">
+          {/* Video and CTA */}
+          <div className="bg-card rounded-2xl border border-border shadow-xl p-6">
+            <div className="flex flex-col justify-center space-y-4 max-w-2xl mx-auto">
               <div className="aspect-video bg-slate-900 rounded-lg overflow-hidden">
                 <video
                   src={opusDetail.generate_image}
@@ -156,84 +125,6 @@ export default async function ShareVideoPage({ params }: { params: Promise<{ id:
                   Create Your Own Video
                 </Button>
               </Link>
-            </div>
-
-            {/* Right: Details */}
-            <div className="space-y-3">
-              {/* Created At */}
-              <div className="bg-muted/50 rounded-lg p-3">
-                <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Created At</h3>
-                <p className="text-card-foreground text-sm">{formatTimestamp(opusDetail.created_at)}</p>
-              </div>
-
-              {/* Resolution & Generation Time */}
-              <div className="grid grid-cols-2 gap-3">
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Resolution</h3>
-                  <p className="text-card-foreground font-medium text-sm">{resolution}</p>
-                </div>
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Generation Time</h3>
-                  <p className="text-card-foreground text-sm">{opusDetail.generation_time || 0} seconds</p>
-                </div>
-              </div>
-
-              {/* Prompt */}
-              {opusDetail.prompt && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Prompt</h3>
-                  <div className="max-h-32 overflow-y-auto [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-muted [&::-webkit-scrollbar-thumb]:rounded-full">
-                    <p className="text-card-foreground text-sm whitespace-pre-wrap">{opusDetail.prompt}</p>
-                  </div>
-                </div>
-              )}
-
-              {/* Origin Image/Video */}
-              {opusDetail.origin_image && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Original Media</h3>
-                  <div className="mt-2 rounded-lg overflow-hidden bg-slate-900">
-                    {opusDetail.origin_image.match(/\.(mp4|webm|mov)$/i) ? (
-                      <video
-                        src={opusDetail.origin_image}
-                        controls
-                        className="w-full max-h-40 object-contain"
-                        playsInline
-                      >
-                        Your browser does not support the video tag.
-                      </video>
-                    ) : (
-                      <Image
-                        src={opusDetail.origin_image}
-                        alt="Original media"
-                        width={400}
-                        height={300}
-                        className="w-full max-h-40 object-contain"
-                        unoptimized
-                      />
-                    )}
-                  </div>
-                </div>
-              )}
-
-              {/* Audio Files */}
-              {opusDetail.other_image && parseAudioUrls(opusDetail.other_image).length > 0 && (
-                <div className="bg-muted/50 rounded-lg p-3">
-                  <h3 className="text-xs font-semibold text-muted-foreground mb-1.5">Audio Files</h3>
-                  <div className="space-y-2 mt-2">
-                    {parseAudioUrls(opusDetail.other_image).map((audioUrl, index) => (
-                      <div key={index} className="bg-slate-900 rounded-lg p-2.5">
-                        <p className="text-xs text-muted-foreground mb-1.5">Audio {index + 1}</p>
-                        <audio controls className="w-full h-8" preload="metadata">
-                          <source src={audioUrl} type="audio/wav" />
-                          <source src={audioUrl} type="audio/mpeg" />
-                          Your browser does not support the audio element.
-                        </audio>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
 
