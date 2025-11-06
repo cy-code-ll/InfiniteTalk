@@ -187,6 +187,16 @@ export const userApi = {
 
     return handleApiError(response);
   },
+
+  // 注销账户
+  closeAccount: async () => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/close_account`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
 };
 
 // 支付相关接口
