@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect, useMemo } from 'react';
+import { useState, useRef, useCallback, useEffect, useMemo, startTransition } from 'react';
 import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Progress } from '../../components/ui/progress';
@@ -91,6 +91,9 @@ export default function InfiniteTalkGenerator() {
   const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('480p');
   const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
 
+  // 本地输入缓冲，减少输入时的整体重渲染
+  const [promptInput, setPromptInput] = useState<string>('');
+
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -102,6 +105,8 @@ export default function InfiniteTalkGenerator() {
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
+  // 使用 ref 存储当前的 AbortController，避免 useEffect 依赖导致的问题
+  const abortControllerRef = useRef<AbortController | null>(null);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
@@ -248,11 +253,18 @@ export default function InfiniteTalkGenerator() {
       if (progressInterval) {
         clearInterval(progressInterval);
       }
-      if (abortController) {
-        abortController.abort();
+    };
+  }, [progressInterval]);
+
+  // 组件卸载时清理 AbortController（只在卸载时执行）
+  useEffect(() => {
+    return () => {
+      // 只在组件卸载时取消 AbortController，避免 progressInterval 变化时误取消
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
       }
     };
-  }, [progressInterval, abortController]);
+  }, []);
 
   // 检查登录状态并执行操作
   const checkAuthAndProceed = (callback: () => void) => {
@@ -870,7 +882,7 @@ export default function InfiniteTalkGenerator() {
   };
 
   // 计算积分消耗 - 新规则：5s以下固定积分，5s以上按秒计算
-  const calculateCredits = (): number => {
+  const calculateCredits = useCallback((): number => {
     if (audioDuration === 0) return 0;
 
     // 音乐时长向上取整
@@ -887,10 +899,14 @@ export default function InfiniteTalkGenerator() {
       const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
       return roundedDuration * creditsPerSecond;
     }
-  };
+  }, [audioDuration, resolution]);
 
-  // 验证表单
-  const validateForm = (): string | null => {
+  // 缓存积分计算结果，避免每次渲染都计算
+  const creditsCost = useMemo(() => calculateCredits(), [calculateCredits]);
+
+  // 验证表单 - 使用 useCallback 优化性能
+  const validateForm = useCallback((): string | null => {
+    // 快速路径检查，避免不必要的计算
     if (tabMode === 'image-to-video') {
       if (!selectedImage) return 'Please upload an image';
     } else {
@@ -899,21 +915,25 @@ export default function InfiniteTalkGenerator() {
     if (!selectedAudio) return 'Please upload an audio file';
     if (audioDuration === 0) return 'Audio duration could not be determined';
     return null;
-  };
+  }, [tabMode, selectedImage, selectedVideo, selectedAudio, audioDuration]);
 
-  // 生成视频
-  const handleGenerate = async () => {
-    // CNZZ 事件追踪 - 点击生成按钮
+  // 缓存验证结果，避免在 handleGenerate 中重复计算
+  const validationError = useMemo(() => validateForm(), [validateForm]);
+
+  // 生成视频 - 使用 useCallback 优化性能
+  const handleGenerate = useCallback(async () => {
+    // CNZZ 事件追踪 - 异步执行，不阻塞主线程
     if (typeof window !== 'undefined' && (window as any)._czc) {
-      (window as any)._czc.push(['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk', '1', '']);
-      console.log('✅ CNZZ 事件追踪成功:', {
-        事件类别: '用户操作',
-        事件动作: '点击生成按钮',
-        页面路径: '/infinitetalk',
-        完整数据: ['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk', '1', '']
-      });
-    } else {
-      console.warn('⚠️ CNZZ 未初始化，无法追踪事件');
+      // 使用 setTimeout 将事件追踪推迟到下一个事件循环
+      setTimeout(() => {
+        (window as any)._czc.push(['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk', '1', '']);
+        // console.log('✅ CNZZ 事件追踪成功:', {
+        //   事件类别: '用户操作',
+        //   事件动作: '点击生成按钮',
+        //   页面路径: '/infinitetalk',
+        //   完整数据: ['_trackEvent', '用户操作', '点击生成按钮', '/infinitetalk', '1', '']
+        // });
+      }, 0);
     }
 
     // 检查登录状态
@@ -924,41 +944,66 @@ export default function InfiniteTalkGenerator() {
 
     // 检查用户积分
     if (!userInfo) {
-      toast.error('User information not available, please try again');
+      // 推迟 toast 调用，减少处理时间
+      setTimeout(() => {
+        toast.error('User information not available, please try again');
+      }, 0);
       return;
     }
 
-    const requiredCredits = calculateCredits();
+    // 使用缓存的积分计算结果，避免同步计算
+    const requiredCredits = creditsCost;
     if (userInfo.total_credits < requiredCredits) {
-      setIsInsufficientCreditsModalOpen(true);
-      // CNZZ 事件追踪 - 积分不足弹窗出现
+      // 使用 startTransition 包装非紧急状态更新
+      startTransition(() => {
+        setIsInsufficientCreditsModalOpen(true);
+      });
+      // CNZZ 事件追踪 - 异步执行
       if (typeof window !== 'undefined' && (window as any)._czc) {
-        (window as any)._czc.push(['_trackEvent', '系统弹窗', '积分不足弹窗', '/infinitetalk', 1, '']);
-        console.log('✅ CNZZ 事件追踪成功: 积分不足弹窗出现');
+        setTimeout(() => {
+          (window as any)._czc.push(['_trackEvent', '系统弹窗', '积分不足弹窗', '/infinitetalk', 1, '']);
+          // console.log('✅ CNZZ 事件追踪成功: 积分不足弹窗出现');
+        }, 0);
       }
       return;
     }
 
-    // 验证表单
-    const validationError = validateForm();
+    // 验证表单 - 使用缓存的结果
     if (validationError) {
-      toast.info(validationError);
+      // 推迟 toast 调用，减少处理时间
+      setTimeout(() => {
+        toast.info(validationError);
+      }, 0);
       return;
     }
 
+    // 立即更新关键状态（用户可见的反馈）- 使用 React 18 自动批处理
+    // 这些更新会被自动批处理，减少重渲染次数
     setIsGenerating(true);
-    setViewState('loading');
-    setProgress(0);
-    setTaskCreated(false); // 重置任务创建状态
-    setResultVideoUrl(''); // 清除之前的结果视频URL
-    setResultTaskId(''); // 清除之前的任务ID
-
-    // 创建新的 AbortController
+    
+    // 创建新的 AbortController - 这个很快，保持同步
+    // 先取消旧的 AbortController（如果存在）
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
     const newAbortController = new AbortController();
+    abortControllerRef.current = newAbortController;
     setAbortController(newAbortController);
+    
+    // 将重渲染较重的工作推迟到下一个事件循环，并作为低优先级处理
+    setTimeout(() => {
+      startTransition(() => {
+        // 设置加载视图与初始进度在低优先级中处理，避免阻塞点击反馈
+        setViewState('loading');
+        setProgress(0);
+        setTaskCreated(false);
+        setResultVideoUrl('');
+        setResultTaskId('');
+      });
 
-    // 启动虚假进度条
-    startFakeProgress();
+      // 启动虚假进度条
+      startFakeProgress();
+    }, 0);
 
     try {
       let createResult;
@@ -1027,10 +1072,198 @@ export default function InfiniteTalkGenerator() {
       setResultTaskId(''); // 清除任务ID
     } finally {
       setIsGenerating(false);
+      abortControllerRef.current = null;
       setAbortController(null); // 清理 AbortController
       // 不在这里重置progress，让结果状态保持
     }
-  };
+  }, [
+    isSignedIn,
+    openSignIn,
+    userInfo,
+    creditsCost,
+    validationError,
+    toast,
+    tabMode,
+    selectedImage,
+    selectedVideo,
+    selectedAudio,
+    prompt,
+    audioDuration,
+    resolution,
+    maskImageData,
+    startFakeProgress,
+    completeProgress,
+    stopFakeProgress,
+  ]);
+
+  // Tab 切换处理函数 - 使用 useCallback 和 startTransition 优化性能
+  const handleTabChange = useCallback((newTabMode: TabMode) => {
+    // 如果已经是当前 tab，直接返回，避免不必要的更新
+    if (newTabMode === tabMode) return;
+    
+    // 使用 startTransition 标记为非紧急更新，优先响应用户交互
+    startTransition(() => {
+      setTabMode(newTabMode);
+    });
+  }, [tabMode]);
+
+  // 分辨率切换处理函数 - 使用 useCallback 和 startTransition 优化
+  const handleResolutionChange = useCallback((newResolution: '480p' | '720p' | '1080p') => {
+    if (newResolution === resolution) return;
+    startTransition(() => {
+      setResolution(newResolution);
+    });
+  }, [resolution]);
+
+  // 右侧预览区域：memo 化，避免与按钮点击等无关状态导致的重渲染
+  const rightPanel = useMemo(() => (
+    <div className="lg:col-span-3 lg:sticky lg:top-24 lg:h-fit">
+      <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
+        <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
+
+        <div className="relative">
+          {/* Video Demo State */}
+          {viewState === 'videodemo' && (
+            <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+              <video
+                ref={demoVideoRef}
+                src="https://cfsource.infinitetalk.net/infinitetalk/mp4/demo.mp4"
+                controls
+                muted
+                preload="metadata"
+                className="w-full h-full object-cover"
+                playsInline
+              >
+                Your browser does not support the video tag.
+              </video>
+            </div>
+          )}
+
+          {/* Loading State */}
+          {viewState === 'loading' && (
+            <div className="aspect-video bg-slate-800 rounded-lg flex flex-col items-center justify-center p-8">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
+              <h3 className="text-white text-xl font-semibold mb-4">Generating Video...</h3>
+              <div className="w-full max-w-md">
+                <Progress value={progress} className="w-full mb-2" />
+                <p className="text-slate-400 text-sm text-center">{Math.round(progress)}% complete</p>
+              </div>
+              {taskCreated && (
+                <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
+                  <p className="text-slate-300 text-sm text-center">
+                    You don't need to wait here. Check your work in the{' '}
+                    <Link href="/profile" className="text-primary hover:text-primary/80 underline">
+                      Profile Center
+                    </Link>{' '}
+                    after 5 minutes.
+                  </p>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Result State */}
+          {viewState === 'result' && resultVideoUrl && (
+            <div className="space-y-3">
+              <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
+                <video
+                  ref={resultVideoRef}
+                  src={resultVideoUrl}
+                  controls
+                  muted
+                  preload="metadata"
+                  className="w-full h-full"
+                  playsInline
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+              
+              {/* Download and Share Buttons */}
+              <div className="flex gap-2 justify-center items-center">
+                {/* Download Button */}
+                <Button
+                  onClick={() => downloadMediaWithCors(resultVideoUrl, `infinitetalk-${Date.now()}.mp4`, toast.showToast)}
+                  variant="outline"
+                  className="flex items-center justify-center gap-2"
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </Button>
+
+                {/* Share Buttons */}
+                {resultTaskId && (
+                  <>
+                    {/* Twitter */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => shareToSocial(resultTaskId, 'twitter')}
+                      title="Share to Twitter"
+                      className="hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2]"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                      </svg>
+                    </Button>
+
+                    {/* Facebook */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => shareToSocial(resultTaskId, 'facebook')}
+                      title="Share to Facebook"
+                      className="hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                      </svg>
+                    </Button>
+
+                    {/* WhatsApp */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={() => shareToSocial(resultTaskId, 'whatsapp')}
+                      title="Share to WhatsApp"
+                      className="hover:bg-[#25D366] hover:text-white hover:border-[#25D366]"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                      </svg>
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          )}
+        </div>
+
+
+      </div>
+    </div>
+  ), [viewState, progress, taskCreated, resultVideoUrl, resultTaskId]);
+
+  // 初始化/外部变化时同步 prompt 到本地输入缓冲
+  useEffect(() => {
+    setPromptInput(prompt);
+  }, [prompt]);
+
+  // 将本地输入缓冲以防抖的方式同步到真正的 prompt，降低同步开销
+  useEffect(() => {
+    const id = setTimeout(() => {
+      if (promptInput !== prompt) {
+        startTransition(() => {
+          setPrompt(promptInput);
+        });
+      }
+    }, 200); // 200ms 防抖
+    return () => clearTimeout(id);
+  }, [promptInput, prompt]);
+
+  const handlePromptInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setPromptInput(e.target.value);
+  }, []);
 
   return (
     <div className="container mx-auto px-4 pb-16">
@@ -1041,25 +1274,27 @@ export default function InfiniteTalkGenerator() {
             {/* Tab Navigation */}
             <div className="flex mb-6">
               <button
-                onClick={() => setTabMode('image-to-video')}
+                onClick={() => handleTabChange('image-to-video')}
                 className={cn(
-                  "flex-1 py-3 px-2 sm:px-4 rounded-l-lg border-2 transition-all duration-200 font-medium text-xs sm:text-sm",
+                  "flex-1 py-3 px-2 sm:px-4 rounded-l-lg border-2 transition-all duration-200 font-medium text-xs sm:text-sm will-change-transform active:scale-[0.98]",
                   tabMode === 'image-to-video'
                     ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                     : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                 )}
+                aria-pressed={tabMode === 'image-to-video'}
               >
                 <span className="hidden sm:inline">Image To Video</span>
                 <span className="sm:hidden">Image</span>
               </button>
               <button
-                onClick={() => setTabMode('video-to-video')}
+                onClick={() => handleTabChange('video-to-video')}
                 className={cn(
-                  "flex-1 py-3 px-2 sm:px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium text-xs sm:text-sm",
+                  "flex-1 py-3 px-2 sm:px-4 rounded-r-lg border-2 border-l-0 transition-all duration-200 font-medium text-xs sm:text-sm will-change-transform active:scale-[0.98]",
                   tabMode === 'video-to-video'
                     ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                     : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
                 )}
+                aria-pressed={tabMode === 'video-to-video'}
               >
                 <span className="hidden sm:inline">Video To Video</span>
                 <span className="sm:hidden">Video</span>
@@ -1075,7 +1310,7 @@ export default function InfiniteTalkGenerator() {
                 {tabMode === 'image-to-video' && selectedImage && (
                   <button
                     onClick={() => setIsMaskModalOpen(true)}
-                    className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary/90 text-sm font-medium rounded-lg transition-all duration-200"
+                    className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary/90 text-sm font-medium rounded-lg transition-all duration-200 will-change-transform active:scale-[0.98]"
                     title="Optional mask image to specify the person in the image to animate."
                   >
                     Select Speaker
@@ -1295,9 +1530,9 @@ export default function InfiniteTalkGenerator() {
               <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onClick={() => setResolution('480p')}
+                  onClick={() => handleResolutionChange('480p')}
                   className={cn(
-                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium will-change-transform active:scale-[0.98] touch-manipulation",
                     resolution === '480p'
                       ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                       : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
@@ -1310,9 +1545,9 @@ export default function InfiniteTalkGenerator() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setResolution('720p')}
+                  onClick={() => handleResolutionChange('720p')}
                   className={cn(
-                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium will-change-transform active:scale-[0.98] touch-manipulation",
                     resolution === '720p'
                       ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                       : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
@@ -1325,9 +1560,9 @@ export default function InfiniteTalkGenerator() {
                 </button>
                 <button
                   type="button"
-                  onClick={() => setResolution('1080p')}
+                  onClick={() => handleResolutionChange('1080p')}
                   className={cn(
-                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium",
+                    "py-3 px-2 rounded-lg border-2 transition-all duration-200 font-medium will-change-transform active:scale-[0.98] touch-manipulation",
                     resolution === '1080p'
                       ? "border-primary bg-primary/20 text-primary shadow-lg shadow-primary/25"
                       : "border-slate-600 bg-slate-800/50 text-slate-300 hover:border-slate-500 hover:bg-slate-700/50"
@@ -1345,8 +1580,8 @@ export default function InfiniteTalkGenerator() {
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">Prompt</label>
               <Textarea
-                value={prompt}
-                onChange={(e) => setPrompt(e.target.value)}
+                value={promptInput}
+                onChange={handlePromptInputChange}
                 placeholder="Describe what you want the character to express or do... (Optional)"
                 className="w-full h-24 bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 resize-none"
               />
@@ -1357,13 +1592,23 @@ export default function InfiniteTalkGenerator() {
               <Button
                 onClick={handleGenerate}
                 disabled={isGenerating}
-                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white py-3 font-semibold disabled:opacity-50"
+                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white py-3 font-semibold disabled:opacity-50 will-change-transform active:scale-[0.98] touch-manipulation"
+                style={{ 
+                  // 优化渲染性能 - 使用 CSS containment
+                  contain: 'layout style paint',
+                  // 移动端优化 - 禁用双击缩放
+                  touchAction: 'manipulation',
+                  // 使用 GPU 加速
+                  transform: 'translateZ(0)',
+                  // 只对 transform 和 opacity 过渡，性能更好
+                  transition: 'transform 75ms ease-out, opacity 75ms ease-out',
+                } as React.CSSProperties}
               >
                 {isGenerating ? 'Generating...' : 'Generate Video'}
               </Button>
               {/* Credit cost label */}
               <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                {audioDuration > 0 ? `${calculateCredits()} Credits` :
+                {audioDuration > 0 ? `${creditsCost} Credits` :
                   `${resolution === '480p' ? '5' : resolution === '720p' ? '10' : '15'} Credits`}
               </div>
             </div>
@@ -1386,131 +1631,7 @@ export default function InfiniteTalkGenerator() {
         </div>
 
         {/* Right Side - Preview/Result */}
-        <div className="lg:col-span-3 lg:sticky lg:top-24 lg:h-fit">
-          <div className="bg-gradient-to-b from-slate-800/60 to-slate-900/60 rounded-2xl border border-slate-700/50 backdrop-blur-sm p-8">
-            <h2 className="text-2xl font-bold text-white mb-6">Preview</h2>
-
-            <div className="relative">
-              {/* Video Demo State */}
-              {viewState === 'videodemo' && (
-                <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
-                  <video
-                    ref={demoVideoRef}
-                    src="https://cfsource.infinitetalk.net/infinitetalk/mp4/demo.mp4"
-                    controls
-                    muted
-                    preload="metadata"
-                    className="w-full h-full object-cover"
-                    playsInline
-                  >
-                    Your browser does not support the video tag.
-                  </video>
-                </div>
-              )}
-
-              {/* Loading State */}
-              {viewState === 'loading' && (
-                <div className="aspect-video bg-slate-800 rounded-lg flex flex-col items-center justify-center p-8">
-                  <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6"></div>
-                  <h3 className="text-white text-xl font-semibold mb-4">Generating Video...</h3>
-                  <div className="w-full max-w-md">
-                    <Progress value={progress} className="w-full mb-2" />
-                    <p className="text-slate-400 text-sm text-center">{Math.round(progress)}% complete</p>
-                  </div>
-                  {taskCreated && (
-                    <div className="mt-6 p-4 bg-slate-700/50 rounded-lg border border-slate-600">
-                      <p className="text-slate-300 text-sm text-center">
-                        You don't need to wait here. Check your work in the{' '}
-                        <Link href="/profile" className="text-primary hover:text-primary/80 underline">
-                          Profile Center
-                        </Link>{' '}
-                        after 5 minutes.
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Result State */}
-              {viewState === 'result' && resultVideoUrl && (
-                <div className="space-y-3">
-                  <div className="aspect-video bg-slate-800 rounded-lg overflow-hidden">
-                    <video
-                      ref={resultVideoRef}
-                      src={resultVideoUrl}
-                      controls
-                      muted
-                      preload="metadata"
-                      className="w-full h-full"
-                      playsInline
-                    >
-                      Your browser does not support the video tag.
-                    </video>
-                  </div>
-                  
-                  {/* Download and Share Buttons */}
-                  <div className="flex gap-2 justify-center items-center">
-                    {/* Download Button */}
-                    <Button
-                      onClick={() => downloadMediaWithCors(resultVideoUrl, `infinitetalk-${Date.now()}.mp4`, toast.showToast)}
-                      variant="outline"
-                      className="flex items-center justify-center gap-2"
-                    >
-                      <Download className="h-4 w-4" />
-                      Download
-                    </Button>
-
-                    {/* Share Buttons */}
-                    {resultTaskId && (
-                      <>
-                        {/* Twitter */}
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => shareToSocial(resultTaskId, 'twitter')}
-                          title="Share to Twitter"
-                          className="hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2]"
-                        >
-                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                          </svg>
-                        </Button>
-
-                        {/* Facebook */}
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => shareToSocial(resultTaskId, 'facebook')}
-                          title="Share to Facebook"
-                          className="hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]"
-                        >
-                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                          </svg>
-                        </Button>
-
-                        {/* WhatsApp */}
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          onClick={() => shareToSocial(resultTaskId, 'whatsapp')}
-                          title="Share to WhatsApp"
-                          className="hover:bg-[#25D366] hover:text-white hover:border-[#25D366]"
-                        >
-                          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                          </svg>
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-
-          </div>
-        </div>
+        {rightPanel}
       </div>
 
       {/* Insufficient Credits Modal */}
@@ -1527,7 +1648,7 @@ export default function InfiniteTalkGenerator() {
               Not enough credits
             </h3>
             <p className="text-muted-foreground mb-6">
-              You need at least {calculateCredits()} credits to generate video. Please purchase more credits to continue.
+              You need at least {creditsCost} credits to generate video. Please purchase more credits to continue.
             </p>
             <div className="flex gap-3 justify-center">
               <Button
