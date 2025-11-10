@@ -362,6 +362,8 @@ export default function ProfilePage() {
   // 视频详情弹窗状态
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedVideoDetail, setSelectedVideoDetail] = useState<GenerationHistoryItem | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // 临时假数据用于测试样式（已移除）
 
@@ -877,6 +879,27 @@ export default function ProfilePage() {
   const handleOpenDetailDialog = (item: GenerationHistoryItem) => {
     setSelectedVideoDetail(item);
     setIsDetailDialogOpen(true);
+  };
+
+  // 删除作品
+  const handleDeleteOpus = async () => {
+    if (!selectedVideoDetail) return;
+    setIsDeleting(true);
+    try {
+      const result = await api.user.deleteOpus(selectedVideoDetail.id);
+      if ((result as any).code === 200) {
+        toast.success('Deleted successfully!');
+        setIsDeleteConfirmOpen(false);
+        setIsDetailDialogOpen(false);
+        refreshHistory();
+      } else {
+        toast.error('Failed to delete: ' + ((result as any).msg || 'Unknown error'));
+      }
+    } catch (error) {
+      toast.error('Failed to delete: ' + (error instanceof Error ? error.message : 'Unknown error'));
+    } finally {
+      setIsDeleting(false);
+    }
   };
 
   // 解析音频URL字符串（用 | 分割）
@@ -1735,6 +1758,16 @@ export default function ProfilePage() {
                         </>
                       )}
                     </Button>
+                    {/* 删除按钮 */}
+                    <Button
+                      variant="destructive"
+                      onClick={() => setIsDeleteConfirmOpen(true)}
+                      disabled={isDeleting}
+                      className="flex items-center gap-2"
+                    >
+                      <Cross2Icon className="h-4 w-4" />
+                      Delete
+                    </Button>
 
                     {/* 分享按钮组 */}
                     <div className="flex gap-2">
@@ -1778,6 +1811,44 @@ export default function ProfilePage() {
                       </Button>
                     </div>
                   </div>
+                  {/* 删除确认弹窗 */}
+                  <Dialog open={isDeleteConfirmOpen} onOpenChange={setIsDeleteConfirmOpen}>
+                    <DialogContent className="max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-lg font-semibold text-card-foreground">Delete Work</DialogTitle>
+                        <DialogDescription className="text-muted-foreground">
+                          Are you sure you want to delete this work? This action cannot be undone.
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="flex justify-end gap-3 mt-4">
+                        <Button
+                          variant="outline"
+                          onClick={() => setIsDeleteConfirmOpen(false)}
+                          disabled={isDeleting}
+                        >
+                          Cancel
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          onClick={handleDeleteOpus}
+                          disabled={isDeleting}
+                          className="flex items-center gap-2"
+                        >
+                          {isDeleting ? (
+                            <>
+                              <ReloadIcon className="h-4 w-4 animate-spin" />
+                              Deleting...
+                            </>
+                          ) : (
+                            <>
+                              <Cross2Icon className="h-4 w-4" />
+                              Delete
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
 
                 {/* 右侧：详细信息 */}

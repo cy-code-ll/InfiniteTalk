@@ -140,6 +140,18 @@ export const userApi = {
 
     return handleApiError(response);
   },
+  // 删除用户作品
+  deleteOpus: async (opusId: number) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/opus/delete`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        opus_id: opusId,
+      }),
+    });
+
+    return handleApiError(response);
+  },
   // 获取推广链接
   getPromotionLink: async () => {
     const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/user/promotion_link`, {
