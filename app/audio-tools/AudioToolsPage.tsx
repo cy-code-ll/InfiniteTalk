@@ -5,7 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/toast-provider';
 import { Upload, Play, Pause, Download, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-import { useAuth, useClerk } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import {
   Dialog,
   DialogContent,
@@ -46,7 +47,7 @@ function parseTimeToSeconds(timeString: string): number {
 export default function AudioToolsPage() {
   const toast = useToast();
   const { isSignedIn } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openAuthModal } = useAuthModal();
 
   const [sourceType, setSourceType] = useState<SourceType>(null);
   const [sourceFile, setSourceFile] = useState<File | null>(null);
@@ -274,7 +275,8 @@ export default function AudioToolsPage() {
   // 检查登录状态
   const checkAuthAndProceed = (callback: () => void) => {
     if (!isSignedIn) {
-      openSignIn();
+      // 使用全局自定义登录弹窗，推迟到下一帧，降低 INP
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
     callback();

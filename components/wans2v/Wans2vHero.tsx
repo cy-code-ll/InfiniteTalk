@@ -8,6 +8,7 @@ import { Upload, Play, Pause, Download, Loader2, X } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '@/components/ui/toast-provider';
 import { useAuth } from '@clerk/nextjs';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { useUserInfo } from '@/lib/providers';
 import Link from 'next/link';
 import { isMobileDevice } from '@/lib/utils';
@@ -55,6 +56,7 @@ export function Wans2vHero() {
   const toast = useToast();
   const { isSignedIn } = useAuth();
   const { userInfo } = useUserInfo();
+  const { openAuthModal } = useAuthModal();
 
   // 获取音频时长
   const getAudioDuration = (file: File): Promise<number> => {
@@ -424,8 +426,8 @@ export function Wans2vHero() {
 
     // 检查用户是否登录
     if (!isSignedIn) {
-      // 如果没有登录，调用 Clerk 登录
-      window.location.href = '/sign-in';
+      // 使用全局自定义登录弹窗，避免整页刷新与 INP 抖动
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
 

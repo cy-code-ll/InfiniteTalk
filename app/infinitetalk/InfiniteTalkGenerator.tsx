@@ -5,7 +5,7 @@ import { Button } from '../../components/ui/button';
 import { Textarea } from '../../components/ui/textarea';
 import { Progress } from '../../components/ui/progress';
 import { useToast } from '../../components/ui/toast-provider';
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
 import { api } from '@/lib/api';
@@ -13,6 +13,7 @@ import { cn, isMobileDevice } from '@/lib/utils';
 import Image from 'next/image';
 import Link from 'next/link';
 import { saveToIndexedDB, getFromIndexedDB, deleteFromIndexedDB } from '@/lib/indexedDB';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import {
   Dialog,
   DialogContent,
@@ -74,9 +75,9 @@ async function downloadMediaWithCors(
 
 export default function InfiniteTalkGenerator() {
   const { isSignedIn } = useUser();
-  const { openSignIn } = useClerk();
   const toast = useToast();
   const { userInfo } = useUserInfo();
+  const { openAuthModal } = useAuthModal();
 
   // IndexedDB 缓存键名
   const CACHE_KEY = 'infinitetalk-form-cache';
@@ -269,7 +270,8 @@ export default function InfiniteTalkGenerator() {
   // 检查登录状态并执行操作
   const checkAuthAndProceed = (callback: () => void) => {
     if (!isSignedIn) {
-      openSignIn();
+      // 标记为非紧急更新并推迟到下一帧，降低 INP
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
     callback();
@@ -938,7 +940,7 @@ export default function InfiniteTalkGenerator() {
 
     // 检查登录状态
     if (!isSignedIn) {
-      openSignIn();
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
 
@@ -1078,7 +1080,6 @@ export default function InfiniteTalkGenerator() {
     }
   }, [
     isSignedIn,
-    openSignIn,
     userInfo,
     creditsCost,
     validationError,
@@ -1267,6 +1268,7 @@ export default function InfiniteTalkGenerator() {
 
   return (
     <div className="container mx-auto px-4 pb-16">
+      
       <div className="grid lg:grid-cols-5 gap-12 max-w-7xl mx-auto">
         {/* Left Side - Form */}
         <div className="lg:col-span-2 space-y-8">

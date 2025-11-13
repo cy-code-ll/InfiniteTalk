@@ -8,7 +8,8 @@ import { Textarea } from '../ui/textarea';
 import { Upload, Play, Pause, Download, Loader2, X, HelpCircle } from 'lucide-react';
 import { api } from '@/lib/api';
 import { useToast } from '../ui/toast-provider';
-import { useAuth, useClerk } from '@clerk/nextjs';
+import { useAuth } from '@clerk/nextjs';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { useUserInfo } from '@/lib/providers';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '../ui/tooltip';
 import Link from 'next/link';
@@ -65,7 +66,7 @@ export default function MultiHero() {
   const rightAudioInputRef = useRef<HTMLInputElement>(null);
   const toast = useToast();
   const { isSignedIn } = useAuth();
-  const { openSignIn } = useClerk();
+  const { openAuthModal } = useAuthModal();
   const { userInfo } = useUserInfo();
 
   // 组件卸载时清理轮询
@@ -80,7 +81,8 @@ export default function MultiHero() {
   // 检查登录状态
   const checkAuthAndProceed = (callback: () => void) => {
     if (!isSignedIn) {
-      openSignIn();
+      // 推迟到下一帧，缩短当前输入任务，降低 INP
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
     callback();
@@ -509,7 +511,7 @@ export default function MultiHero() {
 
     // 检查用户是否登录
     if (!isSignedIn) {
-      openSignIn();
+      requestAnimationFrame(() => openAuthModal('signin'));
       return;
     }
 

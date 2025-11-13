@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useCallback, memo, useMemo } from 'react';
+import { useState, useEffect, useCallback, memo, useMemo, useTransition } from 'react';
 import { createPortal } from 'react-dom';
 import { useSignIn, useSignUp } from '@clerk/nextjs';
 import { Button } from '@/components/ui/button';
@@ -15,10 +15,12 @@ interface CustomSignModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialView?: View;
+  // When true, keep the modal mounted even when not open (render hidden)
+  forceMount?: boolean;
 }
 
 // Memoize the component to prevent unnecessary re-renders
-export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChange, initialView = 'signin' }: CustomSignModalProps) {
+export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChange, initialView = 'signin', forceMount = false }: CustomSignModalProps) {
   const [view, setView] = useState<View>(initialView);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,6 +38,16 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
   const router = useRouter();
   const pathname = usePathname();
   const [mounted, setMounted] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  // Pre-compute paths to avoid calculation during click
+  const currentPath = useMemo(() => {
+    return pathname || (typeof window !== 'undefined' ? window.location.pathname : '/') || '/';
+  }, [pathname]);
+
+  const redirectUrlWithPath = useMemo(() => {
+    return `/sso-callback?redirect_url=${encodeURIComponent(currentPath)}`;
+  }, [currentPath]);
 
   // Ensure component is mounted (for SSR compatibility)
   useEffect(() => {
@@ -85,12 +97,13 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
   const handleGoogleSignIn = useCallback(async () => {
     if (isOAuthLoading || isLoading) return;
     
-    setIsOAuthLoading(true);
+    // Clear error immediately for instant feedback
     setError(null);
     
-    // Get current page path, default to '/' if pathname is not available
-    const currentPath = pathname || window.location.pathname || '/';
-    const redirectUrlWithPath = `/sso-callback?redirect_url=${encodeURIComponent(currentPath)}`;
+    // Delay loading state update to improve INP (50ms delay)
+    const loadingTimeout = setTimeout(() => {
+      setIsOAuthLoading(true);
+    }, 50);
     
     try {
       if (view === 'signin' && signInLoaded && signIn) {
@@ -109,16 +122,22 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
         });
       }
     } catch (err: any) {
+      clearTimeout(loadingTimeout);
       setError(err.errors?.[0]?.message || 'Failed to sign in with Google');
       setIsOAuthLoading(false);
     }
-  }, [view, signInLoaded, signIn, signUpLoaded, signUp, isOAuthLoading, isLoading, pathname]);
+  }, [view, signInLoaded, signIn, signUpLoaded, signUp, isOAuthLoading, isLoading, redirectUrlWithPath, currentPath]);
 
   const handleSignIn = useCallback(async () => {
     if (!signInLoaded || !signIn || isLoading || isOAuthLoading) return;
     
-    setIsLoading(true);
+    // Clear error immediately for instant feedback
     setError(null);
+    
+    // Delay loading state update to improve INP (50ms delay)
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(true);
+    }, 50);
 
     try {
       const result = await signIn.create({
@@ -143,6 +162,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
       console.error('Sign-in error:', JSON.stringify(err, null, 2));
       setError(err.errors?.[0]?.message || 'Failed to sign in');
     } finally {
+      clearTimeout(loadingTimeout);
       setIsLoading(false);
     }
   }, [signInLoaded, signIn, email, password, isLoading, isOAuthLoading, setActiveSignIn, onOpenChange, router]);
@@ -150,8 +170,13 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
   const handleSignUp = useCallback(async () => {
     if (!signUpLoaded || !signUp || isLoading || isOAuthLoading) return;
     
-    setIsLoading(true);
+    // Clear error immediately for instant feedback
     setError(null);
+    
+    // Delay loading state update to improve INP (50ms delay)
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(true);
+    }, 50);
 
     try {
       // Step 1: Start the sign-up process using the email and password provided
@@ -173,6 +198,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
       console.error('Sign-up error:', JSON.stringify(err, null, 2));
       setError(err.errors?.[0]?.message || 'Failed to create account');
     } finally {
+      clearTimeout(loadingTimeout);
       setIsLoading(false);
     }
   }, [signUpLoaded, signUp, email, password, isLoading, isOAuthLoading, setView]);
@@ -180,8 +206,13 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
   const handleVerifyEmail = useCallback(async () => {
     if (!signUpLoaded || !signUp || isLoading || isOAuthLoading) return;
     
-    setIsLoading(true);
+    // Clear error immediately for instant feedback
     setError(null);
+    
+    // Delay loading state update to improve INP (50ms delay)
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(true);
+    }, 50);
 
     try {
       const result = await signUp.attemptEmailAddressVerification({
@@ -208,6 +239,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
       // Clear code on error
       setVerificationCode('');
     } finally {
+      clearTimeout(loadingTimeout);
       setIsLoading(false);
     }
   }, [signUpLoaded, signUp, verificationCode, isLoading, isOAuthLoading, setActiveSignUp, onOpenChange, router]);
@@ -257,16 +289,21 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
     return null;
   }, [view]);
 
-  // Only render content when open to improve performance
-  if (!open || !mounted || typeof document === 'undefined') return null;
+  // Only render content when open OR forceMount (preload), and client ready
+  if ((!open && !forceMount) || !mounted || typeof document === 'undefined') return null;
+
+  // Show all at once: when not open (but force mounted), keep fully hidden without fade
+  const backdropClass = open
+    ? "fixed inset-0 z-50 pointer-events-auto bg-black/20"
+    : "fixed inset-0 z-50 pointer-events-none bg-transparent hidden";
 
   const modalContent = (
-    <div className="fixed inset-0 z-50 pointer-events-none bg-black/20">
+    <div className={backdropClass} aria-hidden={!open}>
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[calc(100%-2rem)] sm:max-w-[440px] p-4">
         <div
           role="dialog"
           aria-modal="true"
-          className="relative rounded-lg border bg-white shadow-lg pointer-events-auto max-h-[90vh] overflow-auto"
+          className={`relative rounded-lg border bg-white shadow-lg ${open ? 'pointer-events-auto' : 'pointer-events-none'} max-h-[90vh] overflow-auto`}
         >
         <button
           type="button"
@@ -299,7 +336,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
               <Button
                 type="button"
                 variant="outline"
-                className="w-full mb-3 h-10 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 relative text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full mb-3 h-10 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98] active:bg-gray-100 transition-transform duration-75 relative text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 onClick={handleGoogleSignIn}
                 disabled={isOAuthLoading || isLoading}
               >
@@ -391,7 +428,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                   type="button"
                   onClick={handleSignIn}
                   disabled={isLoading || isOAuthLoading || !email || !password}
-                  className="w-full h-9 bg-black text-white hover:bg-gray-800 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="w-full h-9 bg-black text-white hover:bg-gray-800 active:scale-[0.98] active:bg-gray-900 transition-transform duration-75 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -410,8 +447,10 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                 Don't have an account?{' '}
                 <button
                   onClick={() => {
-                    setView('signup');
-                    setError(null);
+                    startTransition(() => {
+                      setView('signup');
+                      setError(null);
+                    });
                   }}
                   className="text-gray-900 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || isOAuthLoading}
@@ -427,7 +466,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
               <Button
                 type="button"
                 variant="outline"
-                className="w-full mb-3 h-10 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full mb-3 h-10 border-gray-300 bg-white hover:bg-gray-50 hover:text-gray-900 active:scale-[0.98] active:bg-gray-100 transition-transform duration-75 text-gray-900 disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 onClick={handleGoogleSignIn}
                 disabled={isOAuthLoading || isLoading}
               >
@@ -536,7 +575,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                   type="button"
                   onClick={handleSignUp}
                   disabled={isLoading || isOAuthLoading || !email || !password}
-                  className="w-full h-9 bg-gray-800 text-white hover:bg-gray-900 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                  className="w-full h-9 bg-gray-800 text-white hover:bg-gray-900 active:scale-[0.98] active:bg-gray-950 transition-transform duration-75 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
                 >
                   {isLoading ? (
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
@@ -555,8 +594,10 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                 Already have an account?{' '}
                 <button
                   onClick={() => {
-                    setView('signin');
-                    setError(null);
+                    startTransition(() => {
+                      setView('signin');
+                      setError(null);
+                    });
                   }}
                   className="text-gray-900 font-semibold hover:underline disabled:opacity-50 disabled:cursor-not-allowed"
                   disabled={isLoading || isOAuthLoading}
@@ -578,8 +619,10 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                   <span className="text-xs text-gray-900">{email}</span>
                   <button
                     onClick={() => {
-                      setView('signup');
-                      setError(null);
+                      startTransition(() => {
+                        setView('signup');
+                        setError(null);
+                      });
                     }}
                     className="text-gray-500 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     disabled={isLoading || isOAuthLoading}
@@ -629,7 +672,7 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
                 type="button"
                 onClick={handleVerifyEmail}
                 disabled={isLoading || isOAuthLoading || verificationCode.length !== 6}
-                className="w-full h-9 bg-black text-white hover:bg-gray-800 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                className="w-full h-9 bg-black text-white hover:bg-gray-800 active:scale-[0.98] active:bg-gray-900 transition-transform duration-75 rounded-md font-medium disabled:opacity-50 disabled:cursor-not-allowed text-sm"
               >
                 {isLoading ? (
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

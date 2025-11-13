@@ -1,6 +1,7 @@
 'use client';
 
 import { useUser, useAuth } from '@clerk/nextjs';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { Footer } from '../../components/Footer';
 import Image from 'next/image';
 import { useEffect, useState, useRef } from 'react';
@@ -42,6 +43,7 @@ import {
 export default function ProfilePage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const { userId } = useAuth();
+  const { openAuthModal } = useAuthModal();
 
   // API 数据状态 (用户信息)
   const [userApiInfo, setUserApiInfo] = useState<UserApiInfo | null>(null);
@@ -318,11 +320,12 @@ export default function ProfilePage() {
             <div className="bg-card rounded-2xl p-8 text-center shadow-custom border border-border">
               <h1 className="text-2xl font-bold mb-4 text-card-foreground">Profile</h1>
               <p className="mb-6 text-muted-foreground">Please sign in to view your profile</p>
-              <Link href="/sign-in">
-                <Button className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                  Sign In
-                </Button>
-              </Link>
+              <Button
+                className="bg-primary hover:bg-primary/90 text-primary-foreground"
+                onClick={() => requestAnimationFrame(() => openAuthModal('signin'))}
+              >
+                Sign In
+              </Button>
             </div>
           </div>
         </main>

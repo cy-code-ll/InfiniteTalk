@@ -7,6 +7,7 @@ import { metadata, schemaData } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
 import { Poppins } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { AuthModalProvider } from '@/components/auth/auth-modal-provider';
 
 // Optimized font loading - only load primary font
 // Poppins is the core brand font used 25+ times across the site
@@ -110,12 +111,12 @@ export default function RootLayout({
         <ClerkProviderWithLocale>
           <ToastProvider>
             <UserProvider>
-              <>
+              <AuthModalProvider>
                 <Navbar />
                 <main className="min-h-[calc(100vh-80px)]">
                   {children}
                 </main>
-              </>
+              </AuthModalProvider>
             </UserProvider>
           </ToastProvider>
         </ClerkProviderWithLocale>

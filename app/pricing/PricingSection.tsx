@@ -3,7 +3,8 @@
 import { Button } from '../../components/ui/button';
 import { Check, Loader2, DollarSign, Shield, MessageCircle } from 'lucide-react';
 import { useState } from 'react';
-import { useUser, useClerk } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
+import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { cn } from '@/lib/utils';
 import { api } from '@/lib/api';
 import Link from 'next/link';
@@ -23,7 +24,7 @@ interface PricingPlan {
 export default function PricingSection() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { user, isSignedIn } = useUser();
-  const { openSignIn } = useClerk();
+  const { openAuthModal } = useAuthModal();
 
   // 定义固定的价格计划数据
   const pricingPlans: PricingPlan[] = [
@@ -185,8 +186,8 @@ export default function PricingSection() {
   const handleUpgradeClick = async (priceId: string, planKey: string) => {
     // 1. 检查用户是否登录
     if (!isSignedIn) {
-      // 如果未登录，打开 Clerk 登录框
-      openSignIn();
+      // 如果未登录，打开自定义登录弹窗（推迟到下一帧，降低 INP）
+      requestAnimationFrame(() => openAuthModal('signin'));
       return; // 阻止后续操作
     }
 
