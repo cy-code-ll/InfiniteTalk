@@ -3,6 +3,20 @@ export default function SSOCallbackLayout({
 }: {
   children: React.ReactNode;
 }) {
-  return <>{children}</>;
+  return (
+    <>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          nav {
+            display: none !important;
+          }
+          main {
+            min-height: 100vh !important;
+          }
+        `
+      }} />
+      {children}
+    </>
+  );
 }
 
