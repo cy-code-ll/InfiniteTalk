@@ -92,9 +92,6 @@ export default function InfiniteTalkGenerator() {
   const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('480p');
   const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
 
-  // 本地输入缓冲，减少输入时的整体重渲染
-  const [promptInput, setPromptInput] = useState<string>('');
-
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -541,7 +538,7 @@ export default function InfiniteTalkGenerator() {
   // 🔄 自动保存（防抖）
   useEffect(() => {
     // 只有在有数据时才保存
-    if (!selectedImage && !selectedVideo && !selectedAudio && !prompt) {
+    if (!selectedImage && !selectedVideo && !selectedAudio) {
       return;
     }
 
@@ -1245,26 +1242,6 @@ export default function InfiniteTalkGenerator() {
     </div>
   ), [viewState, progress, taskCreated, resultVideoUrl, resultTaskId]);
 
-  // 初始化/外部变化时同步 prompt 到本地输入缓冲
-  useEffect(() => {
-    setPromptInput(prompt);
-  }, [prompt]);
-
-  // 将本地输入缓冲以防抖的方式同步到真正的 prompt，降低同步开销
-  useEffect(() => {
-    const id = setTimeout(() => {
-      if (promptInput !== prompt) {
-        startTransition(() => {
-          setPrompt(promptInput);
-        });
-      }
-    }, 200); // 200ms 防抖
-    return () => clearTimeout(id);
-  }, [promptInput, prompt]);
-
-  const handlePromptInputChange = useCallback((e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setPromptInput(e.target.value);
-  }, []);
 
   return (
     <div className="container mx-auto px-4 pb-16">
@@ -1582,8 +1559,8 @@ export default function InfiniteTalkGenerator() {
             <div className="mb-6">
               <label className="block text-white font-medium mb-3">Prompt</label>
               <Textarea
-                value={promptInput}
-                onChange={handlePromptInputChange}
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
                 placeholder="Describe what you want the character to express or do... (Optional)"
                 className="w-full h-24 bg-slate-800/50 border-slate-600 text-white placeholder-slate-400 resize-none"
               />
