@@ -603,6 +603,16 @@ export const cmsApi = {
 
     return handleApiError(response);
   },
+
+  // 博客点击统计
+  trackBlogClick: async (url: string) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/cms/statistics?url=${encodeURIComponent(url)}`, {
+      method: 'GET',
+      headers: getHeaders(false), // 不需要认证
+    });
+
+    return handleApiError(response);
+  },
 };
 
 // 站点配置相关接口

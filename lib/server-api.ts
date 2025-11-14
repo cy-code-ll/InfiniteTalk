@@ -153,6 +153,36 @@ export const serverCmsApi = {
     }
   },
 
+  // 获取博客文章详情（服务端专用）- 通过 ID
+  getBlogDetail: async (id: number): Promise<BlogPost | null> => {
+    try {
+      const response = await fetch(
+        `${SERVER_API_CONFIG.VIDOR_AI_BASE}/api/cms/blogDetail?id=${id}`,
+        {
+          method: 'GET',
+          headers: getServerHeaders(),
+          // 禁用缓存，每次都获取最新数据
+          cache: 'no-store',
+        }
+      );
+
+      const result = await handleServerApiError(response);
+      console.log('Blog Detail API Response:', result);
+
+      // 根据实际API返回格式处理数据
+      if (result.code === 200 && result.success && result.data) {
+        console.log(`Server API: Successfully fetched blog detail for id: ${id}`);
+        return result.data;
+      }
+
+      console.warn('Server API: Invalid blog detail response format', result);
+      return null;
+    } catch (error) {
+      console.error('Server API: Failed to fetch blog detail:', error);
+      return null;
+    }
+  },
+
   // 获取作品详情（公开接口，服务端专用）
   getOpusDetail: async (taskId: string): Promise<OpusDetail | null> => {
     try {

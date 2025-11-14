@@ -5,6 +5,7 @@ import { Footer } from '../../../components/Footer';
 import { Home, ChevronRight } from 'lucide-react';
 import { Metadata } from 'next';
 import styles from './blog-post.module.css';
+import BlogViewTracker from './BlogViewTracker';
 
 interface BlogPostPageProps {
   params: Promise<{
@@ -56,16 +57,32 @@ function estimateReadingTime(content: string): string {
 }
 
 // 获取单篇博客文章
-async function getBlogPost(slug: string): Promise<BlogPost | null> {
+async function getBlogPost(slug: string): Promise<{ post: BlogPost; originalUrl: string } | null> {
   try {
+    // 通过列表找到对应的文章
     const blogResponse = await serverCmsApi.getBlogList(1, 100, 0);
+    
+    // 在 find 之前，先找到文章并保存原始 url
+    let foundPost: BlogPost | undefined;
+    let originalUrl = '';
+    
+    for (const p of blogResponse.list) {
+      // 在调用 generateSlug 之前保存原始 url
+      const currentUrl = p.url;
+      if (generateSlug(p.title, currentUrl) === slug) {
+        foundPost = p;
+        originalUrl = currentUrl; // 保存原始 url
+        break;
+      }
+    }
 
-    // 通过比较slug来查找对应的文章
-    const post = blogResponse.list.find(p => generateSlug(p.title, p.url) === slug);
-    // console.log(post,'post---------------------------------------------')
-    // console.log('App Router: Successfully fetched blog post:', post?.title);
-    // console.log('App Router: Successfully fetched blog post:', post);
-    return post || null;
+    if (!foundPost) {
+      console.log('App Router: Blog post not found in list');
+      return null;
+    }
+
+    console.log('App Router: Successfully fetched blog post:', foundPost.title);
+    return { post: foundPost, originalUrl };
   } catch (error) {
     console.error('App Router: Failed to fetch blog post:', error);
     return null;
@@ -75,14 +92,16 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
 // 生成动态metadata
 export async function generateMetadata({ params }: BlogPostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const result = await getBlogPost(slug);
 
-  if (!post) {
+  if (!result) {
     return {
       title: 'Blog Post Not Found',
       description: 'The requested blog post could not be found.'
     };
   }
+
+  const { post } = result;
 
   return {
     title: post.seo_name || post.title,
@@ -107,14 +126,19 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
 
 export default async function BlogPost({ params }: BlogPostPageProps) {
   const { slug } = await params;
-  const post = await getBlogPost(slug);
+  const result = await getBlogPost(slug);
 
-  if (!post) {
+  if (!result) {
     notFound();
   }
 
+  const { post, originalUrl } = result;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* 博客浏览统计组件 - 使用列表中的原始 url */}
+      <BlogViewTracker url={originalUrl} />
+      
       {/* Hero Section（用于面包屑和标题） */}
       <div className="pt-24 pb-12 bg-transparent">
         <div className="container mx-auto px-6 max-w-7xl">
