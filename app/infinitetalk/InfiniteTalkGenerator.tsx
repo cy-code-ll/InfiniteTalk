@@ -1946,7 +1946,12 @@ export default function InfiniteTalkGenerator() {
       <Dialog open={isMaskModalOpen} onOpenChange={setIsMaskModalOpen}>
         <DialogContent className="max-w-[98vw] mx-auto w-[98vw] sm:max-w-[700px] sm:w-auto max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center">Select Speaker</DialogTitle>
+            <DialogTitle className="text-left text-2xl font-bold text-foreground mb-2">
+              Select Speaker
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground text-left">
+              Optional mask image to specify the person in the image to animate.
+            </p>
           </DialogHeader>
           <div className="py-3 sm:py-6 px-2 sm:px-0">
             {((tabMode === 'image-to-video' && selectedImage) ||
