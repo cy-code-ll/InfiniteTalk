@@ -122,6 +122,7 @@ export default function InfiniteTalkGenerator() {
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
   const drawingRafRef = useRef<number | null>(null);
   const pendingDrawRef = useRef<{ x: number; y: number } | null>(null);
+  const originalImageSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   // 缓存图片 URL，避免频繁创建 blob 链接
   const imageUrl = useMemo(() => {
@@ -740,6 +741,12 @@ export default function InfiniteTalkGenerator() {
     // 加载图片以获取原始尺寸
     const img = document.createElement('img');
     img.onload = () => {
+      // 💾 保存原图尺寸，用于导出遮罩时缩放
+      originalImageSizeRef.current = {
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      };
+
       // 计算 object-contain 的实际显示尺寸和位置
       const imgAspect = img.naturalWidth / img.naturalHeight;
       const containerAspect = containerRect.width / containerRect.height;
@@ -1028,19 +1035,22 @@ export default function InfiniteTalkGenerator() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
 
-    // 创建一个新的画布来生成最终的遮罩图
-    const maskCanvas = document.createElement('canvas');
-    const maskCtx = maskCanvas.getContext('2d');
-    if (!maskCtx) return '';
+    // 获取原图尺寸
+    const originalSize = originalImageSizeRef.current;
+    if (!originalSize) {
+      console.error('Original image size not found');
+      return '';
+    }
 
-    maskCanvas.width = canvas.width;
-    maskCanvas.height = canvas.height;
+    // 创建临时画布处理当前画布内容
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    if (!tempCtx) return '';
 
-    // 填充黑色背景
-    maskCtx.fillStyle = 'black';
-    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
 
-    // 将原画布的内容复制到新画布，但将半透明白色转换为纯白色
+    // 将原画布的内容复制到临时画布，并将半透明白色转换为纯白色
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
@@ -1061,7 +1071,29 @@ export default function InfiniteTalkGenerator() {
       }
     }
 
-    maskCtx.putImageData(imageData, 0, 0);
+    tempCtx.putImageData(imageData, 0, 0);
+
+    // 🎯 创建最终的遮罩画布，使用原图尺寸
+    const maskCanvas = document.createElement('canvas');
+    const maskCtx = maskCanvas.getContext('2d');
+    if (!maskCtx) return '';
+
+    maskCanvas.width = originalSize.width;
+    maskCanvas.height = originalSize.height;
+
+    // 填充黑色背景
+    maskCtx.fillStyle = 'black';
+    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+    // 将临时画布的内容缩放绘制到最终画布
+    // 使用高质量的图像缩放算法
+    maskCtx.imageSmoothingEnabled = true;
+    maskCtx.imageSmoothingQuality = 'high';
+    maskCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height,
+      0, 0, maskCanvas.width, maskCanvas.height);
+
+    console.log(`🎨 Mask generated: canvas ${canvas.width}x${canvas.height} -> original ${originalSize.width}x${originalSize.height}`);
+
     return maskCanvas.toDataURL('image/png');
   };
 
