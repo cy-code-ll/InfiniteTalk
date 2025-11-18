@@ -8,6 +8,7 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import FastMenu from "@/components/profile/FastMenu";
 import { useUserInfo } from '@/lib/providers';
+import { api } from '@/lib/api';
 
 interface UserProfileMenuProps {
   user: UserResource;
