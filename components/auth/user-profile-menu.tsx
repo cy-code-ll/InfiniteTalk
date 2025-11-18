@@ -2,22 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { useClerk } from "@clerk/nextjs";
 import { UserResource } from "@clerk/types";
 import Link from "next/link";
 import { useCallback, useState } from "react";
-import { api } from "@/lib/api";
 import FastMenu from "@/components/profile/FastMenu";
 import { useUserInfo } from '@/lib/providers';
-import { useToast } from "@/components/ui/toast-provider";
 
 interface UserProfileMenuProps {
   user: UserResource;
@@ -26,11 +16,8 @@ interface UserProfileMenuProps {
 export default function UserProfileMenu({ user }: UserProfileMenuProps) {
   const { signOut } = useClerk();
   const { clearUserState } = useUserInfo();
-  const toast = useToast();
   const [pathname, setPathname] = useState('');
   const [isSigningOut, setIsSigningOut] = useState(false);
-  const [isCloseAccountDialogOpen, setIsCloseAccountDialogOpen] = useState(false);
-  const [isClosingAccount, setIsClosingAccount] = useState(false);
 
   const initials = `${user.firstName?.[0] || ''}${user.lastName?.[0] || ''}`;
 
@@ -61,32 +48,6 @@ export default function UserProfileMenu({ user }: UserProfileMenuProps) {
     });
   };
 
-  const handleCloseAccountClick = useCallback((close: () => void) => {
-    close();
-    setIsCloseAccountDialogOpen(true);
-  }, []);
-
-  const handleConfirmCloseAccount = useCallback(async () => {
-    setIsClosingAccount(true);
-    try {
-      const result = await api.user.closeAccount();
-      if (result.code === 200) {
-        toast.success('Account closed successfully');
-        // 清除token并退出登录
-        api.auth.clearTokens();
-        clearUserState();
-        signOut();
-      } else {
-        toast.error(result.msg || 'Failed to close account');
-      }
-    } catch (error) {
-      console.error('Failed to close account:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to close account');
-    } finally {
-      setIsClosingAccount(false);
-      setIsCloseAccountDialogOpen(false);
-    }
-  }, [signOut, toast, clearUserState]);
 
   // 预热函数：供触发器 pointer 事件使用
   // 从 auth-button 的模块级缓存中读取并触发（允许重复调用）
@@ -151,52 +112,9 @@ export default function UserProfileMenu({ user }: UserProfileMenuProps) {
             >
               Sign Out
             </button>
-            <div className="h-px bg-border my-1" />
-            <button
-              className="flex w-full items-center px-2 py-2 text-sm rounded-md hover:bg-red-500/10 text-red-500 hover:text-red-600"
-              onClick={() => handleCloseAccountClick(close)}
-            >
-              Close Account
-            </button>
           </div>
         )}
       </FastMenu>
-
-      {/* 注销账户确认弹窗 */}
-      <Dialog open={isCloseAccountDialogOpen} onOpenChange={setIsCloseAccountDialogOpen}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-lg font-semibold text-foreground">Close Account</DialogTitle>
-            <DialogDescription className="text-muted-foreground">
-              Are you sure you want to close your account? This action cannot be undone. All your data will be permanently deleted.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter className="flex gap-2 sm:gap-0">
-            <Button
-              variant="outline"
-              onClick={() => setIsCloseAccountDialogOpen(false)}
-              disabled={isClosingAccount}
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              onClick={handleConfirmCloseAccount}
-              disabled={isClosingAccount}
-              className="flex items-center gap-2 ml-5"
-            >
-              {isClosingAccount ? (
-                <>
-                  <span className="animate-spin">⏳</span>
-                  Closing...
-                </>
-              ) : (
-                'Confirm Close Account'
-              )}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
     </>
   );
 }

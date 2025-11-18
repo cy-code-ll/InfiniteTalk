@@ -1,14 +1,19 @@
 'use client';
 
-import { useUser, useAuth } from '@clerk/nextjs';
+import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { Footer } from '../../components/Footer';
 import Image from 'next/image';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogTrigger,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import {
   Pagination,
@@ -22,6 +27,7 @@ import {
 import Link from 'next/link';
 import { ReloadIcon, EyeOpenIcon } from '@radix-ui/react-icons';
 import { api } from '@/lib/api';
+import { useToast } from '@/components/ui/toast-provider';
 import { 
   PayLogDialog, 
   PointsLogDialog, 
@@ -43,7 +49,9 @@ import {
 export default function ProfilePage() {
   const { user, isLoaded, isSignedIn } = useUser();
   const { userId } = useAuth();
+  const { signOut } = useClerk();
   const { openAuthModal } = useAuthModal();
+  const toast = useToast();
 
   // API 数据状态 (用户信息)
   const [userApiInfo, setUserApiInfo] = useState<UserApiInfo | null>(null);
@@ -74,6 +82,10 @@ export default function ProfilePage() {
   // 视频详情弹窗状态
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedVideoDetail, setSelectedVideoDetail] = useState<GenerationHistoryItem | null>(null);
+
+  // Close Account 相关状态
+  const [isCloseAccountDialogOpen, setIsCloseAccountDialogOpen] = useState(false);
+  const [isClosingAccount, setIsClosingAccount] = useState(false);
 
   // 打开发票弹窗
   const handleOpenInvoiceDialog = (payLogId: number) => {
@@ -296,6 +308,32 @@ export default function ProfilePage() {
     fetchGenerationHistory(currentPage);
   };
 
+  // 处理关闭账户
+  const handleCloseAccountClick = useCallback(() => {
+    setIsCloseAccountDialogOpen(true);
+  }, []);
+
+  const handleConfirmCloseAccount = useCallback(async () => {
+    setIsClosingAccount(true);
+    try {
+      const result = await api.user.closeAccount();
+      if (result.code === 200) {
+        toast.success('Account closed successfully');
+        // 清除token并退出登录
+        api.auth.clearTokens();
+        signOut();
+      } else {
+        toast.error(result.msg || 'Failed to close account');
+      }
+    } catch (error) {
+      console.error('Failed to close account:', error);
+      toast.error(error instanceof Error ? error.message : 'Failed to close account');
+    } finally {
+      setIsClosingAccount(false);
+      setIsCloseAccountDialogOpen(false);
+    }
+  }, [signOut, toast]);
+
   if (!isLoaded) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -493,6 +531,14 @@ export default function ProfilePage() {
                     onOpenChange={setIsSubscriptionDialogOpen}
                   />
                 </Dialog>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="flex items-center gap-2 rounded-full border-red-500/50 bg-card/50 hover:bg-red-500/10 backdrop-blur-sm shadow-sm transition-all duration-200 hover:shadow-md px-4 py-2 text-red-500 hover:text-red-600"
+                  onClick={handleCloseAccountClick}
+                >
+                  <span>Close Account</span>
+                </Button>
               </div>
             </div>
           </div>
@@ -698,6 +744,42 @@ export default function ProfilePage() {
           videoDetail={selectedVideoDetail}
           onDeleteSuccess={refreshHistory}
         />
+
+        {/* 注销账户确认弹窗 */}
+        <Dialog open={isCloseAccountDialogOpen} onOpenChange={setIsCloseAccountDialogOpen}>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-lg font-semibold text-foreground">Close Account</DialogTitle>
+              <DialogDescription className="text-muted-foreground">
+                Are you sure you want to close your account? This action cannot be undone. All your data will be permanently deleted.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter className="flex gap-2 sm:gap-0">
+              <Button
+                variant="outline"
+                onClick={() => setIsCloseAccountDialogOpen(false)}
+                disabled={isClosingAccount}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleConfirmCloseAccount}
+                disabled={isClosingAccount}
+                className="flex items-center gap-2 ml-5"
+              >
+                {isClosingAccount ? (
+                  <>
+                    <span className="animate-spin">⏳</span>
+                    Closing...
+                  </>
+                ) : (
+                  'Confirm Close Account'
+                )}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
       <Footer friendlyLinks={friendlyLinks} />
     </div>
