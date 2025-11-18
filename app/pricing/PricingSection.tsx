@@ -17,6 +17,7 @@ interface PricingPlan {
   title: string;
   price: string;
   priceAmount: number; // 数字类型的金额，用于统计
+  credits: number;
   features: string[];
   buttonText: string;
 }
@@ -35,6 +36,7 @@ export default function PricingSection() {
       title: 'Starter',
       price: '$9.9',
       priceAmount: 9.9,
+      credits: 90,
       buttonText: 'Get 90 Credits',
       features: [
         '90 Credits included',
@@ -52,6 +54,7 @@ export default function PricingSection() {
       title: 'Pro',
       price: '$29.9',
       priceAmount: 29.9,
+      credits: 400,
       buttonText: 'Get 400 Credits',
       features: [
         '400 Credits included',
@@ -70,6 +73,7 @@ export default function PricingSection() {
       title: 'Ultimate',
       price: '$49.9',
       priceAmount: 49.9,
+      credits: 800,
       buttonText: 'Get 800 Credits',
       features: [
         '800 Credits included',
@@ -89,6 +93,7 @@ export default function PricingSection() {
       title: 'Enterprise',
       price: '$99.9',
       priceAmount: 99.9,
+      credits: 1800,
       buttonText: 'Get 1800 Credits',
       features: [
         '1800 Credits included',
@@ -113,6 +118,7 @@ export default function PricingSection() {
       title: 'Starter',
       price: '$9.9',
       priceAmount: 9.9,
+      credits: 100,
       buttonText: 'Subscribe 100 Credits',
       features: [
         '100 Credits included',
@@ -130,6 +136,7 @@ export default function PricingSection() {
       title: 'Pro',
       price: '$29.9',
       priceAmount: 29.9,
+      credits: 480,
       buttonText: 'Subscribe 480 Credits',
       features: [
         '480 Credits included',
@@ -148,6 +155,7 @@ export default function PricingSection() {
       title: 'Ultimate',
       price: '$49.9',
       priceAmount: 49.9,
+      credits: 990,
       buttonText: 'Subscribe 990 Credits',
       features: [
         '990 Credits included',
@@ -167,6 +175,7 @@ export default function PricingSection() {
       title: 'Enterprise',
       price: '$99.9',
       priceAmount: 99.9,
+      credits: 2200,
       buttonText: 'Subscribe 2200 Credits',
       features: [
         '2200 Credits included',
@@ -203,14 +212,14 @@ export default function PricingSection() {
     // 3. 缓存支付信息到本地存储
     const selectedPlan = [...pricingPlans, ...subscriptionPlans].find(plan => plan.key === planKey);
     if (selectedPlan) {
-      const paymentInfo = {
-        planKey: planKey,
+      localStorage.setItem('selectedPlan', JSON.stringify({
+        key: selectedPlan.key,
+        title: selectedPlan.title,
         price: selectedPlan.price,
-        credits: selectedPlan.buttonText.match(/\d+/)?.[0] || '0',
-        planTitle: selectedPlan.title,
-        timestamp: new Date().toISOString()
-      };
-      localStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+        features: selectedPlan.features,
+        credits: selectedPlan.credits,
+        timestamp: Date.now()
+      }));
       
       // CNZZ 事件追踪 - 点击购买积分
       if (typeof window !== 'undefined' && (window as any)._czc) {
