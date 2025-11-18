@@ -61,7 +61,7 @@ export function InvoiceDialog({ open, onOpenChange, payLogId, payLogList }: Invo
         customerName: user?.fullName || user?.username || 'Customer',
         customerEmail: user?.primaryEmailAddress?.emailAddress || 'customer@example.com',
         customerCompanyName: invoiceType === 'business' ? companyName.trim() : '',
-        description: `${payLogItem.amount} Credits`,
+        description: `Purchase Credits for Video Generation Service`,
         quantity: 1,
         unitPrice: priceValue,
         amount: priceValue,
