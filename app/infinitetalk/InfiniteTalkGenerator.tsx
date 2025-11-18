@@ -91,6 +91,7 @@ export default function InfiniteTalkGenerator() {
   const [audioDuration, setAudioDuration] = useState<number>(0);
   const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('480p');
   const [tabMode, setTabMode] = useState<TabMode>('image-to-video');
+  const [videoFirstFrame, setVideoFirstFrame] = useState<string | null>(null);
 
   // UI state
   const [viewState, setViewState] = useState<ViewState>('videodemo');
@@ -110,14 +111,18 @@ export default function InfiniteTalkGenerator() {
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
   const [isDragOver, setIsDragOver] = useState<string | null>(null);
 
-  // Mask drawing state
+  // Mask drawing state - 分别为两种模式存储
   const [isMaskModalOpen, setIsMaskModalOpen] = useState(false);
-  const [maskImageData, setMaskImageData] = useState<string | null>(null);
+  const [maskImageDataForImage, setMaskImageDataForImage] = useState<string | null>(null);
+  const [maskImageDataForVideo, setMaskImageDataForVideo] = useState<string | null>(null);
   const [brushSize, setBrushSize] = useState(30);
   const [isDrawing, setIsDrawing] = useState(false);
   const [canvasHistory, setCanvasHistory] = useState<ImageData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const drawingRafRef = useRef<number | null>(null);
+  const pendingDrawRef = useRef<{ x: number; y: number } | null>(null);
+  const originalImageSizeRef = useRef<{ width: number; height: number } | null>(null);
 
   // 缓存图片 URL，避免频繁创建 blob 链接
   const imageUrl = useMemo(() => {
@@ -127,6 +132,14 @@ export default function InfiniteTalkGenerator() {
     return null;
   }, [selectedImage]);
 
+  // 缓存视频 URL
+  const videoUrl = useMemo(() => {
+    if (selectedVideo) {
+      return URL.createObjectURL(selectedVideo);
+    }
+    return null;
+  }, [selectedVideo]);
+
   // 清理 blob URL
   useEffect(() => {
     return () => {
@@ -135,6 +148,15 @@ export default function InfiniteTalkGenerator() {
       }
     };
   }, [imageUrl]);
+
+  // 清理视频 blob URL
+  useEffect(() => {
+    return () => {
+      if (videoUrl) {
+        URL.revokeObjectURL(videoUrl);
+      }
+    };
+  }, [videoUrl]);
 
   // Preview helper: robust playback with multiple type fallbacks
   const previewSelectedAudio = useCallback(() => {
@@ -282,8 +304,10 @@ export default function InfiniteTalkGenerator() {
         image: selectedImage,
         video: selectedVideo,
         audio: selectedAudio,
-        maskImageData: maskImageData,
-        
+        maskImageDataForImage: maskImageDataForImage,
+        maskImageDataForVideo: maskImageDataForVideo,
+        videoFirstFrame: videoFirstFrame,
+
         // 表单数据
         prompt: prompt,
         resolution: resolution,
@@ -312,7 +336,7 @@ export default function InfiniteTalkGenerator() {
     try {
       // 1️⃣ 检查是否是同一会话
       const isActiveSession = sessionStorage.getItem(SESSION_KEY);
-      
+
       if (!isActiveSession) {
         // 新会话，清除旧缓存
         console.log('🆕 New session detected, clearing old cache...');
@@ -337,10 +361,15 @@ export default function InfiniteTalkGenerator() {
           setSelectedImage(cache.image);
           console.log('✅ Image restored');
         }
-        
+
         if (cache.video) {
           setSelectedVideo(cache.video);
           console.log('✅ Video restored');
+        }
+
+        if (cache.videoFirstFrame) {
+          setVideoFirstFrame(cache.videoFirstFrame);
+          console.log('✅ Video first frame restored');
         }
 
         // 恢复音频 - 只有在没有新音频时才恢复
@@ -350,9 +379,14 @@ export default function InfiniteTalkGenerator() {
           console.log('✅ Audio restored from cache');
         }
 
-        if (cache.maskImageData) {
-          setMaskImageData(cache.maskImageData);
-          console.log('✅ Mask restored');
+        if (cache.maskImageDataForImage) {
+          setMaskImageDataForImage(cache.maskImageDataForImage);
+          console.log('✅ Image mask restored');
+        }
+
+        if (cache.maskImageDataForVideo) {
+          setMaskImageDataForVideo(cache.maskImageDataForVideo);
+          console.log('✅ Video mask restored');
         }
 
         // 恢复表单数据
@@ -383,7 +417,7 @@ export default function InfiniteTalkGenerator() {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
-        setMaskImageData(null);
+        setMaskImageDataForImage(null);
       }
     });
   };
@@ -395,10 +429,46 @@ export default function InfiniteTalkGenerator() {
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
-        setMaskImageData(null);
+        setMaskImageDataForImage(null);
       } else {
         toast.error('Please drop a valid image file');
       }
+    });
+  };
+
+  // 提取视频第一帧
+  const extractVideoFirstFrame = (videoFile: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const video = document.createElement('video');
+      video.preload = 'metadata';
+      video.muted = true;
+      video.playsInline = true;
+
+      video.onloadedmetadata = () => {
+        video.currentTime = 0;
+      };
+
+      video.onseeked = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+          const dataUrl = canvas.toDataURL('image/png');
+          URL.revokeObjectURL(video.src);
+          resolve(dataUrl);
+        } else {
+          reject(new Error('Failed to get canvas context'));
+        }
+      };
+
+      video.onerror = () => {
+        URL.revokeObjectURL(video.src);
+        reject(new Error('Failed to load video'));
+      };
+
+      video.src = URL.createObjectURL(videoFile);
     });
   };
 
@@ -408,6 +478,16 @@ export default function InfiniteTalkGenerator() {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('video/')) {
         setSelectedVideo(file);
+        setMaskImageDataForVideo(null)
+        // 提取第一帧
+        extractVideoFirstFrame(file)
+          .then(frameDataUrl => {
+            setVideoFirstFrame(frameDataUrl);
+          })
+          .catch(error => {
+            console.error('Failed to extract video first frame:', error);
+            toast.error('Failed to extract video frame');
+          });
       }
     });
   };
@@ -419,6 +499,15 @@ export default function InfiniteTalkGenerator() {
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('video/')) {
         setSelectedVideo(file);
+        // 提取第一帧
+        extractVideoFirstFrame(file)
+          .then(frameDataUrl => {
+            setVideoFirstFrame(frameDataUrl);
+          })
+          .catch(error => {
+            console.error('Failed to extract video first frame:', error);
+            toast.error('Failed to extract video frame');
+          });
       } else {
         toast.error('Please drop a valid video file');
       }
@@ -489,11 +578,11 @@ export default function InfiniteTalkGenerator() {
       if (!sessionStorage.getItem(SESSION_KEY)) {
         sessionStorage.setItem(SESSION_KEY, 'true');
       }
-      
+
       // 恢复缓存数据
       await restoreFormCache();
     };
-    
+
     initCache();
   }, []); // 只在组件挂载时执行
 
@@ -547,7 +636,7 @@ export default function InfiniteTalkGenerator() {
     }, 2000); // 2秒防抖
 
     return () => clearTimeout(timer);
-  }, [selectedImage, selectedVideo, selectedAudio, prompt, resolution, tabMode, maskImageData, audioDuration]);
+  }, [selectedImage, selectedVideo, selectedAudio, prompt, resolution, tabMode, maskImageDataForImage, maskImageDataForVideo, videoFirstFrame, audioDuration]);
 
   // 🗑️ 生成成功后清除缓存
   useEffect(() => {
@@ -563,7 +652,7 @@ export default function InfiniteTalkGenerator() {
       // 使用 sendBeacon 发送异步清除请求（更可靠）
       // 或直接标记为需要清除，下次打开时清除
       console.log('❌ Page closing, clearing cache...');
-      
+
       // 尝试同步清除（可能来不及完成）
       deleteFromIndexedDB(CACHE_KEY);
       sessionStorage.removeItem(SESSION_KEY);
@@ -587,18 +676,22 @@ export default function InfiniteTalkGenerator() {
 
   // 初始化画布
   useEffect(() => {
-    if (isMaskModalOpen && selectedImage) {
-      // 延迟初始化，确保DOM已渲染
-      setTimeout(() => {
-        initializeCanvas();
-      }, 100);
+    if (isMaskModalOpen) {
+      if ((tabMode === 'image-to-video' && selectedImage) ||
+        (tabMode === 'video-to-video' && videoFirstFrame)) {
+        // 延迟初始化，确保DOM已渲染
+        setTimeout(() => {
+          initializeCanvas();
+        }, 100);
+      }
     }
-  }, [isMaskModalOpen, selectedImage]);
+  }, [isMaskModalOpen, selectedImage, videoFirstFrame, tabMode]);
 
 
   // 删除选中的图片
   const removeSelectedImage = () => {
     setSelectedImage(null);
+    setMaskImageDataForImage(null);
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
@@ -607,6 +700,7 @@ export default function InfiniteTalkGenerator() {
   // 删除选中的视频
   const removeSelectedVideo = () => {
     setSelectedVideo(null);
+    setVideoFirstFrame(null);
     if (videoInputRef.current) {
       videoInputRef.current.value = '';
     }
@@ -623,28 +717,93 @@ export default function InfiniteTalkGenerator() {
 
   // 遮罩绘制相关函数
   const initializeCanvas = useCallback(() => {
-    if (!canvasRef.current || !selectedImage) return;
+    if (!canvasRef.current) return;
+
+    // 根据模式确定使用哪个图片源
+    let imgSrc: string | null = null;
+    if (tabMode === 'image-to-video' && imageUrl) {
+      imgSrc = imageUrl;
+    } else if (tabMode === 'video-to-video' && videoFirstFrame) {
+      imgSrc = videoFirstFrame;
+    }
+
+    if (!imgSrc) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    // 设置画布尺寸为显示区域尺寸
+    // 获取容器尺寸
     const container = canvas.parentElement;
     if (!container) return;
+    const containerRect = container.getBoundingClientRect();
 
-    const rect = container.getBoundingClientRect();
-    canvas.width = rect.width;
-    canvas.height = rect.height;
+    // 加载图片以获取原始尺寸
+    const img = document.createElement('img');
+    img.onload = () => {
+      // 💾 保存原图尺寸，用于导出遮罩时缩放
+      originalImageSizeRef.current = {
+        width: img.naturalWidth,
+        height: img.naturalHeight
+      };
 
-    // 填充透明背景（让原图透过）
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // 计算 object-contain 的实际显示尺寸和位置
+      const imgAspect = img.naturalWidth / img.naturalHeight;
+      const containerAspect = containerRect.width / containerRect.height;
 
-    // 保存初始状态
-    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    setCanvasHistory([imageData]);
-    setHistoryIndex(0);
-  }, [selectedImage]);
+      let displayWidth, displayHeight, offsetX, offsetY;
+
+      if (imgAspect > containerAspect) {
+        // 图片更宽，以宽度为准
+        displayWidth = containerRect.width;
+        displayHeight = containerRect.width / imgAspect;
+        offsetX = 0;
+        offsetY = (containerRect.height - displayHeight) / 2;
+      } else {
+        // 图片更高，以高度为准
+        displayHeight = containerRect.height;
+        displayWidth = containerRect.height * imgAspect;
+        offsetX = (containerRect.width - displayWidth) / 2;
+        offsetY = 0;
+      }
+
+      // 🚀 性能优化：限制画布最大尺寸为 1920x1080（1080p）
+      // 对于 4K 视频，这将减少 4 倍的像素处理量
+      const MAX_CANVAS_WIDTH = 1920;
+      const MAX_CANVAS_HEIGHT = 1080;
+
+      let canvasWidth = img.naturalWidth;
+      let canvasHeight = img.naturalHeight;
+
+      // 如果超过最大尺寸，按比例缩小
+      if (canvasWidth > MAX_CANVAS_WIDTH || canvasHeight > MAX_CANVAS_HEIGHT) {
+        const scale = Math.min(MAX_CANVAS_WIDTH / canvasWidth, MAX_CANVAS_HEIGHT / canvasHeight);
+        canvasWidth = Math.floor(canvasWidth * scale);
+        canvasHeight = Math.floor(canvasHeight * scale);
+        console.log(`📊 Canvas size optimized: ${img.naturalWidth}x${img.naturalHeight} -> ${canvasWidth}x${canvasHeight}`);
+      }
+
+      // 设置画布尺寸为优化后的尺寸
+      canvas.width = canvasWidth;
+      canvas.height = canvasHeight;
+
+      // 设置画布显示尺寸和位置（CSS）
+      canvas.style.width = `${displayWidth}px`;
+      canvas.style.height = `${displayHeight}px`;
+      canvas.style.left = `${offsetX}px`;
+      canvas.style.top = `${offsetY}px`;
+      canvas.style.position = 'absolute';
+
+      // 填充透明背景（让原图透过）
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // 保存初始状态
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      setCanvasHistory([imageData]);
+      setHistoryIndex(0);
+    };
+    img.src = imgSrc;
+  }, [tabMode, imageUrl, videoFirstFrame]);
 
   const saveCanvasState = () => {
     if (!canvasRef.current) return;
@@ -655,8 +814,17 @@ export default function InfiniteTalkGenerator() {
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const newHistory = canvasHistory.slice(0, historyIndex + 1);
     newHistory.push(imageData);
-    setCanvasHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
+
+    // 🚀 性能优化：限制历史记录数量为 20 条，避免内存占用过大
+    const MAX_HISTORY = 20;
+    if (newHistory.length > MAX_HISTORY) {
+      newHistory.shift(); // 移除最旧的记录
+      setCanvasHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    } else {
+      setCanvasHistory(newHistory);
+      setHistoryIndex(newHistory.length - 1);
+    }
   };
 
   const undoCanvas = () => {
@@ -691,45 +859,85 @@ export default function InfiniteTalkGenerator() {
     draw(e);
   };
 
-  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
-    if (!isDrawing || !canvasRef.current) return;
+  // 实际执行绘制的函数
+  const performDraw = useCallback((x: number, y: number) => {
+    if (!canvasRef.current) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
     const rect = canvas.getBoundingClientRect();
-    let x: number, y: number;
 
-    // 处理触摸事件和鼠标事件
-    if ('touches' in e && e.touches.length > 0) {
-      // 触摸事件
-      x = e.touches[0].clientX - rect.left;
-      y = e.touches[0].clientY - rect.top;
-    } else if ('clientX' in e) {
-      // 鼠标事件
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
-    } else {
-      return;
-    }
+    // 将显示坐标转换为画布实际坐标
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    const canvasX = x * scaleX;
+    const canvasY = y * scaleY;
 
-    // 检查是否在画布范围内
-    if (x < 0 || x > canvas.width || y < 0 || y > canvas.height) {
-      return;
-    }
+    // 计算实际画布上的画笔大小
+    const actualBrushSize = brushSize * scaleX;
 
     // 使用半透明白色绘制，让用户看到绘制效果
     ctx.globalCompositeOperation = 'source-over';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
     ctx.beginPath();
-    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
+    ctx.arc(canvasX, canvasY, actualBrushSize / 2, 0, Math.PI * 2);
     ctx.fill();
+  }, [brushSize]);
+
+  const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
+    if (!isDrawing || !canvasRef.current) return;
+
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    let clientX: number, clientY: number;
+
+    // 处理触摸事件和鼠标事件
+    if ('touches' in e && e.touches.length > 0) {
+      // 触摸事件
+      clientX = e.touches[0].clientX - rect.left;
+      clientY = e.touches[0].clientY - rect.top;
+    } else if ('clientX' in e) {
+      // 鼠标事件
+      clientX = e.clientX - rect.left;
+      clientY = e.clientY - rect.top;
+    } else {
+      return;
+    }
+
+    // 检查是否在画布显示范围内
+    if (clientX < 0 || clientX > rect.width || clientY < 0 || clientY > rect.height) {
+      return;
+    }
+
+    // 🚀 性能优化：使用 requestAnimationFrame 节流绘制
+    // 保存待绘制的坐标
+    pendingDrawRef.current = { x: clientX, y: clientY };
+
+    // 如果还没有安排动画帧，则安排一个
+    if (drawingRafRef.current === null) {
+      drawingRafRef.current = requestAnimationFrame(() => {
+        if (pendingDrawRef.current) {
+          performDraw(pendingDrawRef.current.x, pendingDrawRef.current.y);
+          pendingDrawRef.current = null;
+        }
+        drawingRafRef.current = null;
+      });
+    }
   };
 
   const stopDrawing = () => {
     if (isDrawing) {
       setIsDrawing(false);
+
+      // 清理待处理的 RAF
+      if (drawingRafRef.current !== null) {
+        cancelAnimationFrame(drawingRafRef.current);
+        drawingRafRef.current = null;
+      }
+      pendingDrawRef.current = null;
+
       saveCanvasState();
     }
   };
@@ -740,27 +948,27 @@ export default function InfiniteTalkGenerator() {
 
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    let x: number, y: number;
+    let clientX: number, clientY: number;
 
     // 处理触摸事件和鼠标事件
     if ('touches' in e && e.touches.length > 0) {
       // 触摸事件
-      x = e.touches[0].clientX - rect.left;
-      y = e.touches[0].clientY - rect.top;
+      clientX = e.touches[0].clientX - rect.left;
+      clientY = e.touches[0].clientY - rect.top;
     } else if ('clientX' in e) {
       // 鼠标事件
-      x = e.clientX - rect.left;
-      y = e.clientY - rect.top;
+      clientX = e.clientX - rect.left;
+      clientY = e.clientY - rect.top;
     } else {
       return;
     }
 
-    // 检查是否在画布范围内
-    const isInCanvas = x >= 0 && x <= canvas.width && y >= 0 && y <= canvas.height;
+    // 检查是否在画布显示范围内
+    const isInCanvas = clientX >= 0 && clientX <= rect.width && clientY >= 0 && clientY <= rect.height;
 
     // 只有在画布范围内才更新鼠标位置，避免不必要的状态更新
     if (isInCanvas) {
-      setMousePosition({ x, y });
+      setMousePosition({ x: clientX, y: clientY });
     } else {
       // 如果不在画布范围内，清除鼠标位置
       setMousePosition(null);
@@ -768,22 +976,33 @@ export default function InfiniteTalkGenerator() {
 
     // 如果正在绘制且在画布范围内
     if (isDrawing && isInCanvas) {
-      const ctx = canvas.getContext('2d');
-      if (!ctx) return;
+      // 🚀 性能优化：使用 requestAnimationFrame 节流绘制
+      pendingDrawRef.current = { x: clientX, y: clientY };
 
-      // 使用半透明白色绘制，让用户看到绘制效果
-      ctx.globalCompositeOperation = 'source-over';
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-      ctx.beginPath();
-      ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2);
-      ctx.fill();
+      if (drawingRafRef.current === null) {
+        drawingRafRef.current = requestAnimationFrame(() => {
+          if (pendingDrawRef.current) {
+            performDraw(pendingDrawRef.current.x, pendingDrawRef.current.y);
+            pendingDrawRef.current = null;
+          }
+          drawingRafRef.current = null;
+        });
+      }
     }
-  }, [isDrawing, brushSize]);
+  }, [isDrawing, performDraw]);
 
   // 处理鼠标释放事件
   const handleMouseUp = useCallback(() => {
     if (isDrawing) {
       setIsDrawing(false);
+
+      // 清理待处理的 RAF
+      if (drawingRafRef.current !== null) {
+        cancelAnimationFrame(drawingRafRef.current);
+        drawingRafRef.current = null;
+      }
+      pendingDrawRef.current = null;
+
       saveCanvasState();
     }
     // 清除鼠标位置
@@ -816,19 +1035,22 @@ export default function InfiniteTalkGenerator() {
     const ctx = canvas.getContext('2d');
     if (!ctx) return '';
 
-    // 创建一个新的画布来生成最终的遮罩图
-    const maskCanvas = document.createElement('canvas');
-    const maskCtx = maskCanvas.getContext('2d');
-    if (!maskCtx) return '';
+    // 获取原图尺寸
+    const originalSize = originalImageSizeRef.current;
+    if (!originalSize) {
+      console.error('Original image size not found');
+      return '';
+    }
 
-    maskCanvas.width = canvas.width;
-    maskCanvas.height = canvas.height;
+    // 创建临时画布处理当前画布内容
+    const tempCanvas = document.createElement('canvas');
+    const tempCtx = tempCanvas.getContext('2d');
+    if (!tempCtx) return '';
 
-    // 填充黑色背景
-    maskCtx.fillStyle = 'black';
-    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+    tempCanvas.width = canvas.width;
+    tempCanvas.height = canvas.height;
 
-    // 将原画布的内容复制到新画布，但将半透明白色转换为纯白色
+    // 将原画布的内容复制到临时画布，并将半透明白色转换为纯白色
     const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
     const data = imageData.data;
 
@@ -849,13 +1071,40 @@ export default function InfiniteTalkGenerator() {
       }
     }
 
-    maskCtx.putImageData(imageData, 0, 0);
+    tempCtx.putImageData(imageData, 0, 0);
+
+    // 🎯 创建最终的遮罩画布，使用原图尺寸
+    const maskCanvas = document.createElement('canvas');
+    const maskCtx = maskCanvas.getContext('2d');
+    if (!maskCtx) return '';
+
+    maskCanvas.width = originalSize.width;
+    maskCanvas.height = originalSize.height;
+
+    // 填充黑色背景
+    maskCtx.fillStyle = 'black';
+    maskCtx.fillRect(0, 0, maskCanvas.width, maskCanvas.height);
+
+    // 将临时画布的内容缩放绘制到最终画布
+    // 使用高质量的图像缩放算法
+    maskCtx.imageSmoothingEnabled = true;
+    maskCtx.imageSmoothingQuality = 'high';
+    maskCtx.drawImage(tempCanvas, 0, 0, tempCanvas.width, tempCanvas.height,
+      0, 0, maskCanvas.width, maskCanvas.height);
+
+    console.log(`🎨 Mask generated: canvas ${canvas.width}x${canvas.height} -> original ${originalSize.width}x${originalSize.height}`);
+
     return maskCanvas.toDataURL('image/png');
   };
 
   const handleUseMask = () => {
     const maskData = generateMaskImage();
-    setMaskImageData(maskData);
+    // 根据当前模式保存到对应的状态
+    if (tabMode === 'image-to-video') {
+      setMaskImageDataForImage(maskData);
+    } else {
+      setMaskImageDataForVideo(maskData);
+    }
     setIsMaskModalOpen(false);
     toast.showToast('Mask created successfully!', 'success');
     setMousePosition(null);
@@ -863,6 +1112,14 @@ export default function InfiniteTalkGenerator() {
 
   const handleCancelMask = () => {
     setIsMaskModalOpen(false);
+
+    // 清理待处理的 RAF
+    if (drawingRafRef.current !== null) {
+      cancelAnimationFrame(drawingRafRef.current);
+      drawingRafRef.current = null;
+    }
+    pendingDrawRef.current = null;
+
     // 重置画布为透明
     if (canvasRef.current) {
       const ctx = canvasRef.current.getContext('2d');
@@ -876,7 +1133,11 @@ export default function InfiniteTalkGenerator() {
   };
 
   const removeMask = () => {
-    setMaskImageData(null);
+    if (tabMode === 'image-to-video') {
+      setMaskImageDataForImage(null);
+    } else {
+      setMaskImageDataForVideo(null);
+    }
     toast.showToast('Mask removed', 'info');
   };
 
@@ -979,7 +1240,7 @@ export default function InfiniteTalkGenerator() {
     // 立即更新关键状态（用户可见的反馈）- 使用 React 18 自动批处理
     // 这些更新会被自动批处理，减少重渲染次数
     setIsGenerating(true);
-    
+
     // 创建新的 AbortController - 这个很快，保持同步
     // 先取消旧的 AbortController（如果存在）
     if (abortControllerRef.current) {
@@ -988,7 +1249,7 @@ export default function InfiniteTalkGenerator() {
     const newAbortController = new AbortController();
     abortControllerRef.current = newAbortController;
     setAbortController(newAbortController);
-    
+
     // 将重渲染较重的工作推迟到下一个事件循环，并作为低优先级处理
     setTimeout(() => {
       startTransition(() => {
@@ -1015,7 +1276,7 @@ export default function InfiniteTalkGenerator() {
           prompt: prompt.trim(),
           duration: audioDuration,
           resolution: resolution,
-          mask: maskImageData || undefined, // 添加遮罩图
+          mask: maskImageDataForImage || undefined, // 添加遮罩图
         });
       } else {
         // Video to Video 模式
@@ -1025,6 +1286,7 @@ export default function InfiniteTalkGenerator() {
           prompt: prompt.trim(),
           duration: audioDuration,
           resolution: resolution,
+          mask: maskImageDataForVideo || undefined, // 添加遮罩图
         });
       }
 
@@ -1088,7 +1350,8 @@ export default function InfiniteTalkGenerator() {
     prompt,
     audioDuration,
     resolution,
-    maskImageData,
+    maskImageDataForImage,
+    maskImageDataForVideo,
     startFakeProgress,
     completeProgress,
     stopFakeProgress,
@@ -1098,7 +1361,7 @@ export default function InfiniteTalkGenerator() {
   const handleTabChange = useCallback((newTabMode: TabMode) => {
     // 如果已经是当前 tab，直接返回，避免不必要的更新
     if (newTabMode === tabMode) return;
-    
+
     // 使用 startTransition 标记为非紧急更新，优先响应用户交互
     startTransition(() => {
       setTabMode(newTabMode);
@@ -1176,7 +1439,7 @@ export default function InfiniteTalkGenerator() {
                   Your browser does not support the video tag.
                 </video>
               </div>
-              
+
               {/* Download and Share Buttons */}
               <div className="flex gap-2 justify-center items-center">
                 {/* Download Button */}
@@ -1201,7 +1464,7 @@ export default function InfiniteTalkGenerator() {
                       className="hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2]"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
                     </Button>
 
@@ -1214,7 +1477,7 @@ export default function InfiniteTalkGenerator() {
                       className="hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2]"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
                       </svg>
                     </Button>
 
@@ -1227,7 +1490,7 @@ export default function InfiniteTalkGenerator() {
                       className="hover:bg-[#25D366] hover:text-white hover:border-[#25D366]"
                     >
                       <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                       </svg>
                     </Button>
                   </>
@@ -1245,7 +1508,7 @@ export default function InfiniteTalkGenerator() {
 
   return (
     <div className="container mx-auto px-4 pb-16">
-      
+
       <div className="grid lg:grid-cols-5 gap-12 max-w-7xl mx-auto">
         {/* Left Side - Form */}
         <div className="lg:col-span-2 space-y-8">
@@ -1286,15 +1549,16 @@ export default function InfiniteTalkGenerator() {
                 <label className="block text-white font-medium">
                   {tabMode === 'image-to-video' ? 'Upload Image' : 'Upload Video'} <span className="text-red-500">*</span>
                 </label>
-                {tabMode === 'image-to-video' && selectedImage && (
-                  <button
-                    onClick={() => setIsMaskModalOpen(true)}
-                    className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary/90 text-sm font-medium rounded-lg transition-all duration-200 will-change-transform active:scale-[0.98]"
-                    title="Optional mask image to specify the person in the image to animate."
-                  >
-                    Select Speaker
-                  </button>
-                )}
+                {((tabMode === 'image-to-video' && selectedImage) ||
+                  (tabMode === 'video-to-video' && selectedVideo && videoFirstFrame)) && (
+                    <button
+                      onClick={() => setIsMaskModalOpen(true)}
+                      className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 border border-primary/30 hover:border-primary/50 text-primary hover:text-primary/90 text-sm font-medium rounded-lg transition-all duration-200 will-change-transform active:scale-[0.98]"
+                      title="Optional mask image to specify the person in the image/video to animate."
+                    >
+                      Select Speaker
+                    </button>
+                  )}
               </div>
               <div className="relative">
                 {tabMode === 'image-to-video' ? (
@@ -1309,10 +1573,10 @@ export default function InfiniteTalkGenerator() {
                         className="w-full h-48 object-contain"
                         unoptimized
                       />
-                      {maskImageData && (
+                      {maskImageDataForImage && (
                         <div className="absolute inset-0 pointer-events-none">
                           <Image
-                            src={maskImageData}
+                            src={maskImageDataForImage}
                             alt="Mask overlay"
                             width={400}
                             height={300}
@@ -1327,7 +1591,7 @@ export default function InfiniteTalkGenerator() {
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {maskImageData && (
+                      {maskImageDataForImage && (
                         <button
                           onClick={removeMask}
                           className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
@@ -1361,17 +1625,38 @@ export default function InfiniteTalkGenerator() {
                   selectedVideo ? (
                     <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
                       <video
-                        src={URL.createObjectURL(selectedVideo)}
+                        src={videoUrl!}
                         className="w-full h-48 object-contain"
                         controls
                         muted
                       />
+                      {maskImageDataForVideo && videoFirstFrame && (
+                        <div className="absolute inset-0 pointer-events-none">
+                          <Image
+                            src={maskImageDataForVideo}
+                            alt="Mask overlay"
+                            width={400}
+                            height={300}
+                            className="w-full h-48 object-contain opacity-50"
+                            unoptimized
+                          />
+                        </div>
+                      )}
                       <button
                         onClick={removeSelectedVideo}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
                       >
                         <X className="w-4 h-4" />
                       </button>
+                      {maskImageDataForVideo && (
+                        <button
+                          onClick={removeMask}
+                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
+                          title="Remove mask"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
                     </div>
                   ) : (
                     <div
@@ -1429,8 +1714,8 @@ export default function InfiniteTalkGenerator() {
               </div>
               <div className="flex justify-between items-center text-sm mb-3">
                 <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
-                <Link 
-                  href="/audio-tools" 
+                <Link
+                  href="/audio-tools"
                   className="text-primary hover:text-primary/80 underline"
                   onClick={handleAudioToolsClick}
                 >
@@ -1572,7 +1857,7 @@ export default function InfiniteTalkGenerator() {
                 onClick={handleGenerate}
                 disabled={isGenerating}
                 className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white py-3 font-semibold disabled:opacity-50 will-change-transform active:scale-[0.98] touch-manipulation"
-                style={{ 
+                style={{
                   // 优化渲染性能 - 使用 CSS containment
                   contain: 'layout style paint',
                   // 移动端优化 - 禁用双击缩放
@@ -1693,131 +1978,86 @@ export default function InfiniteTalkGenerator() {
       <Dialog open={isMaskModalOpen} onOpenChange={setIsMaskModalOpen}>
         <DialogContent className="max-w-[98vw] mx-auto w-[98vw] sm:max-w-[700px] sm:w-auto max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-center">Select Speaker</DialogTitle>
+            <DialogTitle className="text-left text-2xl font-bold text-foreground mb-2">
+              Select Speaker
+            </DialogTitle>
+            <p className="text-sm text-muted-foreground text-left">
+              Optional mask image to specify the person in the image to animate.
+            </p>
           </DialogHeader>
           <div className="py-3 sm:py-6 px-2 sm:px-0">
-            {selectedImage && (
-              <div className="space-y-4">
-                {/* Combined Image and Canvas */}
-                <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600">
-                  {/* Background Image */}
-                  <Image
-                    src={imageUrl!}
-                    alt="Original image"
-                    width={1200}
-                    height={800}
-                    className="w-full h-[300px] sm:h-[500px] object-contain"
-                    unoptimized
-                  />
+            {((tabMode === 'image-to-video' && selectedImage) ||
+              (tabMode === 'video-to-video' && videoFirstFrame)) && (
+                <div className="space-y-4">
+                  {/* Combined Image and Canvas */}
+                  <div className="relative bg-slate-800 rounded-lg overflow-hidden border border-slate-600" style={{ minHeight: '300px' }}>
+                    {/* Background Image */}
+                    <Image
+                      src={tabMode === 'image-to-video' ? imageUrl! : videoFirstFrame!}
+                      alt={tabMode === 'image-to-video' ? 'Original image' : 'Video first frame'}
+                      width={1200}
+                      height={800}
+                      className="w-full h-[300px] sm:h-[500px] object-contain"
+                      unoptimized
+                    />
 
-                  {/* Canvas overlay for drawing mask */}
-                  <canvas
-                    ref={canvasRef}
-                    className="absolute inset-0 w-full h-[300px] sm:h-[500px] cursor-none"
-                    onMouseDown={startDrawing}
-                    onTouchStart={startDrawing}
-                    onTouchMove={(e) => {
-                      e.preventDefault();
-                      if (isDrawing) {
-                        draw(e);
-                      }
-                    }}
-                    style={{ imageRendering: 'pixelated', touchAction: 'none' }}
-                  />
-
-                  {/* Mouse cursor circle */}
-                  {mousePosition && (
-                    <div
-                      className="absolute pointer-events-none border-2 border-white rounded-full opacity-70"
+                    {/* Canvas overlay for drawing mask */}
+                    <canvas
+                      ref={canvasRef}
+                      className="cursor-none"
+                      onMouseDown={startDrawing}
+                      onTouchStart={startDrawing}
+                      onTouchMove={(e) => {
+                        e.preventDefault();
+                        if (isDrawing) {
+                          draw(e);
+                        }
+                      }}
                       style={{
-                        left: 0,
-                        top: 0,
-                        width: brushSize,
-                        height: brushSize,
-                        transform: `translate(${mousePosition.x - brushSize / 2}px, ${mousePosition.y - brushSize / 2}px)`,
+                        imageRendering: 'pixelated',
+                        touchAction: 'none',
+                        position: 'absolute',
+                        pointerEvents: 'auto'
                       }}
                     />
-                  )}
-                </div>
 
-                {/* Controls */}
-                <div className="bg-slate-700/50 rounded-lg p-3 sm:p-6">
-                  {/* Mobile Layout */}
-                  <div className="block sm:hidden space-y-4">
-                    {/* Brush Size Control */}
-                    <div className="flex items-center justify-between">
-                      <label className="text-white text-sm font-medium">Brush Size:</label>
-                      <div className="flex items-center space-x-2">
-                        <input
-                          type="range"
-                          min="5"
-                          max="50"
-                          value={brushSize}
-                          onChange={(e) => setBrushSize(Number(e.target.value))}
-                          className="w-24"
-                        />
-                        <span className="text-white text-sm w-8">{brushSize}px</span>
-                      </div>
-                    </div>
-
-                    {/* Undo/Redo Buttons */}
-                    <div className="flex items-center justify-center space-x-4">
-                      <button
-                        onClick={undoCanvas}
-                        disabled={historyIndex <= 0}
-                        className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Undo"
-                      >
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                        </svg>
-                      </button>
-                      <button
-                        onClick={redoCanvas}
-                        disabled={historyIndex >= canvasHistory.length - 1}
-                        className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
-                        title="Redo"
-                      >
-                        <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
-                        </svg>
-                      </button>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div className="flex items-center space-x-3">
-                      <button
-                        onClick={handleCancelMask}
-                        className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleUseMask}
-                        className="flex-1 py-2 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
-                      >
-                        Use Mask
-                      </button>
-                    </div>
+                    {/* Mouse cursor circle */}
+                    {mousePosition && canvasRef.current && (
+                      <div
+                        className="absolute pointer-events-none border-2 border-white rounded-full opacity-70"
+                        style={{
+                          left: canvasRef.current.style.left || '0',
+                          top: canvasRef.current.style.top || '0',
+                          width: brushSize,
+                          height: brushSize,
+                          transform: `translate(${mousePosition.x - brushSize / 2}px, ${mousePosition.y - brushSize / 2}px)`,
+                        }}
+                      />
+                    )}
                   </div>
 
-                  {/* Desktop Layout */}
-                  <div className="hidden sm:flex items-center justify-between">
-                    <div className="flex items-center space-x-8">
-                      <div className="flex items-center space-x-3">
-                        <label className="text-white text-sm font-medium w-20">Brush Size:</label>
-                        <input
-                          type="range"
-                          min="5"
-                          max="50"
-                          value={brushSize}
-                          onChange={(e) => setBrushSize(Number(e.target.value))}
-                          className="w-32"
-                        />
-                        <span className="text-white text-sm w-10">{brushSize}px</span>
+                  {/* Controls */}
+                  <div className="bg-slate-700/50 rounded-lg p-3 sm:p-6">
+                    {/* Mobile Layout */}
+                    <div className="block sm:hidden space-y-4">
+                      {/* Brush Size Control */}
+                      <div className="flex items-center justify-between">
+                        <label className="text-white text-sm font-medium">Brush Size:</label>
+                        <div className="flex items-center space-x-2">
+                          <input
+                            type="range"
+                            min="5"
+                            max="50"
+                            value={brushSize}
+                            onChange={(e) => setBrushSize(Number(e.target.value))}
+                            className="w-24"
+                          />
+                          <span className="text-white text-sm w-8">{brushSize}px</span>
+                        </div>
                       </div>
 
-                      <div className="flex items-center space-x-3">
+                      {/* Undo/Redo Buttons */}
+                      <div className="flex items-center justify-center space-x-4">
                         <button
                           onClick={undoCanvas}
                           disabled={historyIndex <= 0}
@@ -1839,30 +2079,86 @@ export default function InfiniteTalkGenerator() {
                           </svg>
                         </button>
                       </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center space-x-3">
+                        <button
+                          onClick={handleCancelMask}
+                          className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleUseMask}
+                          className="flex-1 py-2 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Use Mask
+                        </button>
+                      </div>
                     </div>
 
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={handleCancelMask}
-                        className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={handleUseMask}
-                        className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
-                      >
-                        Use Mask
-                      </button>
+                    {/* Desktop Layout */}
+                    <div className="hidden sm:flex items-center justify-between">
+                      <div className="flex items-center space-x-8">
+                        <div className="flex items-center space-x-3">
+                          <label className="text-white text-sm font-medium w-20">Brush Size:</label>
+                          <input
+                            type="range"
+                            min="5"
+                            max="50"
+                            value={brushSize}
+                            onChange={(e) => setBrushSize(Number(e.target.value))}
+                            className="w-32"
+                          />
+                          <span className="text-white text-sm w-10">{brushSize}px</span>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={undoCanvas}
+                            disabled={historyIndex <= 0}
+                            className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Undo"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                            </svg>
+                          </button>
+                          <button
+                            onClick={redoCanvas}
+                            disabled={historyIndex >= canvasHistory.length - 1}
+                            className="p-2 rounded-lg bg-slate-600 hover:bg-slate-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                            title="Redo"
+                          >
+                            <svg className="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 10h-10a8 8 0 00-8 8v2m18-10l-6 6m6-6l-6-6" />
+                            </svg>
+                          </button>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-4">
+                        <button
+                          onClick={handleCancelMask}
+                          className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleUseMask}
+                          className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
+                        >
+                          Use Mask
+                        </button>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                <div className="text-center text-slate-400 text-sm">
-                  <p>Draw on the image to create a mask. </p>
+                  <div className="text-center text-slate-400 text-sm">
+                    <p>Draw on the image to create a mask. </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </DialogContent>
       </Dialog>

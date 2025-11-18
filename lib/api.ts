@@ -522,6 +522,7 @@ export const infiniteTalkApi = {
     prompt: string;
     duration: number;
     resolution: string;
+    mask?: string;
   }) => {
     const formData = new FormData();
     formData.append('video', params.video);
@@ -529,6 +530,11 @@ export const infiniteTalkApi = {
     formData.append('prompt', params.prompt);
     formData.append('duration', params.duration.toString());
     formData.append('resolution', params.resolution);
+
+    // 如果有遮罩数据，添加到 FormData
+    if (params.mask) {
+      formData.append('mask', params.mask);
+    }
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
     const token = localStorage.getItem('access_token');
