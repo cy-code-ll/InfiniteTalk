@@ -87,7 +87,7 @@ export function UserProvider({ children }: UserProviderProps) {
     const checkAndCacheIvcode = () => {
       try {
         const urlParams = new URLSearchParams(window.location.search);
-        const ivcode = urlParams.get('ivcode');
+        const ivcode = urlParams.get('ivcode') || urlParams.get('i');
 
         if (ivcode) {
           // 如果 URL 中有 ivcode，保存到缓存
