@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
@@ -57,6 +57,48 @@ export function Wans2vHero() {
   const { isSignedIn } = useAuth();
   const { userInfo } = useUserInfo();
   const { openAuthModal } = useAuthModal();
+
+  // 使用 AudioContext.decodeAudioData 校验音频文件是否损坏
+  const validateAudioFile = useCallback(async (file: File): Promise<{ isValid: boolean; duration?: number; error?: string }> => {
+    try {
+      // 读取文件为 ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+
+      // 创建 AudioContext
+      const audioContext = new AudioContext();
+
+      try {
+        // 尝试解码音频数据
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        // 解码成功，获取时长
+        const duration = audioBuffer.duration;
+
+        // 清理资源
+        await audioContext.close();
+
+        return {
+          isValid: true,
+          duration: Math.ceil(duration)
+        };
+      } catch (decodeError) {
+        // 解码失败，文件可能损坏
+        await audioContext.close();
+
+        const errorMessage = 'Audio file is corrupted';
+        return {
+          isValid: false,
+          error: errorMessage
+        };
+      }
+    } catch (readError) {
+      // 文件读取失败
+      return {
+        isValid: false,
+        error: 'Failed to read file'
+      };
+    }
+  }, []);
 
   // 获取音频时长
   const getAudioDuration = (file: File): Promise<number> => {
@@ -201,7 +243,16 @@ export function Wans2vHero() {
         return;
       }
 
-      const duration = await getAudioDuration(file);
+      // 使用 AudioContext.decodeAudioData 校验文件
+      const validation = await validateAudioFile(file);
+
+      if (!validation.isValid) {
+        toast.showToast(validation.error || 'Audio file is corrupted or invalid', 'error');
+        return;
+      }
+
+      // 获取时长（优先使用校验返回的时长）
+      const duration = validation.duration || await getAudioDuration(file);
 
       // 检查音频时长是否超过600秒
       if (duration > 600) {
@@ -209,6 +260,7 @@ export function Wans2vHero() {
         return;
       }
 
+      // 校验通过，设置文件
       setAudioFile(file);
       setAudioDuration(duration);
     }
@@ -229,7 +281,16 @@ export function Wans2vHero() {
         return;
       }
 
-      const duration = await getAudioDuration(file);
+      // 使用 AudioContext.decodeAudioData 校验文件
+      const validation = await validateAudioFile(file);
+
+      if (!validation.isValid) {
+        toast.showToast(validation.error || 'Audio file is corrupted or invalid', 'error');
+        return;
+      }
+
+      // 获取时长（优先使用校验返回的时长）
+      const duration = validation.duration || await getAudioDuration(file);
 
       // 检查音频时长是否超过600秒
       if (duration > 600) {
@@ -237,6 +298,7 @@ export function Wans2vHero() {
         return;
       }
 
+      // 校验通过，设置文件
       setAudioFile(file);
       setAudioDuration(duration);
     }
@@ -268,31 +330,45 @@ export function Wans2vHero() {
 
   // 从 AudioTools 页面接收处理后的音频
   React.useEffect(() => {
-    const checkForAudioFromTools = () => {
+    const checkForAudioFromTools = async () => {
       try {
         const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudio');
         if (audioDataStr) {
           const audioData = JSON.parse(audioDataStr);
 
           // 将 base64 数据转换为 File 对象
-          fetch(audioData.data)
-            .then(res => res.blob())
-            .then(async (blob) => {
-              const file = new File([blob], audioData.name, { type: audioData.type });
-              const duration = await getAudioDuration(file);
+          try {
+            const res = await fetch(audioData.data);
+            const blob = await res.blob();
+            const file = new File([blob], audioData.name, { type: audioData.type });
 
-              // 检查音频时长是否超过600秒
-              if (duration > 600) {
-                toast.showToast('Audio file must be 600 seconds or less', 'error');
-                return;
-              }
+            // 使用 AudioContext.decodeAudioData 校验文件
+            const validation = await validateAudioFile(file);
 
-              setAudioFile(file);
-              setAudioDuration(duration);
-            })
-            .catch(error => {
-              console.error('Failed to load audio from AudioTools:', error);
-            });
+            if (!validation.isValid) {
+              console.error('Audio from AudioTools is invalid:', validation.error);
+              toast.showToast('Audio file from Audio Tools is corrupted or invalid', 'error');
+              sessionStorage.removeItem('audioToolsProcessedAudio');
+              return;
+            }
+
+            // 获取时长（优先使用校验返回的时长）
+            const duration = validation.duration || await getAudioDuration(file);
+
+            // 检查音频时长是否超过600秒
+            if (duration > 600) {
+              toast.showToast('Audio file must be 600 seconds or less', 'error');
+              sessionStorage.removeItem('audioToolsProcessedAudio');
+              return;
+            }
+
+            // 校验通过，设置文件
+            setAudioFile(file);
+            setAudioDuration(duration);
+          } catch (error) {
+            console.error('Failed to load audio from AudioTools:', error);
+            toast.showToast('Failed to load audio from Audio Tools', 'error');
+          }
 
           // 清除 sessionStorage 中的数据
           sessionStorage.removeItem('audioToolsProcessedAudio');
@@ -303,7 +379,7 @@ export function Wans2vHero() {
     };
 
     checkForAudioFromTools();
-  }, []);
+  }, [validateAudioFile, toast]);
 
   // 🔄 自动保存（防抖）
   React.useEffect(() => {

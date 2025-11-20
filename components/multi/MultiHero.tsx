@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { Progress } from '../ui/progress';
@@ -188,6 +188,48 @@ export default function MultiHero() {
     saveFormCache();
   };
 
+  // 使用 AudioContext.decodeAudioData 校验音频文件是否损坏
+  const validateAudioFile = useCallback(async (file: File): Promise<{ isValid: boolean; duration?: number; error?: string }> => {
+    try {
+      // 读取文件为 ArrayBuffer
+      const arrayBuffer = await file.arrayBuffer();
+
+      // 创建 AudioContext
+      const audioContext = new AudioContext();
+
+      try {
+        // 尝试解码音频数据
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        // 解码成功，获取时长
+        const duration = audioBuffer.duration;
+
+        // 清理资源
+        await audioContext.close();
+
+        return {
+          isValid: true,
+          duration: Math.ceil(duration)
+        };
+      } catch (decodeError) {
+        // 解码失败，文件可能损坏
+        await audioContext.close();
+
+        const errorMessage = 'Audio file is corrupted';
+        return {
+          isValid: false,
+          error: errorMessage
+        };
+      }
+    } catch (readError) {
+      // 文件读取失败
+      return {
+        isValid: false,
+        error: 'Failed to read file'
+      };
+    }
+  }, []);
+
   // 获取音频时长 - 向上取整
   const getAudioDuration = (file: File): Promise<number> => {
     return new Promise((resolve) => {
@@ -240,9 +282,23 @@ export default function MultiHero() {
           return;
         }
         
-        const duration = await getAudioDuration(file);
+        // 使用 AudioContext.decodeAudioData 校验文件
+        const validation = await validateAudioFile(file);
+
+        if (!validation.isValid) {
+          toast.error(validation.error || 'Audio file is corrupted or invalid');
+          return;
+        }
+
+        // 校验通过，设置文件
         setLeftAudioFile(file);
-        setLeftAudioDuration(duration);
+        if (validation.duration) {
+          setLeftAudioDuration(validation.duration);
+        } else {
+          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
+          const duration = await getAudioDuration(file);
+          setLeftAudioDuration(duration);
+        }
       }
     });
   };
@@ -263,9 +319,23 @@ export default function MultiHero() {
           return;
         }
         
-        const duration = await getAudioDuration(file);
+        // 使用 AudioContext.decodeAudioData 校验文件
+        const validation = await validateAudioFile(file);
+
+        if (!validation.isValid) {
+          toast.error(validation.error || 'Audio file is corrupted or invalid');
+          return;
+        }
+
+        // 校验通过，设置文件
         setLeftAudioFile(file);
-        setLeftAudioDuration(duration);
+        if (validation.duration) {
+          setLeftAudioDuration(validation.duration);
+        } else {
+          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
+          const duration = await getAudioDuration(file);
+          setLeftAudioDuration(duration);
+        }
       }
     });
   };
@@ -284,9 +354,23 @@ export default function MultiHero() {
           return;
         }
         
-        const duration = await getAudioDuration(file);
+        // 使用 AudioContext.decodeAudioData 校验文件
+        const validation = await validateAudioFile(file);
+
+        if (!validation.isValid) {
+          toast.error(validation.error || 'Audio file is corrupted or invalid');
+          return;
+        }
+
+        // 校验通过，设置文件
         setRightAudioFile(file);
-        setRightAudioDuration(duration);
+        if (validation.duration) {
+          setRightAudioDuration(validation.duration);
+        } else {
+          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
+          const duration = await getAudioDuration(file);
+          setRightAudioDuration(duration);
+        }
       }
     });
   };
@@ -307,9 +391,23 @@ export default function MultiHero() {
           return;
         }
         
-        const duration = await getAudioDuration(file);
+        // 使用 AudioContext.decodeAudioData 校验文件
+        const validation = await validateAudioFile(file);
+
+        if (!validation.isValid) {
+          toast.error(validation.error || 'Audio file is corrupted or invalid');
+          return;
+        }
+
+        // 校验通过，设置文件
         setRightAudioFile(file);
-        setRightAudioDuration(duration);
+        if (validation.duration) {
+          setRightAudioDuration(validation.duration);
+        } else {
+          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
+          const duration = await getAudioDuration(file);
+          setRightAudioDuration(duration);
+        }
       }
     });
   };
@@ -331,34 +429,52 @@ export default function MultiHero() {
 
   // 从 AudioTools 页面接收处理后的音频 (Multi)
   useEffect(() => {
-    const checkForAudioFromToolsMulti = () => {
+    const checkForAudioFromToolsMulti = async () => {
       try {
         const audioDataStr = sessionStorage.getItem('audioToolsProcessedAudioMulti');
         if (audioDataStr) {
           const audioData = JSON.parse(audioDataStr);
           
           // 将 base64 数据转换为 File 对象
-          fetch(audioData.data)
-            .then(res => res.blob())
-            .then(async (blob) => {
-              const file = new File([blob], audioData.name, { type: audioData.type });
-              const duration = await getAudioDuration(file);
-              
-              // 根据 audioType 设置到对应的音频位置
-              if (audioData.audioType === 'left') {
-                setLeftAudioFile(file);
+          try {
+            const res = await fetch(audioData.data);
+            const blob = await res.blob();
+            const file = new File([blob], audioData.name, { type: audioData.type });
+
+            // 使用 AudioContext.decodeAudioData 校验文件
+            const validation = await validateAudioFile(file);
+
+            if (!validation.isValid) {
+              console.error('Audio from AudioTools Multi is invalid:', validation.error);
+              toast.error('Audio file from Audio Tools is corrupted or invalid');
+              sessionStorage.removeItem('audioToolsProcessedAudioMulti');
+              return;
+            }
+
+            // 校验通过，根据 audioType 设置到对应的音频位置
+            if (audioData.audioType === 'left') {
+              setLeftAudioFile(file);
+              if (validation.duration) {
+                setLeftAudioDuration(validation.duration);
+              } else {
+                const duration = await getAudioDuration(file);
                 setLeftAudioDuration(duration);
-                toast.showToast('Left audio loaded from Audio Tools', 'success');
-              } else if (audioData.audioType === 'right') {
-                setRightAudioFile(file);
-                setRightAudioDuration(duration);
-                toast.showToast('Right audio loaded from Audio Tools', 'success');
               }
-            })
-            .catch(error => {
-              console.error('Failed to load audio from AudioTools Multi:', error);
-              toast.showToast('Failed to load audio from Audio Tools', 'error');
-            });
+              toast.showToast('Left audio loaded from Audio Tools', 'success');
+            } else if (audioData.audioType === 'right') {
+              setRightAudioFile(file);
+              if (validation.duration) {
+                setRightAudioDuration(validation.duration);
+              } else {
+                const duration = await getAudioDuration(file);
+                setRightAudioDuration(duration);
+              }
+              toast.showToast('Right audio loaded from Audio Tools', 'success');
+            }
+          } catch (error) {
+            console.error('Failed to load audio from AudioTools Multi:', error);
+            toast.showToast('Failed to load audio from Audio Tools', 'error');
+          }
           
           // 清除 sessionStorage 中的数据
           sessionStorage.removeItem('audioToolsProcessedAudioMulti');
@@ -369,7 +485,7 @@ export default function MultiHero() {
     };
 
     checkForAudioFromToolsMulti();
-  }, [toast]);
+  }, [toast, validateAudioFile]);
 
   // 🔄 自动保存（防抖）
   useEffect(() => {
