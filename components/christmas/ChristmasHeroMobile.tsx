@@ -621,7 +621,7 @@ export function ChristmasHeroMobile() {
             <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 z-10">
               <Button
                 onClick={handleCustomizeClick}
-                className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-6 text-lg font-semibold shadow-lg"
+                className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg py-6 text-lg font-semibold shadow-lg"
               >
                 Customize
               </Button>
@@ -838,7 +838,7 @@ export function ChristmasHeroMobile() {
                 <Button
                   disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
                   onClick={handleGenerateClick}
-                  className="w-full bg-gradient-to-r from-[#FFD700] to-[#FFA500] hover:from-[#FFA500] hover:to-[#FF8C00] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                  className="w-full bg-gradient-to-r from-[#FFA500] to-[#FF8C00] hover:from-[#FF8C00] hover:to-[#FF7700] text-white  rounded-lg py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
                 >
                   {isGenerating ? 'Generating...' : 'Create the video'}
                 </Button>
