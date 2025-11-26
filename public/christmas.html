@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Basic Meta Tags -->
+    <title>Christmas Greeting Video Ideas | AI Video Generator</title>
+    <meta name="description" content="Check out this amazing Christmas greeting video! Create your own personalized holiday video with AI.">
+    <meta name="keywords" content="Christmas greeting video, AI video generator, personalized video, holiday video">
+    
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="">
+    <meta property="og:title" content="Christmas Greeting Video Ideas | AI Video Generator">
+    <meta property="og:description" content="Check out this amazing Christmas greeting video! Create your own personalized holiday video with AI.">
+    <meta property="og:image" content="https://www.infinitetalk.net/og-christmas.jpg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="InfiniteTalk AI">
+    <meta property="og:locale" content="en_US">
+    
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="">
+    <meta name="twitter:title" content="Christmas Greeting Video Ideas | AI Video Generator">
+    <meta name="twitter:description" content="Check out this amazing Christmas greeting video! Create your own personalized holiday video with AI.">
+    <meta name="twitter:image" content="https://www.infinitetalk.net/og-christmas.jpg">
+    
+    <!-- Canonical URL -->
+    <link rel="canonical" href="">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+        }
+        
+        .background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('https://cfsource.infinitetalk.net/infinitetalk/christmas/bg.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        
+        .content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 1.5rem;
+            font-family: serif;
+            letter-spacing: 0.05em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+        
+        .subtitle {
+            font-size: 1.25rem;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 2rem;
+            max-width: 42rem;
+            line-height: 1.6;
+        }
+        
+        .video-container {
+            width: 100%;
+            max-width: 800px;
+            margin: 2rem 0;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+        }
+        
+        .video-container video {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+        
+        .btn {
+            background: linear-gradient(to right, #DC2626, #B91C1C);
+            color: white;
+            border: 2px solid white;
+            border-radius: 0.5rem;
+            padding: 0.875rem 1.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 2rem;
+        }
+        
+        .btn:hover {
+            background: linear-gradient(to right, #B91C1C, #991B1B);
+            transform: scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        }
+        
+        .btn:active {
+            transform: scale(0.98);
+        }
+        
+        .error-message {
+            color: white;
+            background: rgba(220, 38, 38, 0.8);
+            padding: 1rem 2rem;
+            border-radius: 0.5rem;
+            margin: 2rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .btn {
+                padding: 0.75rem 1.25rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="background"></div>
+    
+    <div class="container">
+        <div class="content">
+            <h1>Christmas Greeting Video Ideas</h1>
+            <p class="subtitle">
+                Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
+            </p>
+            
+            <div id="videoWrapper" class="video-container" style="display: none;">
+                <video id="shareVideo" controls autoplay loop playsinline>
+                    Your browser does not support the video tag.
+                </video>
+            </div>
+            
+            <div id="errorMessage" class="error-message" style="display: none;"></div>
+            
+            <a id="createButton" href="#" class="btn" style="display: none;">
+                Create the same video
+            </a>
+        </div>
+    </div>
+    
+    <script>
+        // Get URL parameters
+        function getUrlParams() {
+            const params = new URLSearchParams(window.location.search);
+            return {
+                v: params.get('v') ? decodeURIComponent(params.get('v')) : null,      // Video URL
+                tid: params.get('tid') ? decodeURIComponent(params.get('tid')) : null,  // Template ID
+                mid: params.get('mid') ? decodeURIComponent(params.get('mid')) : null   // Music ID
+            };
+        }
+        
+        // Update Meta tags
+        function updateMetaTags(videoUrl, templateId, musicId) {
+            const currentUrl = window.location.href;
+            const shareText = 'Check out my amazing Christmas greeting video! 🎄✨';
+            
+            // Update Open Graph
+            document.querySelector('meta[property="og:url"]').setAttribute('content', currentUrl);
+            if (videoUrl) {
+                document.querySelector('meta[property="og:image"]').setAttribute('content', videoUrl);
+                document.querySelector('meta[name="twitter:image"]').setAttribute('content', videoUrl);
+            }
+            
+            // Update Twitter Card
+            document.querySelector('meta[name="twitter:url"]').setAttribute('content', currentUrl);
+            
+            // Update Canonical URL
+            document.querySelector('link[rel="canonical"]').setAttribute('href', currentUrl);
+        }
+        
+        // Initialize page
+        function init() {
+            const params = getUrlParams();
+            const videoWrapper = document.getElementById('videoWrapper');
+            const shareVideo = document.getElementById('shareVideo');
+            const createButton = document.getElementById('createButton');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            // Update Meta tags
+            updateMetaTags(params.v, params.tid, params.mid);
+            
+            // Display video if video URL is provided
+            if (params.v) {
+                shareVideo.src = params.v;
+                videoWrapper.style.display = 'block';
+                
+                // Handle video loading errors
+                shareVideo.onerror = function() {
+                    errorMessage.textContent = 'Failed to load video. Please check the video URL.';
+                    errorMessage.style.display = 'block';
+                    videoWrapper.style.display = 'none';
+                };
+            } else {
+                errorMessage.textContent = 'No video URL provided.';
+                errorMessage.style.display = 'block';
+            }
+            
+            // Show "Create the same video" button if template ID and music ID are provided
+            if (params.tid && params.mid) {
+                const redirectUrl = `https://www.infinitetalk.net/christmas?tid=${encodeURIComponent(params.tid)}&mid=${encodeURIComponent(params.mid)}`;
+                createButton.href = redirectUrl;
+                createButton.style.display = 'inline-block';
+            } else {
+                // If no parameters, still show button but redirect to main page
+                createButton.href = 'https://www.infinitetalk.net/christmas';
+                createButton.style.display = 'inline-block';
+            }
+        }
+        
+        // Initialize when page is loaded
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
+

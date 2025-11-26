@@ -597,6 +597,61 @@ export const infiniteTalkApi = {
 
 };
 
+// 通用上传接口
+export const uploadApi = {
+  // 上传图片接口
+  uploadImage: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
+    const token = localStorage.getItem('access_token');
+    const headers: Record<string, string> = {
+      'x-appid': API_CONFIG.APP_ID,
+    };
+    
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/common/upload`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+
+    return handleApiError(response);
+  },
+};
+
+// Nano Banana Edit 相关接口
+export const nanoBananaApi = {
+  // 创建 Nano Banana Edit 任务
+  createTask: async (params: {
+    prompt: string;
+    image_urls: string[];
+    output_format: "png" | "jpeg";
+    image_size: "auto" | "1:1" | "3:4" | "9:16" | "4:3" | "16:9";
+  }) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/kieai/nano-banana-edit`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify(params),
+    });
+
+    return handleApiError(response);
+  },
+
+  // 检查 Nano Banana Edit 任务状态
+  checkTaskStatus: async (taskId: string) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/kieai/nano-banana-edit/check_task_status?task_id=${taskId}`, {
+      method: 'GET',
+      headers: getHeaders(),
+    });
+
+    return handleApiError(response);
+  },
+};
 
 // CMS相关接口
 export const cmsApi = {
@@ -688,6 +743,8 @@ export const api = {
   infiniteTalk: infiniteTalkApi,
   website: websiteApi,
   cms: cmsApi,
+  upload: uploadApi,
+  nanoBanana: nanoBananaApi,
 
   withRetry: apiWithRetry,
 }; 
