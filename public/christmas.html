@@ -30,6 +30,11 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="">
     
+    <!-- Google Fonts - Mountains of Christmas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@400;700&display=swap" rel="stylesheet">
+    
     <style>
         * {
             margin: 0;
@@ -80,9 +85,9 @@
         h1 {
             font-size: 3rem;
             font-weight: bold;
-            color: white;
+            color: #FCD34D; /* yellow-300 */
             margin-bottom: 1.5rem;
-            font-family: serif;
+            font-family: 'Mountains of Christmas', cursive;
             letter-spacing: 0.05em;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
@@ -129,27 +134,39 @@
         .btn {
             background: linear-gradient(to right, #DC2626, #B91C1C);
             color: white;
-            border: 2px solid white;
+            border: 2px solid rgba(250, 204, 21, 0.5); /* yellow-400/50 */
             border-radius: 0.5rem;
-            padding: 0.875rem 1.5rem;
+            padding: 1rem 1.75rem;
             font-size: 1rem;
             font-weight: 600;
+            font-family: 'Mountains of Christmas', cursive;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
             text-decoration: none;
-            display: inline-block;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
             margin-top: 2rem;
+            position: relative;
         }
         
         .btn:hover {
             background: linear-gradient(to right, #B91C1C, #991B1B);
+            border-color: rgba(250, 204, 21, 0.8); /* yellow-400 */
             transform: scale(1.05);
             box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
         }
         
         .btn:active {
             transform: scale(0.98);
+        }
+        
+        .btn .sparkle {
+            color: #FCD34D; /* yellow-300 */
+            font-size: 1rem;
+            display: inline-block;
         }
         
         .error-message {
@@ -170,8 +187,12 @@
             }
             
             .btn {
-                padding: 0.75rem 1.25rem;
+                padding: 0.875rem 1.5rem;
                 font-size: 0.9rem;
+            }
+            
+            .btn .sparkle {
+                font-size: 0.875rem;
             }
         }
     </style>
@@ -198,7 +219,9 @@
             <div id="errorMessage" class="error-message" style="display: none;"></div>
             
             <a id="createButton" href="#" class="btn" style="display: none;">
+                <span class="sparkle">✨</span>
                 Create the same video
+                <span class="sparkle">✨</span>
             </a>
         </div>
     </div>

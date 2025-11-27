@@ -148,6 +148,11 @@
   .font-poppins {
     font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
   }
+
+  /* Christmas section decorative font */
+  .font-mountains {
+    font-family: var(--font-mountains-of-christmas), system-ui, -apple-system, sans-serif;
+  }
   
   /* Fallback for other font classes - use Poppins or system fonts */
   .font-inter,

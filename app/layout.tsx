@@ -5,7 +5,7 @@ import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
-import { Poppins } from 'next/font/google';
+import { Poppins, Mountains_of_Christmas } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { AuthModalProvider } from '@/components/auth/auth-modal-provider';
 
@@ -18,6 +18,14 @@ const poppins = Poppins({
   display: 'swap',
   preload: true,
   fallback: ['system-ui', 'arial'],
+});
+
+// Christmas section decorative font
+const mountainsOfChristmas = Mountains_of_Christmas({
+  weight: ['400', '700'],
+  subsets: ['latin'],
+  variable: '--font-mountains-of-christmas',
+  display: 'swap',
 });
 
 // Dynamically import Clerk Provider to reduce initial bundle size
@@ -36,7 +44,7 @@ export default function RootLayout({
   const GA_TRACKING_ID = 'G-BST9KGD31X';
 
   return (
-    <html lang="en" className={poppins.variable}>
+    <html lang="en" className={`${poppins.variable} ${mountainsOfChristmas.variable}`}>
       <head>
         {/* Critical CSS - Inlined for instant render (Complete CSS Variables) */}
         <style dangerouslySetInnerHTML={{

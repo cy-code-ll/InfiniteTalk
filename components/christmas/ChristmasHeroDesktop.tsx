@@ -17,7 +17,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2 } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles } from 'lucide-react';
 
 // 下载媒体文件的函数（从 InfiniteTalkGenerator 复制）
 async function downloadMediaWithCors(
@@ -95,49 +95,41 @@ const sampleVideos = [
 const TEMPLATES = [
   {
     id: 't1',
-    name: 'Cozy home',
+    name: 'Cozy Home',
+    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
     prompt:
-      'Extract the person from the image, removing the original background. Place the person, wearing a Santa hat, facing the camera and speaking to it. The new background is an American home lavishly decorated for Christmas, with a festive Christmas night scene visible outside the window. Behind the person is a Christmas tree adorned with various decorations and colorful lights, constantly twinkling. The person is positioned slightly above center. In front of the person, at the top, several small Christmas decorations are gently swaying, such as a Christmas snowman, Santa Claus, candy canes, and Christmas balloons.',
+      '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater and a Christmas hat, standing next to the small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
   {
     id: 't2',
-    name: 'Outdoor party',
+    name: 'Living Room',
+    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
     prompt:
-      'The person in the image is in an outdoor Christmas celebration venue, speaking to the camera. It is Christmas night, and behind the person stands a tall Christmas tree adorned with many twinkling colorful lights and numerous beautiful Christmas decorations. Simultaneously, many people are in the background, celebrating Christmas together, creating a very joyful atmosphere.',
+      '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone and characters standing at the front. The character width accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
   },
   {
     id: 't3',
-    name: 'Santa gift',
+    name: 'Church Interior',
+    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
     prompt:
-      'The person in the image is embodying Santa Claus, wearing a Santa hat and a Santa suit, holding a Christmas gift, and speaking to the camera. The background is a snowy scene with snowflakes falling. A Christmas tree is full of twinkling lights and surrounded by various Christmas gifts. Santa Claus is happily smiling while displaying the gift in their hand, and waving to the camera.',
+      '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
   {
     id: 't4',
-    name: 'Winter wonderland',
+    name: 'Pine Forest',
+    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
     prompt:
-      'The person in the image is in a magical winter wonderland, surrounded by snow-covered trees and twinkling Christmas lights. Snowflakes are gently falling around them as they speak to the camera with a warm smile. A beautiful Christmas tree stands nearby, decorated with ornaments and glowing lights.',
-  },
-  {
-    id: 't5',
-    name: 'Fireplace scene',
-    prompt:
-      'The person in the image is sitting by a cozy fireplace in a warm, inviting living room decorated for Christmas. Stockings hang from the mantel, and Christmas decorations fill the room. The person is speaking to the camera with a cheerful expression, creating a festive and intimate atmosphere.',
-  },
-  {
-    id: 't6',
-    name: 'Christmas market',
-    prompt:
-      'The person in the image is at a bustling Christmas market, surrounded by festive stalls, twinkling lights, and holiday decorations. People are shopping and celebrating in the background. The person is speaking to the camera with joy and excitement, capturing the vibrant spirit of the holiday season.',
-  },
+      'A pine forest in the outskirts, The small wooden house on the farm emits yellow lights from the window, warm and romantic,The most crucial thing is that there are countless warm light strings wrapped around the pine trees in the forest, only white or amber in color, outlining the outline of the pine trees. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a Christmas hat. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
+  }
 ];
 
 const MUSIC_TRACKS = [
-  { id: 'm1', name: 'Track 1', url: 'https://cdn.infinitetalkai.org/audio/voice/English_Trustworth_Man.mp3' },
-  { id: 'm2', name: 'Track 2', url: 'https://cdn.infinitetalkai.org/audio/voice/English_CaptivatingStoryteller.mp3' },
-  { id: 'm3', name: 'Track 3', url: 'https://cdn.infinitetalkai.org/audio/voice/English_ManWithDeepVoice.mp3' },
-  { id: 'm4', name: 'Track 4', url: 'https://cdn.infinitetalkai.org/audio/voice/English_Graceful_Lady.mp3' },
-  { id: 'm5', name: 'Track 5', url: 'https://cdn.infinitetalkai.org/audio/voice/English_Insightful_Speaker.mp3' },
-  { id: 'm6', name: 'Track 6', url: 'https://cdn.infinitetalkai.org/audio/voice/English_Whispering_girl_v3.mp3' },
+  { id: 'm1', name: 'Female Family', url: '/music/fmale_fam.mp3', taglist: ['female'] },
+  { id: 'm2', name: 'Female Friend', url: '/music/fmale_fir.mp3', taglist: ['female'] },
+  { id: 'm3', name: 'Female Colleague', url: '/music/fmale_work.mp3', taglist: ['female'] },
+  { id: 'm4', name: 'Male Family', url: '/music/male_fam.mp3', taglist: ['male'] },
+  { id: 'm5', name: 'Male Friend', url: '/music/male_fri.mp3', taglist: ['male'] },
+  { id: 'm6', name: 'Male Colleague', url: '/music/male_work.mp3', taglist: ['male'] },
 ];
 
 export function ChristmasHeroDesktop() {
@@ -157,6 +149,7 @@ export function ChristmasHeroDesktop() {
   const [prompt, setPrompt] = useState(TEMPLATES[0].prompt);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(TEMPLATES[0].id);
   const [selectedMusicId, setSelectedMusicId] = useState<string>(MUSIC_TRACKS[0].id);
+  const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicId, setCurrentMusicId] = useState<string | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
@@ -194,7 +187,8 @@ export function ChristmasHeroDesktop() {
       if (music) {
         setSelectedMusicId(music.id);
         // 获取音频时长
-        const audioEl = new Audio(music.url);
+        const audioEl = new Audio();
+        audioEl.crossOrigin = 'anonymous';
         audioEl.preload = 'metadata';
         audioEl.onloadedmetadata = () => {
           const duration = Math.ceil(audioEl.duration || 0);
@@ -211,7 +205,8 @@ export function ChristmasHeroDesktop() {
       // 如果没有 mid 参数，使用默认音乐
       const defaultTrack = MUSIC_TRACKS.find((m) => m.id === MUSIC_TRACKS[0].id);
       if (defaultTrack) {
-        const audioEl = new Audio(defaultTrack.url);
+        const audioEl = new Audio();
+        audioEl.crossOrigin = 'anonymous';
         audioEl.preload = 'metadata';
         audioEl.onloadedmetadata = () => {
           const duration = Math.ceil(audioEl.duration || 0);
@@ -233,6 +228,25 @@ export function ChristmasHeroDesktop() {
       setPreviewState('result');
     }
   }, [searchParams]);
+
+  // 当筛选改变时，如果当前选中的音乐不在筛选结果中，自动选择第一个可用的音乐
+  useEffect(() => {
+    const filteredTracks = MUSIC_TRACKS.filter((track) => {
+      if (genderFilter === 'all') return true;
+      return track.taglist?.includes(genderFilter);
+    });
+    
+    const currentTrack = filteredTracks.find((track) => track.id === selectedMusicId);
+    if (!currentTrack && filteredTracks.length > 0) {
+      setSelectedMusicId(filteredTracks[0].id);
+      // 如果正在播放，停止播放
+      if (musicAudioRef.current) {
+        musicAudioRef.current.pause();
+        setIsMusicPlaying(false);
+        setCurrentMusicId(null);
+      }
+    }
+  }, [genderFilter, selectedMusicId]);
 
   // 清理音乐播放
   useEffect(() => {
@@ -329,7 +343,8 @@ export function ChristmasHeroDesktop() {
     if (!track) return;
 
     if (!musicAudioRef.current) {
-      musicAudioRef.current = new Audio(track.url);
+      musicAudioRef.current = new Audio();
+      musicAudioRef.current.crossOrigin = 'anonymous';
     }
 
     if (currentMusicId === id && isMusicPlaying) {
@@ -339,7 +354,8 @@ export function ChristmasHeroDesktop() {
     }
 
     // 获取音频时长
-    const audioEl = new Audio(track.url);
+    const audioEl = new Audio();
+    audioEl.crossOrigin = 'anonymous';
     audioEl.preload = 'metadata';
     audioEl.onloadedmetadata = () => {
       const duration = Math.ceil(audioEl.duration || 0);
@@ -352,6 +368,7 @@ export function ChristmasHeroDesktop() {
     };
     audioEl.src = track.url;
 
+    musicAudioRef.current.crossOrigin = 'anonymous';
     musicAudioRef.current.src = track.url;
     musicAudioRef.current
       .play()
@@ -489,9 +506,18 @@ export function ChristmasHeroDesktop() {
         setPreviewState('idle');
         return;
       }
-      const musicRes = await fetch(music.url);
+      let musicRes;
+      try {
+        musicRes = await fetch(music.url, { mode: 'cors' });
+      } catch (error: any) {
+        console.error('Failed to fetch music:', error);
+        toast.error('Failed to load music: CORS error. Please check network connection.');
+        stopFakeProgress();
+        setPreviewState('idle');
+        return;
+      }
       if (!musicRes.ok) {
-        toast.error('Failed to load music');
+        toast.error(`Failed to load music: ${musicRes.status} ${musicRes.statusText}`);
         stopFakeProgress();
         setPreviewState('idle');
         return;
@@ -586,11 +612,11 @@ export function ChristmasHeroDesktop() {
   );
 
   const renderDisplay = () => (
-    <div className="relative h-[calc(100vh-4rem)] flex flex-col items-center justify-center overflow-hidden">
+      <div className="relative h-[calc(100vh-4rem)] flex flex-col items-center justify-center overflow-hidden font-mountains">
       {renderBackground()}
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
-        <h1 className="text-5xl md:text-6xl font-serif text-white text-center mb-6 font-bold tracking-wide">
+        <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-6 font-bold tracking-wide">
           Christmas Greeting Video Ideas
         </h1>
         <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-8 leading-relaxed">
@@ -599,9 +625,11 @@ export function ChristmasHeroDesktop() {
 
         <Button
           onClick={() => setViewState('create')}
-          className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg px-8 py-6 text-lg font-semibold mb-8 transition-all hover:scale-105 shadow-lg"
+          className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg px-8 py-6 text-lg font-semibold mb-8 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
         >
+          <Sparkles className="w-4 h-4 text-yellow-300" />
           Create the same video
+          <Sparkles className="w-4 h-4 text-yellow-300" />
         </Button>
 
         <div className="flex items-center justify-center gap-4 w-full max-w-5xl">
@@ -652,11 +680,11 @@ export function ChristmasHeroDesktop() {
     const isPortrait = imageOrientation !== 'landscape';
 
     return (
-      <div className="relative min-h-screen flex flex-col items-center justify-center py-20">
+      <div className="relative min-h-screen flex flex-col items-center justify-center py-20 font-mountains">
         {renderBackground()}
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
-          <h1 className="text-5xl md:text-6xl font-serif text-white text-center mb-4 font-bold tracking-wide">
+          <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-4 font-bold tracking-wide">
             Christmas Greeting Video Ideas
           </h1>
           <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-10 leading-relaxed">
@@ -667,14 +695,14 @@ export function ChristmasHeroDesktop() {
             {/* 左侧：工具区 */}
             <div className="space-y-4 w-full md:w-[40%] md:flex-shrink-0">
               {/* 上传图片 + 提示词 + 模板选择 */}
-              <div className="bg-[#7A2424]/95 rounded-3xl border border-white/10 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
+              <div className="bg-black/40 backdrop-blur-md rounded-3xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-sm font-semibold text-white mb-4">Upload photo</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-4">Upload photo</h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
-                      className="h-32 rounded-2xl border-2 border-dashed border-white/20 bg-black/5 flex flex-col items-center justify-center cursor-pointer hover:border-white/40 transition-colors relative overflow-hidden"
+                      className="h-32 rounded-2xl border-2 border-dashed border-yellow-400/30 bg-black/5 flex flex-col items-center justify-center cursor-pointer hover:border-yellow-400/50 transition-colors relative overflow-hidden"
                     >
                       {imagePreview ? (
                         <>
@@ -693,7 +721,7 @@ export function ChristmasHeroDesktop() {
                         </>
                       ) : (
                         <>
-                          <div className="w-14 h-14 rounded-full border border-white/40 flex items-center justify-center mb-3">
+                          <div className="w-14 h-14 rounded-full border border-yellow-400/40 flex items-center justify-center mb-3">
                             <Upload className="w-7 h-7 text-white/80" />
                           </div>
                           <p className="text-white/80 text-sm">Drag & Drop photo here to upload</p>
@@ -712,18 +740,18 @@ export function ChristmasHeroDesktop() {
 
                 {/* 提示词输入 */}
                 <div>
-                  <h3 className="text-sm font-semibold text-white mb-3">Prompt</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-3">Prompt</h3>
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Describe what you want the character to express or do..."
-                    className="w-full h-24 bg-black/20 border-white/20 text-white placeholder-white/50 resize-none"
+                    className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
                   />
                 </div>
 
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-sm font-semibold text-white mb-3">Template Selection</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-3">Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
                       <button
@@ -733,13 +761,21 @@ export function ChristmasHeroDesktop() {
                           setSelectedTemplateId(tpl.id);
                           setPrompt(tpl.prompt);
                         }}
-                        className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center text-xs font-medium transition-all flex-shrink-0 whitespace-nowrap ${
+                        className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
                           selectedTemplateId === tpl.id
-                            ? 'border-white bg-white/20 text-white shadow-lg'
-                            : 'border-white/30 bg-black/10 text-white/80 hover:border-white/60'
+                            ? 'border-yellow-400 shadow-lg'
+                            : 'border-yellow-400/30 hover:border-yellow-400/60'
                         }`}
+                        style={{ aspectRatio: '2/1', width: '180px' }}
                       >
-                        {tpl.name}
+                        <img
+                          src={tpl.thumbnail}
+                          alt={tpl.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center">
+                          {tpl.name}
+                        </div>
                       </button>
                     ))}
                   </div>
@@ -747,13 +783,53 @@ export function ChristmasHeroDesktop() {
               </div>
 
               {/* 音乐 + 生成按钮 */}
-              <div className="bg-[#7A2424]/95 rounded-3xl border border-white/10 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
+              <div className="bg-black/40 backdrop-blur-md rounded-3xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
 
                 {/* Choose music */}
                 <div>
-                  <h3 className="text-sm font-semibold text-white mb-3">Choose music</h3>
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-base font-semibold text-yellow-300">Choose music</h3>
+                    <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
+                      <button
+                        type="button"
+                        onClick={() => setGenderFilter('all')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                          genderFilter === 'all'
+                            ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
+                            : 'text-white/60 hover:text-white/80'
+                        }`}
+                      >
+                        All
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGenderFilter('male')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                          genderFilter === 'male'
+                            ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
+                            : 'text-white/60 hover:text-white/80'
+                        }`}
+                      >
+                        Male
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setGenderFilter('female')}
+                        className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
+                          genderFilter === 'female'
+                            ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
+                            : 'text-white/60 hover:text-white/80'
+                        }`}
+                      >
+                        Female
+                      </button>
+                    </div>
+                  </div>
                   <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
-                    {MUSIC_TRACKS.slice(0, 6).map((track) => {
+                    {MUSIC_TRACKS.filter((track) => {
+                      if (genderFilter === 'all') return true;
+                      return track.taglist?.includes(genderFilter);
+                    }).map((track) => {
                       const isActive = selectedMusicId === track.id;
                       const isPlaying = isActive && isMusicPlaying;
                       return (
@@ -763,8 +839,8 @@ export function ChristmasHeroDesktop() {
                           onClick={() => handleSelectMusic(track.id)}
                           className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 whitespace-nowrap ${
                             isActive
-                              ? 'border-white bg-white/20 text-white shadow-lg'
-                              : 'border-white/30 bg-black/10 text-white/80 hover:border-white/60'
+                              ? 'border-yellow-400 bg-yellow-400/20 text-white shadow-lg'
+                              : 'border-yellow-400/30 bg-black/10 text-white/80 hover:border-yellow-400/60'
                           }`}
                           title={track.name}
                         >
@@ -783,9 +859,11 @@ export function ChristmasHeroDesktop() {
                   <Button
                     disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim()}
                     onClick={handleGenerateClick}
-                    className="w-full bg-gradient-to-r from-[#FFA500] to-[#FF8C00] hover:from-[#FF8C00] hover:to-[#FF7700] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                    className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
                   >
+                    <Sparkles className="w-4 h-4 text-yellow-300" />
                     Create the video
+                    <Sparkles className="w-4 h-4 text-yellow-300" />
                   </Button>
                   {/* 积分显示 */}
                   {selectedMusicId && (
@@ -865,30 +943,30 @@ export function ChristmasHeroDesktop() {
 
               {/* 结果分享区 */}
               {previewState === 'result' && resultVideoUrl && selectedTemplateId && selectedMusicId && (
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 font-mountains">
                   <Button
                     size="sm"
                     variant="outline"
                     disabled={isDownloading}
-                    className="flex items-center gap-2 border-white/40 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="flex items-center gap-2 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600/30 to-red-700/30 text-yellow-300 hover:from-red-600/50 hover:to-red-700/50 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-4 rounded-lg shadow-lg"
                     onClick={handleDownload}
                   >
                     {isDownloading ? (
                       <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        Downloading...
+                        <Loader2 className="w-4 h-4 animate-spin text-yellow-300" />
+                        <span>Downloading...</span>
                       </>
                     ) : (
                       <>
-                        <Download className="w-4 h-4" />
-                        Download
+                        <Download className="w-4 h-4 text-yellow-300" />
+                        <span>Download</span>
                       </>
                     )}
                   </Button>
                   <Button
                     size="icon"
                     variant="outline"
-                    className="border-white/40 text-white hover:bg-[#1DA1F2] hover:border-[#1DA1F2]"
+                    className="border-2 border-yellow-400/50 bg-blue-500/20 text-white hover:bg-[#1DA1F2] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
                     onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
                     title="Share to Twitter"
                   >
@@ -899,7 +977,7 @@ export function ChristmasHeroDesktop() {
                   <Button
                     size="icon"
                     variant="outline"
-                    className="border-white/40 text-white hover:bg-[#1877F2] hover:border-[#1877F2]"
+                    className="border-2 border-yellow-400/50 bg-blue-600/20 text-white hover:bg-[#1877F2] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
                     onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
                     title="Share to Facebook"
                   >
@@ -910,7 +988,7 @@ export function ChristmasHeroDesktop() {
                   <Button
                     size="icon"
                     variant="outline"
-                    className="border-white/40 text-white hover:bg-[#25D366] hover:border-[#25D366]"
+                    className="border-2 border-yellow-400/50 bg-green-600/20 text-white hover:bg-[#25D366] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
                     onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
                     title="Share to WhatsApp"
                   >
