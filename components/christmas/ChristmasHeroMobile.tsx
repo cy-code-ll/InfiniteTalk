@@ -928,7 +928,7 @@ export function ChristmasHeroMobile() {
                 </Button>
                 {/* 积分显示 */}
                 {selectedMusicId && (
-                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                     {audioDuration > 0 
                       ? `${calculateCredits(audioDuration, '720p')} Credits`
                       : '11 Credits'}

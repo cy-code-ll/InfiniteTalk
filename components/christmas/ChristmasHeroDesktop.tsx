@@ -632,7 +632,7 @@ export function ChristmasHeroDesktop() {
           <Sparkles className="w-4 h-4 text-yellow-300" />
         </Button>
 
-        <div className="flex items-center justify-center gap-2 md:gap-3 lg:gap-4 w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mt-15">
+        <div className="flex items-center justify-center gap-1 md:gap-1 lg:gap-2 w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mt-15">
           {/* 左竖版 - 3:4 比例 */}
           <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[240px] md:h-[300px] lg:h-[350px] xl:h-[380px] aspect-[3/4] flex-shrink-0 -mt-[5%] md:-mt-[10%] lg:-mt-[15%] xl:-mt-[20%]">
             <video
@@ -647,7 +647,7 @@ export function ChristmasHeroDesktop() {
           </div>
 
           {/* 中间横版 */}
-          <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[200px] md:h-[280px] lg:h-[320px] xl:h-[360px] w-[280px] md:w-[480px] lg:w-[560px] xl:w-[640px] flex-shrink-0 mx-4 md:mx-12 lg:mx-16 xl:mx-20">
+          <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[200px] md:h-[280px] lg:h-[320px] xl:h-[360px] w-[320px] md:w-[560px] lg:w-[640px] xl:w-[720px] flex-shrink-0 mx-1 md:mx-4 lg:mx-6 xl:mx-8">
             <video
               src={sampleVideos[1].src}
               poster={sampleVideos[1].poster}
@@ -677,7 +677,7 @@ export function ChristmasHeroDesktop() {
   );
 
   const renderCreate = () => {
-    const isPortrait = imageOrientation !== 'landscape';
+    const isPortrait = imageOrientation === 'portrait';
 
     return (
       <div className="relative min-h-screen flex flex-col items-center justify-center py-20 font-mountains">
@@ -687,7 +687,7 @@ export function ChristmasHeroDesktop() {
           <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Christmas Greeting Video Ideas
           </h1>
-          <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-10 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+          <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-20 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
           </p>
 
@@ -753,7 +753,7 @@ export function ChristmasHeroDesktop() {
                 {/* Template Selection */}
                 <div>
                   <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
-                  <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
+                  <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
                       <button
                         key={tpl.id}
@@ -829,7 +829,7 @@ export function ChristmasHeroDesktop() {
                       </button>
                     </div>
                   </div>
-                  <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
+                  <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {MUSIC_TRACKS.filter((track) => {
                       if (genderFilter === 'all') return true;
                       return track.taglist?.includes(genderFilter);
@@ -872,7 +872,7 @@ export function ChristmasHeroDesktop() {
                   </Button>
                   {/* 积分显示 */}
                   {selectedMusicId && (
-                    <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                    <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                       {audioDuration > 0 
                         ? `${calculateCredits(audioDuration, '720p')} Credits`
                         : '11 Credits'}
