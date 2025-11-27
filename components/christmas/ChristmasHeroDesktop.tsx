@@ -615,26 +615,26 @@ export function ChristmasHeroDesktop() {
       <div className="relative h-[calc(100vh-4rem)] flex flex-col items-center justify-center overflow-hidden font-mountains">
       {renderBackground()}
 
-      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
-        <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-6 font-bold tracking-wide">
+      <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1 mb-10">
+        <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           Christmas Greeting Video Ideas
         </h1>
-        <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-8 leading-relaxed">
+        <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-12 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
         </p>
 
         <Button
           onClick={() => setViewState('create')}
-          className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg px-8 py-6 text-lg font-semibold mb-8 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+          className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-2xl px-8 py-6 text-lg font-semibold mb-12 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
         >
           <Sparkles className="w-4 h-4 text-yellow-300" />
           Create the same video
           <Sparkles className="w-4 h-4 text-yellow-300" />
         </Button>
 
-        <div className="flex items-center justify-center gap-4 w-full max-w-5xl">
-          {/* 左竖版 */}
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[360px] w-[203px] flex-shrink-0">
+        <div className="flex items-center justify-center gap-2 md:gap-3 lg:gap-4 w-full max-w-4xl md:max-w-5xl lg:max-w-6xl xl:max-w-7xl mt-15">
+          {/* 左竖版 - 3:4 比例 */}
+          <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[240px] md:h-[300px] lg:h-[350px] xl:h-[380px] aspect-[3/4] flex-shrink-0 -mt-[5%] md:-mt-[10%] lg:-mt-[15%] xl:-mt-[20%]">
             <video
               src={sampleVideos[0].src}
               poster={sampleVideos[0].poster}
@@ -647,7 +647,7 @@ export function ChristmasHeroDesktop() {
           </div>
 
           {/* 中间横版 */}
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[360px] w-[640px] flex-shrink-0">
+          <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[200px] md:h-[280px] lg:h-[320px] xl:h-[360px] w-[280px] md:w-[480px] lg:w-[560px] xl:w-[640px] flex-shrink-0 mx-4 md:mx-12 lg:mx-16 xl:mx-20">
             <video
               src={sampleVideos[1].src}
               poster={sampleVideos[1].poster}
@@ -659,8 +659,8 @@ export function ChristmasHeroDesktop() {
             />
           </div>
 
-          {/* 右竖版 */}
-          <div className="relative rounded-3xl overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[360px] w-[203px] flex-shrink-0">
+          {/* 右竖版 - 9:16 比例 */}
+          <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[320px] md:h-[400px] lg:h-[450px] xl:h-[500px] aspect-[9/16] flex-shrink-0 -mt-[5%] md:-mt-[10%] lg:-mt-[15%] xl:-mt-[20%]">
             <video
               src={sampleVideos[2].src}
               poster={sampleVideos[2].poster}
@@ -684,21 +684,21 @@ export function ChristmasHeroDesktop() {
         {renderBackground()}
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
-          <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-4 font-bold tracking-wide">
+          <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Christmas Greeting Video Ideas
           </h1>
-          <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-10 leading-relaxed">
+          <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-10 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
           </p>
 
-          <div className="flex flex-col md:flex-row gap-10 w-full max-w-5xl items-center justify-center">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 w-full max-w-7xl items-center justify-center">
             {/* 左侧：工具区 */}
-            <div className="space-y-4 w-full md:w-[40%] md:flex-shrink-0">
+            <div className="space-y-4 w-full md:w-[45%] md:flex-shrink-0">
               {/* 上传图片 + 提示词 + 模板选择 */}
-              <div className="bg-black/40 backdrop-blur-md rounded-3xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
+              <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-4">Upload photo</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
@@ -724,7 +724,7 @@ export function ChristmasHeroDesktop() {
                           <div className="w-14 h-14 rounded-full border border-yellow-400/40 flex items-center justify-center mb-3">
                             <Upload className="w-7 h-7 text-white/80" />
                           </div>
-                          <p className="text-white/80 text-sm">Drag & Drop photo here to upload</p>
+                          <p className="text-white/80 text-sm" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Drag & Drop photo here to upload</p>
                         </>
                       )}
                     </div>
@@ -740,18 +740,19 @@ export function ChristmasHeroDesktop() {
 
                 {/* 提示词输入 */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-3">Prompt</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
                     placeholder="Describe what you want the character to express or do..."
                     className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
+                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                   />
                 </div>
 
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-3">Template Selection</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
                       <button
@@ -773,7 +774,7 @@ export function ChristmasHeroDesktop() {
                           alt={tpl.name}
                           className="w-full h-full object-cover"
                         />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center">
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                           {tpl.name}
                         </div>
                       </button>
@@ -788,7 +789,7 @@ export function ChristmasHeroDesktop() {
                 {/* Choose music */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-base font-semibold text-yellow-300">Choose music</h3>
+                    <h3 className="text-base font-semibold text-yellow-300 font-mountains">Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                       <button
                         type="button"
@@ -798,6 +799,7 @@ export function ChristmasHeroDesktop() {
                             ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                             : 'text-white/60 hover:text-white/80'
                         }`}
+                        style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                       >
                         All
                       </button>
@@ -809,6 +811,7 @@ export function ChristmasHeroDesktop() {
                             ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                             : 'text-white/60 hover:text-white/80'
                         }`}
+                        style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                       >
                         Male
                       </button>
@@ -820,6 +823,7 @@ export function ChristmasHeroDesktop() {
                             ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                             : 'text-white/60 hover:text-white/80'
                         }`}
+                        style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                       >
                         Female
                       </button>
@@ -847,7 +851,7 @@ export function ChristmasHeroDesktop() {
                           <Music2
                             className={`w-4 h-4 mr-1 ${isPlaying ? 'animate-pulse text-yellow-300' : ''}`}
                           />
-                          <span className="text-xs">{track.name}</span>
+                          <span className="text-xs" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{track.name}</span>
                         </button>
                       );
                     })}
@@ -860,6 +864,7 @@ export function ChristmasHeroDesktop() {
                     disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim()}
                     onClick={handleGenerateClick}
                     className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                   >
                     <Sparkles className="w-4 h-4 text-yellow-300" />
                     Create the video
@@ -881,7 +886,7 @@ export function ChristmasHeroDesktop() {
             <div className="flex flex-col items-center justify-start gap-4 ">
               {isPortrait ? (
                 // 手机容器
-                <div className="relative w-[350px] h-[700px] rounded-[46px] bg-black/80 border-[6px] border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
+                <div className="relative w-[420px] h-[840px] rounded-[46px] bg-black/80 border-[6px] border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
                   {/* 顶部听筒 */}
                   <div className="z-100 absolute top-3 left-1/2 -translate-x-1/2 w-30 h-8 rounded-full bg-black/80 flex items-center justify-center">
                     <div className="w-14 h-1.5 rounded-full bg-slate-800" />
@@ -910,7 +915,7 @@ export function ChristmasHeroDesktop() {
               ) : (
                 // 电脑容器
                 <div 
-                  className="w-[600px] h-[400px] rounded-lg overflow-hidden relative"
+                  className="w-[720px] h-[480px] rounded-lg overflow-hidden relative box-content"
                   style={{
                     backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/pc-wrapper.png)',
                     backgroundSize: 'contain',
@@ -919,7 +924,7 @@ export function ChristmasHeroDesktop() {
                   }}
                 >
                   {/* 视频内容区域 - 需要根据实际图片调整 padding */}
-                  <div className="absolute inset-0 pt-4 pl-16 pr-16 pb-28">
+                  <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
                         <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
@@ -943,13 +948,14 @@ export function ChristmasHeroDesktop() {
 
               {/* 结果分享区 */}
               {previewState === 'result' && resultVideoUrl && selectedTemplateId && selectedMusicId && (
-                <div className="flex items-center gap-3 font-mountains">
+                <div className="flex items-center gap-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                   <Button
                     size="sm"
                     variant="outline"
                     disabled={isDownloading}
                     className="flex items-center gap-2 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600/30 to-red-700/30 text-yellow-300 hover:from-red-600/50 hover:to-red-700/50 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-4 rounded-lg shadow-lg"
                     onClick={handleDownload}
+                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                   >
                     {isDownloading ? (
                       <>

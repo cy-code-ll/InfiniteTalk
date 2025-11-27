@@ -603,7 +603,7 @@ export function ChristmasHeroMobile() {
     <>
       {/* Display State - 背景视频 + 底部按钮 */}
       {(viewState === 'display' || viewState === 'loading') && (
-        <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center font-mountains">
+        <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
           {/* 背景视频 */}
           <video
             src="https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4"
@@ -621,10 +621,10 @@ export function ChristmasHeroMobile() {
           {viewState === 'loading' && (
             <div className="absolute inset-0 z-50 bg-black/70 flex flex-col items-center justify-center p-6">
               <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6" />
-              <h3 className="text-white text-xl font-semibold mb-4">Generating Video...</h3>
+              <h3 className="text-white text-xl font-semibold mb-4" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Generating Video...</h3>
               <div className="w-full max-w-sm">
                 <Progress value={progress} className="w-full mb-2" />
-                <p className="text-slate-400 text-sm text-center">{Math.round(progress)}% complete</p>
+                <p className="text-slate-400 text-sm text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{Math.round(progress)}% complete</p>
               </div>
             </div>
           )}
@@ -632,10 +632,10 @@ export function ChristmasHeroMobile() {
           {/* 标题和副标题 */}
           {viewState === 'display' && (
             <div className="relative z-10 text-center px-6 mb-8">
-              <h1 className="text-3xl md:text-4xl text-yellow-300 mb-3 font-bold tracking-wide">
+              <h1 className="text-3xl md:text-4xl text-yellow-300 mb-3 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                 Christmas Greeting Video Ideas
               </h1>
-              <p className="text-sm md:text-base text-white/90 leading-relaxed">
+              <p className="text-sm md:text-base text-white/90 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                 Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
               </p>
             </div>
@@ -647,6 +647,7 @@ export function ChristmasHeroMobile() {
               <Button
                 onClick={handleCustomizeClick}
                 className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg py-6 text-lg font-semibold shadow-lg flex items-center justify-center gap-2"
+                style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
               >
                 <Sparkles className="w-4 h-4 text-yellow-300" />
                 Customize
@@ -659,7 +660,7 @@ export function ChristmasHeroMobile() {
 
       {/* Result State - 全屏展示视频 */}
       {viewState === 'result' && resultVideoUrl && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col font-mountains">
+        <div className="fixed inset-0 z-50 bg-black flex flex-col">
           {/* 视频区域 */}
           <div className="flex-1 flex items-center justify-center p-4">
             <video
@@ -678,6 +679,7 @@ export function ChristmasHeroMobile() {
               variant="outline"
               className="w-full border-2 border-yellow-400/50 bg-red-600/20 text-yellow-300 hover:bg-red-600/40 hover:border-yellow-400 font-semibold text-lg py-6 rounded-lg shadow-lg"
               onClick={handleBackToDisplay}
+              style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
             >
               <Sparkles className="w-4 h-4 mr-2 text-yellow-300" />
               Back
@@ -691,6 +693,7 @@ export function ChristmasHeroMobile() {
                 disabled={isDownloading}
                 className="flex-1 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600/30 to-red-700/30 text-yellow-300 hover:from-red-600/50 hover:to-red-700/50 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
                 onClick={handleDownload}
+                style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
               >
                 {isDownloading ? (
                   <>
@@ -750,12 +753,12 @@ export function ChristmasHeroMobile() {
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <SheetContent side="bottom" className="h-[90vh] overflow-y-auto bg-black/50 backdrop-blur-sm border-none p-0">
           <SheetTitle className="sr-only">Create Your Christmas Video</SheetTitle>
-          <div className="px-6 pt-6 pb-6 space-y-6 font-mountains">
+          <div className="px-6 pt-6 pb-6 space-y-6">
             {/* 上传图片 + 提示词 + 模板选择 + 音乐 + 生成按钮 */}
             <div className="space-y-6">
               {/* 上传图片 */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-4">Upload photo</h3>
+                <h3 className="text-base font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
                 <div className="relative">
                   <div
                     onClick={() => imageInputRef.current?.click()}
@@ -781,7 +784,7 @@ export function ChristmasHeroMobile() {
                           <div className="w-14 h-14 rounded-full border border-yellow-400/40 flex items-center justify-center mb-3">
                           <Upload className="w-7 h-7 text-white/80" />
                         </div>
-                        <p className="text-white/80 text-sm">Tap to upload photo</p>
+                        <p className="text-white/80 text-sm" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Tap to upload photo</p>
                       </>
                     )}
                   </div>
@@ -797,18 +800,19 @@ export function ChristmasHeroMobile() {
 
               {/* 提示词输入 */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-3">Prompt</h3>
+                <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe what you want the character to express or do..."
                     className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
+                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                 />
               </div>
 
               {/* Template Selection */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-3">Template Selection</h3>
+                <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                   {TEMPLATES.map((tpl) => (
                     <button
@@ -830,7 +834,7 @@ export function ChristmasHeroMobile() {
                         alt={tpl.name}
                         className="w-full h-full object-cover"
                       />
-                      <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center">
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                         {tpl.name}
                       </div>
                     </button>
@@ -841,7 +845,7 @@ export function ChristmasHeroMobile() {
               {/* Choose music */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-yellow-300">Choose music</h3>
+                  <h3 className="text-base font-semibold text-yellow-300 font-mountains">Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"
@@ -851,6 +855,7 @@ export function ChristmasHeroMobile() {
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
                       }`}
+                      style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       All
                     </button>
@@ -862,6 +867,7 @@ export function ChristmasHeroMobile() {
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
                       }`}
+                      style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       Male
                     </button>
@@ -873,6 +879,7 @@ export function ChristmasHeroMobile() {
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
                       }`}
+                      style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       Female
                     </button>
@@ -900,7 +907,7 @@ export function ChristmasHeroMobile() {
                         <Music2
                           className={`w-4 h-4 mr-1 ${isPlaying ? 'animate-pulse text-yellow-300' : ''}`}
                         />
-                        <span className="text-xs">{track.name}</span>
+                        <span className="text-xs" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{track.name}</span>
                       </button>
                     );
                   })}
@@ -913,6 +920,7 @@ export function ChristmasHeroMobile() {
                   disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
                   onClick={handleGenerateClick}
                   className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-lg py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                 >
                   <Sparkles className="w-4 h-4 text-yellow-300" />
                   {isGenerating ? 'Generating...' : 'Create the video'}
