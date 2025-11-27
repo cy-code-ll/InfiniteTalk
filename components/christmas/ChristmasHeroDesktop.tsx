@@ -82,17 +82,17 @@ function calculateCredits(duration: number, resolution: Resolution): number {
 const sampleVideos = [
   {
     id: 1,
-    src: 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4',
+    src: 'https://www.infinitetalk2.com/infinitetalk/h2.mp4',
     poster: '/video/christmas/santa-decorating.webp',
   },
   {
     id: 2,
-    src: 'https://cdn.infinitetalkai.org/video-to-video/lifestyle/lifestyle_19.mp4',
+    src: 'https://www.infinitetalk2.com/infinitetalk/h1.mp4',
     poster: '/video/christmas/santa-reading.webp',
   },
   {
     id: 3,
-    src: 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4',
+    src: 'https://www.infinitetalk2.com/infinitetalk/h3.mp4',
     poster: '/video/christmas/santa-cabin.webp',
   },
 ];
@@ -102,7 +102,7 @@ const TEMPLATES = [
     id: 't1',
     name: 'Cozy Home',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
-    previewVideo: 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t1.mp4',
     prompt:
       '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater and a Christmas hat, standing next to the small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
@@ -110,7 +110,7 @@ const TEMPLATES = [
     id: 't2',
     name: 'Living Room',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
-    previewVideo: 'https://cdn.infinitetalkai.org/video-to-video/lifestyle/lifestyle_19.mp4',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t2.mp4',
     prompt:
       '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone and characters standing at the front. The character width accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
   },
@@ -118,7 +118,7 @@ const TEMPLATES = [
     id: 't3',
     name: 'Church Interior',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
-    previewVideo: 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t3.mp4',
     prompt:
       '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
@@ -126,7 +126,7 @@ const TEMPLATES = [
     id: 't4',
     name: 'Pine Forest',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
-    previewVideo: 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t4.mp4',
     prompt:
       'A pine forest in the outskirts, The small wooden house on the farm emits yellow lights from the window, warm and romantic,The most crucial thing is that there are countless warm light strings wrapped around the pine trees in the forest, only white or amber in color, outlining the outline of the pine trees. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a Christmas hat. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   }
@@ -927,7 +927,7 @@ export function ChristmasHeroDesktop() {
                       </div>
                     ) : (
                       <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4'}
+                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://www.infinitetalk2.com/infinitetalk/h3.mp4'}
                         poster={sampleVideos[0].poster}
                         className="w-full h-full object-cover"
                         controls={previewState === 'result' && resultVideoUrl ? true : false}
@@ -959,7 +959,7 @@ export function ChristmasHeroDesktop() {
                       </div>
                     ) : (
                       <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://cdn.infinitetalkai.org/video-to-video/lifestyle/lifestyle_19.mp4'}
+                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://www.infinitetalk2.com/infinitetalk/h1.mp4'}
                         poster={sampleVideos[1].poster}
                         className="w-full h-full object-cover rounded-lg bg-red/80"
                         autoPlay
