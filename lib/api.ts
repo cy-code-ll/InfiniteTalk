@@ -533,7 +533,7 @@ export const infiniteTalkApi = {
 
     // 如果有遮罩数据，添加到 FormData
     if (params.mask) {
-      formData.append('mask', params.mask);
+      formData.append('mask_image', params.mask);
     }
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
@@ -609,7 +609,7 @@ export const uploadApi = {
     const headers: Record<string, string> = {
       'x-appid': API_CONFIG.APP_ID,
     };
-    
+
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;
     }
