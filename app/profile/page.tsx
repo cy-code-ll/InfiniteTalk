@@ -583,7 +583,18 @@ export default function ProfilePage() {
                   {/* 分组内网格 */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     {group.items
-                      .filter((item: GenerationHistoryItem) => item.status === 0 || item.status === 1 || (item.status === -1 && item.generate_image === ''))
+                      .filter((item: GenerationHistoryItem) => {
+                        // 过滤状态
+                        const statusMatch = item.status === 0 || item.status === 1 || (item.status === -1 && item.generate_image === '');
+                        if (!statusMatch) return false;
+                        
+                        // 过滤掉 model 为 "Nano Banana" 的作品
+                        if (item.model === 'Nano Banana') {
+                          return false;
+                        }
+                        
+                        return true;
+                      })
                       .map((item: GenerationHistoryItem) => {
                         const isFailed = item.status === -1 && item.generate_image === '';
                         const isGenerating = item.status === 0 && item.generate_image === '';
