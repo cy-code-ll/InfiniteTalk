@@ -97,7 +97,8 @@
         
         .video-container {
             width: 100%;
-            max-width: 800px;
+            max-width: 600px;
+            max-height: 400px;
             margin: 2rem 0;
             border-radius: 1.5rem;
             overflow: hidden;
@@ -108,8 +109,21 @@
         
         .video-container video {
             width: 100%;
-            height: auto;
+            height: 100%;
+            max-width: 600px;
+            max-height: 400px;
             display: block;
+            object-fit: contain;
+        }
+        
+        .video-placeholder {
+            width: 100%;
+            min-height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 1.125rem;
         }
         
         .btn {
@@ -172,10 +186,13 @@
                 Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
             </p>
             
-            <div id="videoWrapper" class="video-container" style="display: none;">
-                <video id="shareVideo" controls autoplay loop playsinline>
+            <div id="videoWrapper" class="video-container">
+                <video id="shareVideo" controls autoplay loop playsinline style="display: none;">
                     Your browser does not support the video tag.
                 </video>
+                <div id="videoPlaceholder" class="video-placeholder" style="display: none;">
+                    <p>No video available</p>
+                </div>
             </div>
             
             <div id="errorMessage" class="error-message" style="display: none;"></div>
@@ -221,27 +238,32 @@
             const params = getUrlParams();
             const videoWrapper = document.getElementById('videoWrapper');
             const shareVideo = document.getElementById('shareVideo');
+            const videoPlaceholder = document.getElementById('videoPlaceholder');
             const createButton = document.getElementById('createButton');
             const errorMessage = document.getElementById('errorMessage');
             
             // Update Meta tags
             updateMetaTags(params.v, params.tid, params.mid);
             
-            // Display video if video URL is provided
-            if (params.v) {
-                shareVideo.src = params.v;
-                videoWrapper.style.display = 'block';
-                
-                // Handle video loading errors
-                shareVideo.onerror = function() {
-                    errorMessage.textContent = 'Failed to load video. Please check the video URL.';
-                    errorMessage.style.display = 'block';
-                    videoWrapper.style.display = 'none';
-                };
-            } else {
-                errorMessage.textContent = 'No video URL provided.';
+            // Video container is always visible
+            videoWrapper.style.display = 'block';
+            
+            // Default video URL
+            const defaultVideoUrl = 'https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4';
+            
+            // Display video - use provided URL or default video
+            const videoUrl = params.v || defaultVideoUrl;
+            shareVideo.src = videoUrl;
+            shareVideo.style.display = 'block';
+            videoPlaceholder.style.display = 'none';
+            
+            // Handle video loading errors
+            shareVideo.onerror = function() {
+                errorMessage.textContent = 'Failed to load video. Please check the video URL.';
                 errorMessage.style.display = 'block';
-            }
+                shareVideo.style.display = 'none';
+                videoPlaceholder.style.display = 'flex';
+            };
             
             // Show "Create the same video" button if template ID and music ID are provided
             if (params.tid && params.mid) {
