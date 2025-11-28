@@ -695,6 +695,7 @@ export function ChristmasHeroDesktop() {
         </p>
 
         <Button
+          variant="outline"
           onClick={() => setViewState('create')}
           className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-2xl px-8 py-6 text-lg font-semibold mb-12 transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
         >
@@ -953,6 +954,7 @@ export function ChristmasHeroDesktop() {
                 {/* 生成按钮 */}
                 <div className="pt-2 relative">
                   <Button
+                    variant="outline"
                     disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim()}
                     onClick={handleGenerateClick}
                     className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"

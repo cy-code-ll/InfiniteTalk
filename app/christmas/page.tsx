@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
 import { Footer } from '@/components/Footer';
+import { Upload, Sparkles, Share2 } from 'lucide-react';
 import { ChristmasHero } from '@/components/christmas/ChristmasHero';
 
 // SEO metadata - T<60, D<160, K<100

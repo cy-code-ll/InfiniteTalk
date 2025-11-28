@@ -14,8 +14,8 @@ export const generateChristmasShareUrl = (
   templateId: string,
   musicId: string
 ): string => {
-  const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-  const sharePageUrl = `${baseUrl}/christmas`;
+  const baseUrl = 'https://www.infinitetalk2.com/infinitetalk/christmas.html';
+  const sharePageUrl = `${baseUrl}`;
   
   // 构建查询参数
   const params = new URLSearchParams({
