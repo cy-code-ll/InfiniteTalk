@@ -773,7 +773,7 @@ export function ChristmasHeroDesktop() {
               <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-lg font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
+                  <h3 className="text-lg font-semibold text-white mb-4 font-mountains">Upload photo</h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
@@ -815,7 +815,7 @@ export function ChristmasHeroDesktop() {
 
                 {/* 提示词输入 */}
                 <div>
-                  <h3 className="text-lg font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3 font-mountains">Prompt</h3>
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -827,7 +827,7 @@ export function ChristmasHeroDesktop() {
 
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-lg font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
+                  <h3 className="text-lg font-semibold text-white mb-3 font-mountains">Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
                       <HoverCard key={tpl.id} openDelay={0} closeDelay={100}>
@@ -882,7 +882,7 @@ export function ChristmasHeroDesktop() {
                 {/* Choose music */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-yellow-300 font-mountains">Choose music</h3>
+                    <h3 className="text-lg font-semibold text-white font-mountains">Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                       <button
                         type="button"

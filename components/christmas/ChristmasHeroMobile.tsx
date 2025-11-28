@@ -766,7 +766,7 @@ export function ChristmasHeroMobile() {
             <div className="space-y-6">
               {/* 上传图片 */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
+                <h3 className="text-base font-semibold text-white mb-4 font-mountains">Upload photo</h3>
                 <div className="relative">
                   <div
                     onClick={() => imageInputRef.current?.click()}
@@ -808,7 +808,7 @@ export function ChristmasHeroMobile() {
 
               {/* 提示词输入 */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
+                <h3 className="text-base font-semibold text-white mb-3 font-mountains">Prompt</h3>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -820,7 +820,7 @@ export function ChristmasHeroMobile() {
 
               {/* Template Selection */}
               <div>
-                <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
+                <h3 className="text-base font-semibold text-white mb-3 font-mountains">Template Selection</h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                   {TEMPLATES.map((tpl) => (
                     <button
@@ -853,7 +853,7 @@ export function ChristmasHeroMobile() {
               {/* Choose music */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-yellow-300 font-mountains">Choose music</h3>
+                  <h3 className="text-base font-semibold text-white font-mountains">Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"
