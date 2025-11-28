@@ -83,34 +83,38 @@ const TEMPLATES = [
     id: 't1',
     name: 'Cozy Home',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t1.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t1.webp',
     prompt:
-      'Extract the person from the image, removing the original background. Place the person, wearing a Santa hat, facing the camera and speaking to it. The new background is an American home lavishly decorated for Christmas, with a festive Christmas night scene visible outside the window. Behind the person is a Christmas tree adorned with various decorations and colorful lights, constantly twinkling. The person is positioned slightly above center. In front of the person, at the top, several small Christmas decorations are gently swaying, such as a Christmas snowman, Santa Claus, candy canes, and Christmas balloons.',
+      '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater, wearing a red Christmas hat, holding a Christmas card, and standing next to a small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
   {
     id: 't2',
     name: 'Living Room',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t2.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t2.webp',
     prompt:
-      'The person in the image is in an outdoor Christmas celebration venue, speaking to the camera. It is Christmas night, and behind the person stands a tall Christmas tree adorned with many twinkling colorful lights and numerous beautiful Christmas decorations. Simultaneously, many people are in the background, celebrating Christmas together, creating a very joyful atmosphere.',
+      '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone. The character stands at the front, holding a Christmas card, and the width of the character accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
   },
   {
     id: 't3',
     name: 'Church Interior',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t3.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t3.webp',
     prompt:
-      'The person in the image is embodying Santa Claus, wearing a Santa hat and a Santa suit, holding a Christmas gift, and speaking to the camera. The background is a snowy scene with snowflakes falling. A Christmas tree is full of twinkling lights and surrounded by various Christmas gifts. Santa Claus is happily smiling while displaying the gift in their hand, and waving to the camera.',
+      '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
   {
     id: 't4',
     name: 'Pine Forest',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t4.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4.webp',
     prompt:
-      'The person in the image is in a magical winter wonderland, surrounded by snow-covered trees and twinkling Christmas lights. Snowflakes are gently falling around them as they speak to the camera with a warm smile. A beautiful Christmas tree stands nearby, decorated with ornaments and glowing lights.',
-  },
+      '  A pine forest in the outskirts, covered in snow on the ground, with yellow lights shining from the windows of the small wooden houses on the farm, warm and romantic. Most importantly, countless warm light strings, only white or amber, are wrapped around the pine trees in the forest, outlining their contours. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a red Christmas hat, with a width of 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
+  }
 ];
 
 const MUSIC_TRACKS = [
