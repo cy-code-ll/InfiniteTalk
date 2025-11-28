@@ -83,6 +83,7 @@ const TEMPLATES = [
     id: 't1',
     name: 'Cozy Home',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t1.webp',
     prompt:
       'Extract the person from the image, removing the original background. Place the person, wearing a Santa hat, facing the camera and speaking to it. The new background is an American home lavishly decorated for Christmas, with a festive Christmas night scene visible outside the window. Behind the person is a Christmas tree adorned with various decorations and colorful lights, constantly twinkling. The person is positioned slightly above center. In front of the person, at the top, several small Christmas decorations are gently swaying, such as a Christmas snowman, Santa Claus, candy canes, and Christmas balloons.',
   },
@@ -90,6 +91,7 @@ const TEMPLATES = [
     id: 't2',
     name: 'Living Room',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t2.webp',
     prompt:
       'The person in the image is in an outdoor Christmas celebration venue, speaking to the camera. It is Christmas night, and behind the person stands a tall Christmas tree adorned with many twinkling colorful lights and numerous beautiful Christmas decorations. Simultaneously, many people are in the background, celebrating Christmas together, creating a very joyful atmosphere.',
   },
@@ -97,6 +99,7 @@ const TEMPLATES = [
     id: 't3',
     name: 'Church Interior',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t3.webp',
     prompt:
       'The person in the image is embodying Santa Claus, wearing a Santa hat and a Santa suit, holding a Christmas gift, and speaking to the camera. The background is a snowy scene with snowflakes falling. A Christmas tree is full of twinkling lights and surrounded by various Christmas gifts. Santa Claus is happily smiling while displaying the gift in their hand, and waving to the camera.',
   },
@@ -104,6 +107,7 @@ const TEMPLATES = [
     id: 't4',
     name: 'Pine Forest',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4.webp',
     prompt:
       'The person in the image is in a magical winter wonderland, surrounded by snow-covered trees and twinkling Christmas lights. Snowflakes are gently falling around them as they speak to the camera with a warm smile. A beautiful Christmas tree stands nearby, decorated with ornaments and glowing lights.',
   },

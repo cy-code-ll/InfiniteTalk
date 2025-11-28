@@ -83,16 +83,19 @@ const sampleVideos = [
   {
     id: 1,
     src: 'https://www.infinitetalk2.com/infinitetalk/h2.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h2.webp',
     poster: '/video/christmas/santa-decorating.webp',
   },
   {
     id: 2,
     src: 'https://www.infinitetalk2.com/infinitetalk/h1.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h1.webp',
     poster: '/video/christmas/santa-reading.webp',
   },
   {
     id: 3,
     src: 'https://www.infinitetalk2.com/infinitetalk/h3.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h3.webp',
     poster: '/video/christmas/santa-cabin.webp',
   },
 ];
@@ -103,6 +106,7 @@ const TEMPLATES = [
     name: 'Cozy Home',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t1.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t1.webp',
     prompt:
       '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater and a Christmas hat, standing next to the small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
@@ -111,6 +115,7 @@ const TEMPLATES = [
     name: 'Living Room',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t2.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t2.webp',
     prompt:
       '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone and characters standing at the front. The character width accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
   },
@@ -119,6 +124,7 @@ const TEMPLATES = [
     name: 'Church Interior',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t3.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t3.webp',
     prompt:
       '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
@@ -127,6 +133,7 @@ const TEMPLATES = [
     name: 'Pine Forest',
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t4.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4.webp',
     prompt:
       'A pine forest in the outskirts, The small wooden house on the farm emits yellow lights from the window, warm and romantic,The most crucial thing is that there are countless warm light strings wrapped around the pine trees in the forest, only white or amber in color, outlining the outline of the pine trees. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a Christmas hat. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   }
@@ -625,8 +632,9 @@ export function ChristmasHeroDesktop() {
       {renderBackground()}
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1 mb-10">
-        <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-          Christmas Greeting Video Ideas
+        <h1 className="text-5xl md:text-6xl text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+          <span className="text-yellow-300">Christmas</span>{' '}
+          <span className="text-white">Greeting Video Ideas</span>
         </h1>
         <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-12 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
@@ -646,7 +654,7 @@ export function ChristmasHeroDesktop() {
           <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[240px] md:h-[300px] lg:h-[350px] xl:h-[380px] aspect-[3/4] flex-shrink-0 -mt-[5%] md:-mt-[10%] lg:-mt-[15%] xl:-mt-[20%]">
             <video
               src={sampleVideos[0].src}
-              poster={sampleVideos[0].poster}
+              poster={sampleVideos[0].videoPoster}
               className="w-full h-full object-cover"
               autoPlay
               loop
@@ -659,7 +667,7 @@ export function ChristmasHeroDesktop() {
           <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[200px] md:h-[280px] lg:h-[320px] xl:h-[360px] w-[320px] md:w-[560px] lg:w-[640px] xl:w-[720px] flex-shrink-0 mx-1 md:mx-4 lg:mx-6 xl:mx-8">
             <video
               src={sampleVideos[1].src}
-              poster={sampleVideos[1].poster}
+              poster={sampleVideos[1].videoPoster}
               className="w-full h-full object-cover"
               autoPlay
               loop
@@ -672,7 +680,7 @@ export function ChristmasHeroDesktop() {
           <div className="relative overflow-hidden bg-slate-900/60 border border-white/15 shadow-2xl h-[320px] md:h-[400px] lg:h-[450px] xl:h-[500px] aspect-[9/16] flex-shrink-0 -mt-[5%] md:-mt-[10%] lg:-mt-[15%] xl:-mt-[20%]">
             <video
               src={sampleVideos[2].src}
-              poster={sampleVideos[2].poster}
+              poster={sampleVideos[2].videoPoster}
               className="w-full h-full object-cover"
               autoPlay
               loop
@@ -693,8 +701,9 @@ export function ChristmasHeroDesktop() {
         {renderBackground()}
 
         <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
-          <h1 className="text-5xl md:text-6xl text-yellow-300 text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-            Christmas Greeting Video Ideas
+          <h1 className="text-5xl md:text-6xl text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+            <span className="text-yellow-300">Christmas</span>{' '}
+            <span className="text-white">Greeting Video Ideas</span>
           </h1>
           <p className="text-lg md:text-xl text-white/90 text-center max-w-2xl mx-auto mb-20 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
@@ -707,7 +716,7 @@ export function ChristmasHeroDesktop() {
               <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
+                  <h3 className="text-lg font-semibold text-yellow-300 mb-4 font-mountains">Upload photo</h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
@@ -749,7 +758,7 @@ export function ChristmasHeroDesktop() {
 
                 {/* 提示词输入 */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
+                  <h3 className="text-lg font-semibold text-yellow-300 mb-3 font-mountains">Prompt</h3>
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -761,10 +770,10 @@ export function ChristmasHeroDesktop() {
 
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-base font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
+                  <h3 className="text-lg font-semibold text-yellow-300 mb-3 font-mountains">Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
-                      <HoverCard key={tpl.id}>
+                      <HoverCard key={tpl.id} openDelay={0} closeDelay={100}>
                         <HoverCardTrigger asChild>
                           <button
                             type="button"
@@ -790,10 +799,11 @@ export function ChristmasHeroDesktop() {
                           </button>
                         </HoverCardTrigger>
                         {tpl.previewVideo && (
-                          <HoverCardContent className="w-auto p-2 bg-black/90 border-yellow-400/30">
-                            <div className="w-[240px] aspect-video rounded-lg overflow-hidden">
+                          <HoverCardContent side="top" className="w-auto p-2 bg-black/90 border-yellow-400/30">
+                            <div className="w-[400px] aspect-video rounded-lg overflow-hidden">
                               <video
                                 src={tpl.previewVideo}
+                                poster={tpl.videoPoster}
                                 className="w-full h-full object-cover"
                                 autoPlay
                                 loop
@@ -815,7 +825,7 @@ export function ChristmasHeroDesktop() {
                 {/* Choose music */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-base font-semibold text-yellow-300 font-mountains">Choose music</h3>
+                    <h3 className="text-lg font-semibold text-yellow-300 font-mountains">Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                       <button
                         type="button"
@@ -921,14 +931,28 @@ export function ChristmasHeroDesktop() {
                   <div className="absolute inset-[5px] rounded-[34px] overflow-hidden bg-black">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80">
-                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                        <div className="flex flex-col items-center mb-6">
+                          <div className="relative flex flex-col items-center">
+                            <div className="absolute -top-4 flex items-center justify-center">
+                              <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
+                              <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
+                            </div>
+                            <div className="w-0 h-0 border-l-[26px] border-l-transparent border-r-[26px] border-r-transparent border-b-[40px] border-b-emerald-500 animate-pulse" />
+                            <div className="w-0 h-0 -mt-4 border-l-[32px] border-l-transparent border-r-[32px] border-r-transparent border-b-[46px] border-b-emerald-600 animate-pulse delay-150" />
+                            <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[52px] border-b-emerald-700 animate-pulse delay-300" />
+                            <div className="w-4 h-5 bg-amber-800 mt-1 rounded-sm" />
+                          </div>
+                          <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                            Santa is preparing your Christmas video...
+                          </p>
+                        </div>
                         <Progress value={progress} className="w-32" />
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
                       </div>
                     ) : (
                       <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://www.infinitetalk2.com/infinitetalk/h3.mp4'}
-                        poster={sampleVideos[0].poster}
+                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[2].src}
+                        poster={sampleVideos[0].videoPoster}
                         className="w-full h-full object-cover"
                         controls={previewState === 'result' && resultVideoUrl ? true : false}
                         autoPlay
@@ -953,14 +977,28 @@ export function ChristmasHeroDesktop() {
                   <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
-                        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin mb-4" />
+                        <div className="flex flex-col items-center mb-6">
+                          <div className="relative flex flex-col items-center">
+                            <div className="absolute -top-4 flex items-center justify-center">
+                              <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
+                              <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
+                            </div>
+                            <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[46px] border-b-emerald-500 animate-pulse" />
+                            <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[54px] border-b-emerald-600 animate-pulse delay-150" />
+                            <div className="w-0 h-0 -mt-4 border-l-[46px] border-l-transparent border-r-[46px] border-r-transparent border-b-[62px] border-b-emerald-700 animate-pulse delay-300" />
+                            <div className="w-5 h-6 bg-amber-800 mt-1 rounded-sm" />
+                          </div>
+                          <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                            Santa is preparing your Christmas video...
+                          </p>
+                        </div>
                         <Progress value={progress} className="w-40" />
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
                       </div>
                     ) : (
                       <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : 'https://www.infinitetalk2.com/infinitetalk/h1.mp4'}
-                        poster={sampleVideos[1].poster}
+                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[1].src}
+                        poster={sampleVideos[1].videoPoster}
                         className="w-full h-full object-cover rounded-lg bg-red/80"
                         autoPlay
                         controls={previewState === 'result' && resultVideoUrl ? true : false}
