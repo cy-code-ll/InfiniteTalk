@@ -196,6 +196,18 @@
   }
 }
 
+/* Christmas snow falling animation (used in PC preview background) */
+@keyframes snow-fall {
+  0% {
+    top: -10%;
+    transform: translateX(0);
+  }
+  100% {
+    top: 110%;
+    transform: translateX(10px);
+  }
+}
+
 
 @tailwind base;
 @tailwind components;

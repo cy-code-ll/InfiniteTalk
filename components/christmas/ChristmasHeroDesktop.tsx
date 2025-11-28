@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -147,6 +147,58 @@ const MUSIC_TRACKS = [
   { id: 'm5', name: 'Male Friend', url: '/music/male_fri.mp3', taglist: ['male'] },
   { id: 'm6', name: 'Male Colleague', url: '/music/male_work.mp3', taglist: ['male'] },
 ];
+
+// PC 端下雪覆盖层（只在组件内部覆盖，不影响交互）
+type SnowFlake = {
+  id: number;
+  left: number;
+  delay: number;
+  duration: number;
+  size: number;
+  opacity: number;
+};
+
+function createSnowFlakes(count: number): SnowFlake[] {
+  return Array.from({ length: count }).map((_, i) => ({
+    id: i,
+    left: Math.random() * 100,
+    delay: Math.random() * 12,
+    duration: 8 + Math.random() * 8,
+    size: 4 + Math.random() * 6,
+    opacity: 0.4 + Math.random() * 0.5,
+  }));
+}
+
+function SnowOverlay({ density = 50 }: { density?: number }) {
+  // 通过 useEffect 在客户端生成随机雪花，避免 SSR / hydration 不一致
+  const [flakes, setFlakes] = useState<SnowFlake[]>([]);
+
+  useEffect(() => {
+    setFlakes(createSnowFlakes(density));
+  }, [density]);
+
+  if (!flakes.length) return null;
+
+  return (
+    <div className="pointer-events-none absolute inset-0 overflow-hidden z-20">
+      {flakes.map((flake) => (
+        <div
+          key={flake.id}
+          className="absolute rounded-full bg-white/90 shadow-[0_0_10px_rgba(255,255,255,0.8)]"
+          style={{
+            left: `${flake.left}%`,
+            top: '-10%',
+            width: `${flake.size}px`,
+            height: `${flake.size}px`,
+            opacity: flake.opacity,
+            animation: `snow-fall ${flake.duration}s linear infinite`,
+            animationDelay: `${flake.delay}s`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
 
 export function ChristmasHeroDesktop() {
   const searchParams = useSearchParams();
@@ -617,9 +669,9 @@ export function ChristmasHeroDesktop() {
 
   const renderBackground = () => (
     <div 
-      className="absolute inset-0"
+      className="absolute inset-0 z-0"
       style={{
-        backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/bg.png)',
+        backgroundImage: 'url(https://www.infinitetalk2.com/infinitetalk/bgnew.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -630,6 +682,8 @@ export function ChristmasHeroDesktop() {
   const renderDisplay = () => (
       <div className="relative h-[calc(100vh-4rem)] flex flex-col items-center justify-center overflow-hidden font-mountains">
       {renderBackground()}
+      {/* 整个组件的下雪效果 */}
+      <SnowOverlay density={120} />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1 mb-10">
         <h1 className="text-5xl md:text-6xl text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
@@ -699,8 +753,10 @@ export function ChristmasHeroDesktop() {
     return (
       <div className="relative min-h-screen flex flex-col items-center justify-center py-20 font-mountains">
         {renderBackground()}
+        {/* 整个组件的下雪效果 */}
+        <SnowOverlay density={120} />
 
-        <div className="relative z-10 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
+        <div className="relative z-25 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
           <h1 className="text-5xl md:text-6xl text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             <span className="text-yellow-300">Christmas</span>{' '}
             <span className="text-white">Greeting Video Ideas</span>
@@ -974,7 +1030,7 @@ export function ChristmasHeroDesktop() {
                   }}
                 >
                   {/* 视频内容区域 - 需要根据实际图片调整 padding */}
-                  <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30">
+                  <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30 z-10">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
                         <div className="flex flex-col items-center mb-6">
