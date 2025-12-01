@@ -22,7 +22,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
 
 type ImageOrientation = 'portrait' | 'landscape' | null;
 type Resolution = '480p' | '720p' | '1080p';
@@ -118,6 +118,9 @@ const TEMPLATES = [
 ];
 
 const MUSIC_TRACKS = [
+  { id: 'm9', name: 'Fairytale At Christmas', url: '/music/3.mp3', taglist: [] },
+  { id: 'm7', name: 'All I Want For Christmas', url: '/music/1.mp3', taglist: [] },
+  { id: 'm8', name: 'Feliz Navidad', url: '/music/2.mp3', taglist: [] },
   { id: 'm1', name: 'Female Family', url: '/music/fmale_fam.mp3', taglist: ['female'] },
   { id: 'm2', name: 'Female Friend', url: '/music/fmale_fir.mp3', taglist: ['female'] },
   { id: 'm3', name: 'Female Colleague', url: '/music/fmale_work.mp3', taglist: ['female'] },
@@ -157,6 +160,9 @@ export function ChristmasHeroMobile() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const progressTimerRef = useRef<number | null>(null);
+  
+  // 背景视频静音状态，默认静音
+  const [isBackgroundVideoMuted, setIsBackgroundVideoMuted] = useState(true);
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -614,13 +620,29 @@ export function ChristmasHeroMobile() {
         <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
           {/* 背景视频 */}
           <video
-            src="https://cdn.infinitetalkai.org/video-to-video/outdoors/Outdoors_16.mp4"
+            src="https://www.infinitetalk2.com/infinitetalk/h3.mp4"
+            poster='https://www.infinitetalk2.com/infinitetalk/h3.webp'
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
             loop
-            muted
+            muted={isBackgroundVideoMuted}
             playsInline
           />
+          
+          {/* 静音开关 */}
+          {viewState === 'display' && (
+            <button
+              onClick={() => setIsBackgroundVideoMuted(!isBackgroundVideoMuted)}
+              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+              title={isBackgroundVideoMuted ? 'Unmute' : 'Mute'}
+            >
+              {isBackgroundVideoMuted ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-white" />
+              )}
+            </button>
+          )}
           
           {/* 渐变遮罩 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />

@@ -61,16 +61,7 @@ const infiniteTalkSchemaData = {
     'Infinite-length video generation',
     'Professional quality output',
     'Real-time progress tracking'
-  ],
-  video: {
-    '@type': 'VideoObject',
-    name: 'Meigen Infinite Talk AI Demo',
-    description: 'Demonstration of how Meigen Infinite Talk AI creates talking videos from images and audio',
-    contentUrl: 'https://www.infinitetalk.net/hero/demo.mp4',
-    embedUrl: 'https://www.infinitetalk.net/hero/demo.mp4',
-    uploadDate: '2025-01-01',
-    duration: 'PT30S'
-  }
+  ]
 };
 
 // How-to structured data
@@ -130,6 +121,71 @@ const howToSchemaData = {
   ]
 };
 
+// FAQ structured data
+const faqSchemaData = {
+  '@context': 'https://schema.org',
+  '@type': 'FAQPage',
+  name: 'Meigen Infinite Talk AI - Frequently Asked Questions',
+  mainEntity: [
+    {
+      '@type': 'Question',
+      name: 'What is Meigen Infinite Talk AI?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Meigen Infinite Talk AI is an audio-driven video generation tool for creating lifelike talking avatar videos. It brings characters to life by producing natural lip-sync, expressive facial movements, and realistic body gestures from images or videos.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'How does Meigen Infinite Talk AI work?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Meigen Infinite Talk AI uses a sparse-frame video dubbing framework that takes any video and audio track and synthesizes a seamless new video where lips, head movements, posture, and expressions all stay perfectly in sync with the voice.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'What inputs does Meigen Infinite Talk AI support?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'You can provide either a video + audio (Video2Video) or a single image + audio (ImageToVideo). Simply upload your image or video file along with an audio file containing the speech you want to sync.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'How long can videos generated with Meigen Infinite Talk AI be?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Meigen Infinite Talk AI can generate videos of unlimited length. Unlike traditional tools that cap content at just a few seconds, you can create videos that last minutes or even longer, limited only by your device\'s computing power. Maximum generation duration is 600 seconds.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'What resolutions are supported?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Meigen Infinite Talk AI supports 480p, 720p, and 1080p resolutions. Every 5 seconds, 480P requires 5 credits, 720P requires 10 credits, and 1080P requires 15 credits.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'What is the difference between Video2Video and ImageToVideo?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'Video2Video transforms any video into a fully animated talking character, while ImageToVideo brings static photos to life with just a single image and audio track. Both methods produce natural lip-sync and facial expressions.'
+      }
+    },
+    {
+      '@type': 'Question',
+      name: 'What file formats are supported?',
+      acceptedAnswer: {
+        '@type': 'Answer',
+        text: 'For best results, use high-quality images with clear facial features (frontal face images work best) and audio files with good clarity. The AI works with various image and audio formats commonly used for video production.'
+      }
+    }
+  ]
+};
+
 export default function InfiniteTalkPage() {
   return (
     <div className="min-h-screen flex flex-col">
@@ -139,6 +195,9 @@ export default function InfiniteTalkPage() {
       />
       <Script id="ld-json-howto" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchemaData) }}
+      />
+      <Script id="ld-json-faq" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }}
       />
       
       <main className="flex-grow relative pt-20">

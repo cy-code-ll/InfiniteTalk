@@ -17,7 +17,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
 import {
   HoverCard,
   HoverCardContent,
@@ -140,12 +140,16 @@ const TEMPLATES = [
 ];
 
 const MUSIC_TRACKS = [
+  { id: 'm9', name: 'Fairytale At Christmas', url: '/music/3.mp3', taglist: [] },
+  { id: 'm7', name: 'All I Want For Christmas', url: '/music/1.mp3', taglist: [] },
+  { id: 'm8', name: 'Feliz Navidad', url: '/music/2.mp3', taglist: [] },
   { id: 'm1', name: 'Female Family', url: '/music/fmale_fam.mp3', taglist: ['female'] },
   { id: 'm2', name: 'Female Friend', url: '/music/fmale_fir.mp3', taglist: ['female'] },
   { id: 'm3', name: 'Female Colleague', url: '/music/fmale_work.mp3', taglist: ['female'] },
   { id: 'm4', name: 'Male Family', url: '/music/male_fam.mp3', taglist: ['male'] },
   { id: 'm5', name: 'Male Friend', url: '/music/male_fri.mp3', taglist: ['male'] },
   { id: 'm6', name: 'Male Colleague', url: '/music/male_work.mp3', taglist: ['male'] },
+
 ];
 
 // PC 端下雪覆盖层（只在组件内部覆盖，不影响交互）
@@ -231,6 +235,12 @@ export function ChristmasHeroDesktop() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const progressTimerRef = useRef<number | null>(null);
+  
+  // 静音状态管理
+  const [isPreviewMuted, setIsPreviewMuted] = useState(true); // 预览区视频静音状态，默认静音
+  const [isDisplayVideo1Muted, setIsDisplayVideo1Muted] = useState(true); // renderDisplay 第一个视频
+  const [isDisplayVideo2Muted, setIsDisplayVideo2Muted] = useState(true); // renderDisplay 第二个视频
+  const [isDisplayVideo3Muted, setIsDisplayVideo3Muted] = useState(true); // renderDisplay 第三个视频
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -671,7 +681,7 @@ export function ChristmasHeroDesktop() {
     <div 
       className="absolute inset-0 z-0"
       style={{
-        backgroundImage: 'url(https://www.infinitetalk2.com/infinitetalk/bgnew.jpg)',
+        backgroundImage: 'url(https://www.infinitetalk2.com/infinitetalk/bg03.jpg)',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
@@ -713,9 +723,20 @@ export function ChristmasHeroDesktop() {
               className="w-full h-full object-cover"
               autoPlay
               loop
-              muted
+              muted={isDisplayVideo1Muted}
               playsInline
             />
+            <button
+              onClick={() => setIsDisplayVideo1Muted(!isDisplayVideo1Muted)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+              title={isDisplayVideo1Muted ? 'Unmute' : 'Mute'}
+            >
+              {isDisplayVideo1Muted ? (
+                <VolumeX className="w-4 h-4 text-white" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-white" />
+              )}
+            </button>
           </div>
 
           {/* 中间横版 */}
@@ -726,9 +747,20 @@ export function ChristmasHeroDesktop() {
               className="w-full h-full object-cover"
               autoPlay
               loop
-              muted
+              muted={isDisplayVideo2Muted}
               playsInline
             />
+            <button
+              onClick={() => setIsDisplayVideo2Muted(!isDisplayVideo2Muted)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+              title={isDisplayVideo2Muted ? 'Unmute' : 'Mute'}
+            >
+              {isDisplayVideo2Muted ? (
+                <VolumeX className="w-4 h-4 text-white" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-white" />
+              )}
+            </button>
           </div>
 
           {/* 右竖版 - 9:16 比例 */}
@@ -739,9 +771,20 @@ export function ChristmasHeroDesktop() {
               className="w-full h-full object-cover"
               autoPlay
               loop
-              muted
+              muted={isDisplayVideo3Muted}
               playsInline
             />
+            <button
+              onClick={() => setIsDisplayVideo3Muted(!isDisplayVideo3Muted)}
+              className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+              title={isDisplayVideo3Muted ? 'Unmute' : 'Mute'}
+            >
+              {isDisplayVideo3Muted ? (
+                <VolumeX className="w-4 h-4 text-white" />
+              ) : (
+                <Volume2 className="w-4 h-4 text-white" />
+              )}
+            </button>
           </div>
         </div>
       </div>
@@ -1008,15 +1051,31 @@ export function ChristmasHeroDesktop() {
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
                       </div>
                     ) : (
-                      <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[2].src}
-                        poster={sampleVideos[0].videoPoster}
-                        className="w-full h-full object-cover"
-                        controls={previewState === 'result' && resultVideoUrl ? true : false}
-                        autoPlay
-                        loop
-                        playsInline
-                      />
+                      <>
+                        <video
+                          src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[2].src}
+                          poster={sampleVideos[0].videoPoster}
+                          className="w-full h-full object-cover"
+                          controls={previewState === 'result' && resultVideoUrl ? true : false}
+                          autoPlay
+                          loop
+                          muted={previewState !== 'result' ? isPreviewMuted : false}
+                          playsInline
+                        />
+                        {previewState !== 'result' && (
+                          <button
+                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
+                            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                            title={isPreviewMuted ? 'Unmute' : 'Mute'}
+                          >
+                            {isPreviewMuted ? (
+                              <VolumeX className="w-4 h-4 text-white" />
+                            ) : (
+                              <Volume2 className="w-4 h-4 text-white" />
+                            )}
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -1054,15 +1113,31 @@ export function ChristmasHeroDesktop() {
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
                       </div>
                     ) : (
-                      <video
-                        src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[1].src}
-                        poster={sampleVideos[1].videoPoster}
-                        className="w-full h-full object-cover rounded-lg bg-red/80"
-                        autoPlay
-                        controls={previewState === 'result' && resultVideoUrl ? true : false}
-                        loop
-                        playsInline
-                      />
+                      <>
+                        <video
+                          src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[1].src}
+                          poster={sampleVideos[1].videoPoster}
+                          className="w-full h-full object-cover rounded-lg bg-red/80"
+                          autoPlay
+                          controls={previewState === 'result' && resultVideoUrl ? true : false}
+                          loop
+                          muted={previewState !== 'result' ? isPreviewMuted : false}
+                          playsInline
+                        />
+                        {previewState !== 'result' && (
+                          <button
+                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
+                            className="absolute top-8 right-25 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                            title={isPreviewMuted ? 'Unmute' : 'Mute'}
+                          >
+                            {isPreviewMuted ? (
+                              <VolumeX className="w-4 h-4 text-white" />
+                            ) : (
+                              <Volume2 className="w-4 h-4 text-white" />
+                            )}
+                          </button>
+                        )}
+                      </>
                     )}
                   </div>
                 </div> 

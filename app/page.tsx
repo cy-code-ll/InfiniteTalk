@@ -36,6 +36,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'FAQPage',
+          name: 'InfiniteTalk AI - Frequently Asked Questions',
           mainEntity: [
             {
               '@type': 'Question',
