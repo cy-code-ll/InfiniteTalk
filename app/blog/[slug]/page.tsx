@@ -102,10 +102,14 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
   }
 
   const { post } = result;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.infinitetalk.net';
 
   return {
     title: post.seo_name || post.title,
     description: post.seo_desc || post.abstract || `Read about ${post.title} on InfiniteTalk AI blog.`,
+    alternates: {
+      canonical: `${siteUrl}/blog/${slug}`,
+    },
     openGraph: {
       title: post.seo_name || post.title,
       description: post.seo_desc || post.abstract || `Read about ${post.title} on InfiniteTalk AI blog.`,

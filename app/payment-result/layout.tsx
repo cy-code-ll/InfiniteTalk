@@ -9,6 +9,9 @@ export const metadata: Metadata = {
     index: false,
     follow: false,
   },
+  alternates: {
+    canonical: `${siteUrl}/payment-result`,
+  },
   openGraph: {
     title: 'Payment Result - InfiniteTalk',
     description: 'View your payment result and order details on InfiniteTalk.',

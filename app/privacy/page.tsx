@@ -1,6 +1,24 @@
-'use client';
-
+import { Metadata } from 'next';
 import { Footer } from '../../components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | InfiniteTalk AI',
+  description: 'Read the Privacy Policy for InfiniteTalk AI. Learn how we collect, use, and protect your information when you use our services.',
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy | InfiniteTalk AI',
+    description: 'Read the Privacy Policy for InfiniteTalk AI. Learn how we collect, use, and protect your information when you use our services.',
+    type: 'website',
+    url: 'https://www.infinitetalk.net/privacy',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy | InfiniteTalk AI',
+    description: 'Read the Privacy Policy for InfiniteTalk AI.',
+  },
+};
 
 export default function PrivacyPolicyPage() {
   // 定义静态内容

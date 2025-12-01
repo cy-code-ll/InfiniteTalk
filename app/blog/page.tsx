@@ -10,6 +10,9 @@ export const metadata: Metadata = {
   description:
     "Read the latest posts on InfiniteTalk AI video generation. Get tips, inspiration, feature updates, and creative use cases.",
   keywords: "InfiniteTalk AI blog, AI video tips, AI video ideas, AI video updates",
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/blog',
+  },
   openGraph: {
     title: "InfiniteTalk AI Video Generator Blog",
     description:

@@ -1,7 +1,24 @@
-'use client';
-
+import { Metadata } from 'next';
 import { Footer } from '../../components/Footer';
-import { useState } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | InfiniteTalk AI',
+  description: 'Read the Terms of Service for InfiniteTalk AI. Learn about our service terms, user content policies, and legal agreements.',
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service | InfiniteTalk AI',
+    description: 'Read the Terms of Service for InfiniteTalk AI. Learn about our service terms, user content policies, and legal agreements.',
+    type: 'website',
+    url: 'https://www.infinitetalk.net/terms',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service | InfiniteTalk AI',
+    description: 'Read the Terms of Service for InfiniteTalk AI.',
+  },
+};
 
 export default function TermsOfServicePage() {
   // 定义静态内容

@@ -1,5 +1,24 @@
-'use client';
+import { Metadata } from 'next';
 import { Footer } from '@/components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Refund Policy | InfiniteTalk AI',
+  description: 'Read the Refund Policy for InfiniteTalk AI. Learn about our refund eligibility, request process, and terms.',
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/refund',
+  },
+  openGraph: {
+    title: 'Refund Policy | InfiniteTalk AI',
+    description: 'Read the Refund Policy for InfiniteTalk AI. Learn about our refund eligibility, request process, and terms.',
+    type: 'website',
+    url: 'https://www.infinitetalk.net/refund',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Refund Policy | InfiniteTalk AI',
+    description: 'Read the Refund Policy for InfiniteTalk AI.',
+  },
+};
 
 export default function RefundPolicyPage() {
   return (
