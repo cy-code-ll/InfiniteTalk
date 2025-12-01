@@ -9,7 +9,6 @@
 User-agent: *
 Allow: /
 Disallow: /api/        # API endpoints (not meant for indexing)
-Disallow: /_next/      # Next.js internal assets
 Disallow: /admin/      # Admin dashboard (protected)
 Disallow: /sign-in/    # Authentication pages
 Disallow: /sign-up/    # Authentication pages
@@ -22,7 +21,6 @@ Disallow: /profile/    # User profile pages
 User-agent: Googlebot
 Allow: /
 Disallow: /api/
-Disallow: /_next/
 Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
@@ -33,7 +31,6 @@ Disallow: /profile/
 User-agent: Bingbot
 Allow: /
 Disallow: /api/
-Disallow: /_next/
 Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
@@ -44,7 +41,6 @@ Disallow: /profile/
 User-agent: Baiduspider
 Allow: /
 Disallow: /api/
-Disallow: /_next/
 Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
