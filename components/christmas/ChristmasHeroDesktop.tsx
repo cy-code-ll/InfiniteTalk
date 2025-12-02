@@ -18,11 +18,6 @@ import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
 import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
-import {
-  HoverCard,
-  HoverCardContent,
-  HoverCardTrigger,
-} from '@/components/ui/hover-card';
 
 // 下载媒体文件的函数（从 InfiniteTalkGenerator 复制）
 async function downloadMediaWithCors(
@@ -241,6 +236,9 @@ export function ChristmasHeroDesktop() {
   const [isDisplayVideo1Muted, setIsDisplayVideo1Muted] = useState(true); // renderDisplay 第一个视频
   const [isDisplayVideo2Muted, setIsDisplayVideo2Muted] = useState(true); // renderDisplay 第二个视频
   const [isDisplayVideo3Muted, setIsDisplayVideo3Muted] = useState(true); // renderDisplay 第三个视频
+  
+  // 模板预览视频状态
+  const [templatePreviewVideo, setTemplatePreviewVideo] = useState<string | null>(null);
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -538,6 +536,7 @@ export function ChristmasHeroDesktop() {
       setPreviewState('loading');
       setResultVideoUrl(null);
       setResultTaskId(null);
+      setTemplatePreviewVideo(null); // 清除模板预览视频
       startFakeProgress();
 
       // 使用用户输入的 prompt
@@ -809,14 +808,14 @@ export function ChristmasHeroDesktop() {
             Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
           </p>
 
-          <div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 w-full max-w-7xl items-center justify-center">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 w-full max-w-7xl items-start justify-start">
             {/* 左侧：工具区 */}
             <div className="space-y-4 w-full md:w-[45%] md:flex-shrink-0">
-              {/* 上传图片 + 提示词 + 模板选择 */}
+              {/* 上传图片 + 提示词 + 模板选择 + 音乐 + 生成按钮 */}
               <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-4 font-mountains">Upload photo</h3>
+                  <h3 className="text-xl font-semibold text-white mb-4 font-mountains">1. Upload photo</h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
@@ -858,7 +857,7 @@ export function ChristmasHeroDesktop() {
 
                 {/* 提示词输入 */}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 font-mountains">Prompt</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3 font-mountains">2. Prompt</h3>
                   <Textarea
                     value={prompt}
                     onChange={(e) => setPrompt(e.target.value)}
@@ -870,62 +869,44 @@ export function ChristmasHeroDesktop() {
 
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-lg font-semibold text-white mb-3 font-mountains">Template Selection</h3>
+                  <h3 className="text-xl font-semibold text-white mb-3 font-mountains">3. Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => (
-                      <HoverCard key={tpl.id} openDelay={0} closeDelay={100}>
-                        <HoverCardTrigger asChild>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedTemplateId(tpl.id);
-                              setPrompt(tpl.prompt);
-                            }}
-                            className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
-                              selectedTemplateId === tpl.id
-                                ? 'border-yellow-400 shadow-lg'
-                                : 'border-yellow-400/30 hover:border-yellow-400/60'
-                            }`}
-                            style={{ aspectRatio: '2/1', width: '180px' }}
-                          >
-                            <img
-                              src={tpl.thumbnail}
-                              alt={tpl.name}
-                              className="w-full h-full object-cover"
-                            />
-                            <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                              {tpl.name}
-                            </div>
-                          </button>
-                        </HoverCardTrigger>
-                        {tpl.previewVideo && (
-                          <HoverCardContent side="top" className="w-auto p-2 bg-black/90 border-yellow-400/30">
-                            <div className="w-[400px] aspect-video rounded-lg overflow-hidden">
-                              <video
-                                src={tpl.previewVideo}
-                                poster={tpl.videoPoster}
-                                className="w-full h-full object-cover"
-                                autoPlay
-                                loop
-                                muted
-                                playsInline
-                              />
-                            </div>
-                          </HoverCardContent>
-                        )}
-                      </HoverCard>
+                      <button
+                        key={tpl.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedTemplateId(tpl.id);
+                          setPrompt(tpl.prompt);
+                          // 设置模板预览视频
+                          if (tpl.previewVideo) {
+                            setTemplatePreviewVideo(tpl.previewVideo);
+                          }
+                        }}
+                        className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
+                          selectedTemplateId === tpl.id
+                            ? 'border-yellow-400 shadow-lg'
+                            : 'border-yellow-400/30 hover:border-yellow-400/60'
+                        }`}
+                        style={{ aspectRatio: '2/1', width: '180px' }}
+                      >
+                        <img
+                          src={tpl.thumbnail}
+                          alt={tpl.name}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute bottom-0 left-0 right-0 bg-black/30 text-white text-xs font-medium py-1.5 px-2 text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                          {tpl.name}
+                        </div>
+                      </button>
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* 音乐 + 生成按钮 */}
-              <div className="bg-black/40 backdrop-blur-md rounded-3xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
 
                 {/* Choose music */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-lg font-semibold text-white font-mountains">Choose music</h3>
+                    <h3 className="text-xl font-semibold text-white font-mountains">4. Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                       <button
                         type="button"
@@ -995,12 +976,12 @@ export function ChristmasHeroDesktop() {
                 </div>
 
                 {/* 生成按钮 */}
-                <div className="pt-2 relative">
+                <div className="pt-2 relative flex justify-center">
                   <Button
                     variant="outline"
                     disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim()}
                     onClick={handleGenerateClick}
-                    className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+                    className="w-auto px-8 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
                     style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                   >
                     <Sparkles className="w-4 h-4 text-yellow-300" />
@@ -1020,128 +1001,78 @@ export function ChristmasHeroDesktop() {
             </div>
 
             {/* 右侧：预览区 */}
-            <div className="flex flex-col items-center justify-start gap-4 ">
-              {isPortrait ? (
-                // 手机容器
-                <div className="relative w-[420px] h-[840px] rounded-[46px] bg-black/80 border-[6px] border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
-                  {/* 顶部听筒 */}
-                  <div className="z-100 absolute top-3 left-1/2 -translate-x-1/2 w-30 h-8 rounded-full bg-black/80 flex items-center justify-center">
-                    <div className="w-14 h-1.5 rounded-full bg-slate-800" />
-                  </div>
-                  {/* 屏幕 */}
-                  <div className="absolute inset-[5px] rounded-[34px] overflow-hidden bg-black">
-                    {previewState === 'loading' ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/80">
-                        <div className="flex flex-col items-center mb-6">
-                          <div className="relative flex flex-col items-center">
-                            <div className="absolute -top-4 flex items-center justify-center">
-                              <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
-                              <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
-                            </div>
-                            <div className="w-0 h-0 border-l-[26px] border-l-transparent border-r-[26px] border-r-transparent border-b-[40px] border-b-emerald-500 animate-pulse" />
-                            <div className="w-0 h-0 -mt-4 border-l-[32px] border-l-transparent border-r-[32px] border-r-transparent border-b-[46px] border-b-emerald-600 animate-pulse delay-150" />
-                            <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[52px] border-b-emerald-700 animate-pulse delay-300" />
-                            <div className="w-4 h-5 bg-amber-800 mt-1 rounded-sm" />
+            <div className="flex flex-col items-center justify-start gap-4 sticky top-24 self-start">
+              {/* 始终使用电脑容器展示预览 */}
+              <div 
+                className="w-[720px] h-[480px] rounded-lg overflow-hidden relative box-content"
+                style={{
+                  backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/pc-wrapper.png)',
+                  backgroundSize: 'contain',
+                  backgroundPosition: 'center',
+                  backgroundRepeat: 'no-repeat',
+                }}
+              >
+                {/* 视频内容区域 - 需要根据实际图片调整 padding */}
+                <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30 z-10">
+                  {previewState === 'loading' ? (
+                    <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
+                      <div className="flex flex-col items-center mb-6">
+                        <div className="relative flex flex-col items-center">
+                          <div className="absolute -top-4 flex items-center justify-center">
+                            <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
+                            <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
                           </div>
-                          <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                            Santa is preparing your Christmas video...
-                          </p>
+                          <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[46px] border-b-emerald-500 animate-pulse" />
+                          <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[54px] border-b-emerald-600 animate-pulse delay-150" />
+                          <div className="w-0 h-0 -mt-4 border-l-[46px] border-l-transparent border-r-[46px] border-r-transparent border-b-[62px] border-b-emerald-700 animate-pulse delay-300" />
+                          <div className="w-5 h-6 bg-amber-800 mt-1 rounded-sm" />
                         </div>
-                        <Progress value={progress} className="w-32" />
-                        <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
+                        <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                          Santa is preparing your Christmas video...
+                        </p>
                       </div>
-                    ) : (
-                      <>
-                        <video
-                          src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[2].src}
-                          poster={sampleVideos[0].videoPoster}
-                          className="w-full h-full object-cover"
-                          controls={previewState === 'result' && resultVideoUrl ? true : false}
-                          autoPlay
-                          loop
-                          muted={previewState !== 'result' ? isPreviewMuted : false}
-                          playsInline
-                        />
-                        {previewState !== 'result' && (
-                          <button
-                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
-                            className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                            title={isPreviewMuted ? 'Unmute' : 'Mute'}
-                          >
-                            {isPreviewMuted ? (
-                              <VolumeX className="w-4 h-4 text-white" />
-                            ) : (
-                              <Volume2 className="w-4 h-4 text-white" />
-                            )}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
+                      <Progress value={progress} className="w-40" />
+                      <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
+                    </div>
+                  ) : (
+                    <>
+                      <video
+                        src={
+                          previewState === 'result' && resultVideoUrl 
+                            ? resultVideoUrl 
+                            : templatePreviewVideo 
+                            ? templatePreviewVideo 
+                            : sampleVideos[1].src
+                        }
+                        poster={
+                          templatePreviewVideo 
+                            ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || sampleVideos[1].videoPoster
+                            : sampleVideos[1].videoPoster
+                        }
+                        className="w-full h-full object-cover rounded-lg bg-red/80"
+                        autoPlay
+                        controls={previewState === 'result' && resultVideoUrl ? true : false}
+                        loop
+                        muted={previewState !== 'result' ? isPreviewMuted : false}
+                        playsInline
+                      />
+                      {previewState !== 'result' && (
+                        <button
+                          onClick={() => setIsPreviewMuted(!isPreviewMuted)}
+                          className="absolute top-8 right-25 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                          title={isPreviewMuted ? 'Unmute' : 'Mute'}
+                        >
+                          {isPreviewMuted ? (
+                            <VolumeX className="w-4 h-4 text-white" />
+                          ) : (
+                            <Volume2 className="w-4 h-4 text-white" />
+                          )}
+                        </button>
+                      )}
+                    </>
+                  )}
                 </div>
-              ) : (
-                // 电脑容器
-                <div 
-                  className="w-[720px] h-[480px] rounded-lg overflow-hidden relative box-content"
-                  style={{
-                    backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/pc-wrapper.png)',
-                    backgroundSize: 'contain',
-                    backgroundPosition: 'center',
-                    backgroundRepeat: 'no-repeat',
-                  }}
-                >
-                  {/* 视频内容区域 - 需要根据实际图片调整 padding */}
-                  <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30 z-10">
-                    {previewState === 'loading' ? (
-                      <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
-                        <div className="flex flex-col items-center mb-6">
-                          <div className="relative flex flex-col items-center">
-                            <div className="absolute -top-4 flex items-center justify-center">
-                              <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
-                              <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
-                            </div>
-                            <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[46px] border-b-emerald-500 animate-pulse" />
-                            <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[54px] border-b-emerald-600 animate-pulse delay-150" />
-                            <div className="w-0 h-0 -mt-4 border-l-[46px] border-l-transparent border-r-[46px] border-r-transparent border-b-[62px] border-b-emerald-700 animate-pulse delay-300" />
-                            <div className="w-5 h-6 bg-amber-800 mt-1 rounded-sm" />
-                          </div>
-                          <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                            Santa is preparing your Christmas video...
-                          </p>
-                        </div>
-                        <Progress value={progress} className="w-40" />
-                        <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
-                      </div>
-                    ) : (
-                      <>
-                        <video
-                          src={previewState === 'result' && resultVideoUrl ? resultVideoUrl : sampleVideos[1].src}
-                          poster={sampleVideos[1].videoPoster}
-                          className="w-full h-full object-cover rounded-lg bg-red/80"
-                          autoPlay
-                          controls={previewState === 'result' && resultVideoUrl ? true : false}
-                          loop
-                          muted={previewState !== 'result' ? isPreviewMuted : false}
-                          playsInline
-                        />
-                        {previewState !== 'result' && (
-                          <button
-                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
-                            className="absolute top-8 right-25 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                            title={isPreviewMuted ? 'Unmute' : 'Mute'}
-                          >
-                            {isPreviewMuted ? (
-                              <VolumeX className="w-4 h-4 text-white" />
-                            ) : (
-                              <Volume2 className="w-4 h-4 text-white" />
-                            )}
-                          </button>
-                        )}
-                      </>
-                    )}
-                  </div>
-                </div> 
-              )}
+              </div>
 
               {/* 结果分享区 */}
               {previewState === 'result' && resultVideoUrl && selectedTemplateId && selectedMusicId && (
