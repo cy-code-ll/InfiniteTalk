@@ -625,10 +625,11 @@ export function ChristmasHeroMobile() {
         <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
           {/* 背景视频 */}
           <video
-            src={templatePreviewVideo || "https://www.infinitetalk2.com/infinitetalk/h3.mp4"}
+            key={templatePreviewVideo || 'default'}
+            src={templatePreviewVideo || "https://www.infinitetalk2.com/infinitetalk/h2.mp4"}
             poster={templatePreviewVideo 
-              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://www.infinitetalk2.com/infinitetalk/h3.webp'
-              : 'https://www.infinitetalk2.com/infinitetalk/h3.webp'}
+              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://www.infinitetalk2.com/infinitetalk/h2.webp'
+              : 'https://www.infinitetalk2.com/infinitetalk/h2.webp'}
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
             loop
