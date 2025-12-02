@@ -22,7 +22,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause } from 'lucide-react';
 
 type ImageOrientation = 'portrait' | 'landscape' | null;
 type Resolution = '480p' | '720p' | '1080p';
@@ -163,6 +163,9 @@ export function ChristmasHeroMobile() {
   
   // 背景视频静音状态，默认静音
   const [isBackgroundVideoMuted, setIsBackgroundVideoMuted] = useState(true);
+  
+  // 模板预览视频状态
+  const [templatePreviewVideo, setTemplatePreviewVideo] = useState<string | null>(null);
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -298,6 +301,8 @@ export function ChristmasHeroMobile() {
     }
 
     setImageFile(file);
+    // 清除模板预览视频，恢复默认背景视频
+    setTemplatePreviewVideo(null);
 
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -620,8 +625,10 @@ export function ChristmasHeroMobile() {
         <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
           {/* 背景视频 */}
           <video
-            src="https://www.infinitetalk2.com/infinitetalk/h3.mp4"
-            poster='https://www.infinitetalk2.com/infinitetalk/h3.webp'
+            src={templatePreviewVideo || "https://www.infinitetalk2.com/infinitetalk/h3.mp4"}
+            poster={templatePreviewVideo 
+              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://www.infinitetalk2.com/infinitetalk/h3.webp'
+              : 'https://www.infinitetalk2.com/infinitetalk/h3.webp'}
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
             loop
@@ -781,14 +788,15 @@ export function ChristmasHeroMobile() {
 
       {/* Drawer - 从底部弹出 */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="bottom" className="h-[90vh] overflow-y-auto bg-black/50 backdrop-blur-sm border-none p-0">
+        <SheetContent side="bottom" className="h-[50vh] bg-black/50 backdrop-blur-sm border-none p-0 flex flex-col">
           <SheetTitle className="sr-only">Create Your Christmas Video</SheetTitle>
-          <div className="px-6 pt-6 pb-6 space-y-6">
-            {/* 上传图片 + 提示词 + 模板选择 + 音乐 + 生成按钮 */}
+          {/* 可滚动内容区 */}
+          <div className="flex-1 overflow-y-auto px-6 pt-6 space-y-6">
+            {/* 上传图片 + 提示词 + 模板选择 + 音乐 */}
             <div className="space-y-6">
               {/* 上传图片 */}
               <div>
-                <h3 className="text-base font-semibold text-white mb-4 font-mountains">Upload photo</h3>
+                <h3 className="text-xl font-semibold text-white mb-4 font-mountains">1. Upload photo</h3>
                 <div className="relative">
                   <div
                     onClick={() => imageInputRef.current?.click()}
@@ -830,19 +838,20 @@ export function ChristmasHeroMobile() {
 
               {/* 提示词输入 */}
               <div>
-                <h3 className="text-base font-semibold text-white mb-3 font-mountains">Prompt</h3>
+                <h3 className="text-xl font-semibold text-white mb-3 font-mountains">2. Prompt</h3>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Describe what you want the character to express or do..."
-                    className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
-                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+                  rows={3}
+                  className="w-full bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60 p-0 px-3 py-1"
+                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                 />
               </div>
 
               {/* Template Selection */}
               <div>
-                <h3 className="text-base font-semibold text-white mb-3 font-mountains">Template Selection</h3>
+                <h3 className="text-xl font-semibold text-white mb-3 font-mountains">3. Template Selection</h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                   {TEMPLATES.map((tpl) => (
                     <button
@@ -851,6 +860,10 @@ export function ChristmasHeroMobile() {
                       onClick={() => {
                         setSelectedTemplateId(tpl.id);
                         setPrompt(tpl.prompt);
+                        // 设置模板预览视频
+                        if (tpl.previewVideo) {
+                          setTemplatePreviewVideo(tpl.previewVideo);
+                        }
                       }}
                       className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
                         selectedTemplateId === tpl.id
@@ -875,7 +888,7 @@ export function ChristmasHeroMobile() {
               {/* Choose music */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-base font-semibold text-white font-mountains">Choose music</h3>
+                  <h3 className="text-xl font-semibold text-white font-mountains">4. Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"
@@ -934,38 +947,40 @@ export function ChristmasHeroMobile() {
                         }`}
                         title={track.name}
                       >
-                        <Music2
-                          className={`w-4 h-4 mr-1 ${isPlaying ? 'animate-pulse text-yellow-300' : ''}`}
-                        />
+                        {isPlaying ? (
+                          <Pause className="w-4 h-4 mr-1 text-yellow-300" />
+                        ) : (
+                          <Play className="w-4 h-4 mr-1" />
+                        )}
                         <span className="text-xs" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{track.name}</span>
                       </button>
                     );
                   })}
                 </div>
               </div>
-
-              {/* 生成按钮 */}
-              <div className="pt-2 relative">
-                <Button
-                  disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
-                  onClick={handleGenerateClick}
-                  className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-lg py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
-                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
-                >
-                  <Sparkles className="w-4 h-4 text-yellow-300" />
-                  {isGenerating ? 'Generating...' : 'Create the video'}
-                  <Sparkles className="w-4 h-4 text-yellow-300" />
-                </Button>
-                {/* 积分显示 */}
-                {selectedMusicId && (
-                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                    {audioDuration > 0 
-                      ? `${calculateCredits(audioDuration, '720p')} Credits`
-                      : '11 Credits'}
-                  </div>
-                )}
-              </div>
             </div>
+          </div>
+          
+          {/* 固定在底部的生成按钮 */}
+          <div className="px-6 pb-6 pt-4 border-t border-yellow-400/20 bg-black/50 flex justify-center">
+            <Button
+              disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
+              onClick={handleGenerateClick}
+              className="relative w-auto px-8 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
+              style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+            >
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+              {isGenerating ? 'Generating...' : 'Create the video'}
+              <Sparkles className="w-4 h-4 text-yellow-300" />
+              {/* 积分显示 */}
+              {selectedMusicId && (
+                <div className="absolute -top-2 -right-10 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                  {audioDuration > 0 
+                    ? `${calculateCredits(audioDuration, '720p')} Credits`
+                    : '11 Credits'}
+                </div>
+              )}
+            </Button>
           </div>
         </SheetContent>
       </Sheet>
