@@ -1023,7 +1023,7 @@ export function ChristmasHeroDesktop() {
                   }}
                 >
                   {/* 视频内容区域 - 需要根据实际图片调整 padding */}
-                  <div className="absolute inset-0 pt-5 pl-20 pr-20 pb-30 z-10">
+                  <div className="absolute inset-0 pt-5 pl-19 pr-20 pb-30 z-10">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
                         <div className="flex flex-col items-center mb-6">
