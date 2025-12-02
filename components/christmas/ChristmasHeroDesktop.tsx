@@ -17,7 +17,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause } from 'lucide-react';
 
 // 下载媒体文件的函数（从 InfiniteTalkGenerator 复制）
 async function downloadMediaWithCors(
@@ -967,9 +967,11 @@ export function ChristmasHeroDesktop() {
                           }`}
                           title={track.name}
                         >
-                          <Music2
-                            className={`w-4 h-4 mr-1 ${isPlaying ? 'animate-pulse text-yellow-300' : ''}`}
-                          />
+                          {isPlaying ? (
+                            <Pause className="w-4 h-4 mr-1 text-yellow-300" />
+                          ) : (
+                            <Play className="w-4 h-4 mr-1" />
+                          )}
                           <span className="text-xs" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{track.name}</span>
                         </button>
                       );
