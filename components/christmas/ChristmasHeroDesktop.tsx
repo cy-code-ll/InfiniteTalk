@@ -247,6 +247,10 @@ export function ChristmasHeroDesktop() {
   
   // 模板预览视频状态
   const [templatePreviewVideo, setTemplatePreviewVideo] = useState<string | null>(null);
+  
+  // 视频 ref（用于 result 状态）
+  const desktopResultVideoRef = useRef<HTMLVideoElement | null>(null);
+  const mobileResultVideoRef = useRef<HTMLVideoElement | null>(null);
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -461,6 +465,15 @@ export function ChristmasHeroDesktop() {
       .then(() => {
         setCurrentMusicId(id);
         setIsMusicPlaying(true);
+        // 音乐播放时，自动静音视频（包括 result 状态下的视频）
+        setIsPreviewMuted(true);
+        // 如果 result 状态下的视频存在，也设置为静音
+        if (desktopResultVideoRef.current) {
+          desktopResultVideoRef.current.muted = true;
+        }
+        if (mobileResultVideoRef.current) {
+          mobileResultVideoRef.current.muted = true;
+        }
       })
       .catch(() => {
         setIsMusicPlaying(false);
@@ -1084,6 +1097,7 @@ export function ChristmasHeroDesktop() {
                     ) : (
                       <>
                         <video
+                          ref={previewState === 'result' ? desktopResultVideoRef : null}
                           src={
                             previewState === 'result' && resultVideoUrl 
                               ? resultVideoUrl 
@@ -1117,10 +1131,27 @@ export function ChristmasHeroDesktop() {
                           loop
                           muted={previewState !== 'result' ? isPreviewMuted : false}
                           playsInline
+                          onVolumeChange={(e) => {
+                            // 当用户通过 controls 改变音量时，如果取消静音且音乐正在播放，则停止音乐
+                            if (previewState === 'result' && !e.currentTarget.muted && isMusicPlaying && musicAudioRef.current) {
+                              musicAudioRef.current.pause();
+                              setIsMusicPlaying(false);
+                              setCurrentMusicId(null);
+                            }
+                          }}
                         />
                         {previewState !== 'result' && (
                           <button
-                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
+                            onClick={() => {
+                              const newMutedState = !isPreviewMuted;
+                              setIsPreviewMuted(newMutedState);
+                              // 如果取消静音（视频要播放声音），且音乐正在播放，则停止音乐播放
+                              if (!newMutedState && isMusicPlaying && musicAudioRef.current) {
+                                musicAudioRef.current.pause();
+                                setIsMusicPlaying(false);
+                                setCurrentMusicId(null);
+                              }
+                            }}
                             className="absolute top-12 right-10 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
                             title={isPreviewMuted ? 'Unmute' : 'Mute'}
                           >
@@ -1167,6 +1198,7 @@ export function ChristmasHeroDesktop() {
                     ) : (
                       <>
                         <video
+                          ref={previewState === 'result' ? mobileResultVideoRef : null}
                           src={
                             previewState === 'result' && resultVideoUrl 
                               ? resultVideoUrl 
@@ -1195,10 +1227,27 @@ export function ChristmasHeroDesktop() {
                           loop
                           muted={previewState !== 'result' ? isPreviewMuted : false}
                           playsInline
+                          onVolumeChange={(e) => {
+                            // 当用户通过 controls 改变音量时，如果取消静音且音乐正在播放，则停止音乐
+                            if (previewState === 'result' && !e.currentTarget.muted && isMusicPlaying && musicAudioRef.current) {
+                              musicAudioRef.current.pause();
+                              setIsMusicPlaying(false);
+                              setCurrentMusicId(null);
+                            }
+                          }}
                         />
                         {previewState !== 'result' && (
                           <button
-                            onClick={() => setIsPreviewMuted(!isPreviewMuted)}
+                            onClick={() => {
+                              const newMutedState = !isPreviewMuted;
+                              setIsPreviewMuted(newMutedState);
+                              // 如果取消静音（视频要播放声音），且音乐正在播放，则停止音乐播放
+                              if (!newMutedState && isMusicPlaying && musicAudioRef.current) {
+                                musicAudioRef.current.pause();
+                                setIsMusicPlaying(false);
+                                setCurrentMusicId(null);
+                              }
+                            }}
                             className="absolute top-2 right-2 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
                             title={isPreviewMuted ? 'Unmute' : 'Mute'}
                           >

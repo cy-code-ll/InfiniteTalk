@@ -696,11 +696,11 @@ export function ChristmasHeroMobile() {
         </div>
       )}
 
-      {/* Result State - 全屏展示视频 */}
+      {/* Result State - 上下分布展示视频 */}
       {viewState === 'result' && resultVideoUrl && (
         <div className="fixed inset-0 z-50 bg-black flex flex-col">
           {/* 视频区域 */}
-          <div className="flex-1 flex items-center justify-center p-4">
+          <div className="flex-1 relative flex items-center justify-center">
             <video
               src={resultVideoUrl}
               className="w-full h-full object-contain"
@@ -708,22 +708,23 @@ export function ChristmasHeroMobile() {
               autoPlay
               playsInline
             />
-          </div>
-
-          {/* 底部按钮组 */}
-          <div className="p-6 space-y-4 bg-gradient-to-t from-black via-black/90 to-transparent">
-            {/* 返回按钮 */}
+            
+            {/* 返回按钮 - 悬浮在视频左上角 */}
             <Button
-              variant="outline"
-              className="w-full border-2 border-yellow-400/50 bg-red-600/20 text-yellow-300 hover:bg-red-600/40 hover:border-yellow-400 font-semibold text-lg py-6 rounded-lg shadow-lg"
+              className="absolute top-4 left-4 z-10 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600 to-red-700 text-yellow-300 hover:from-red-700 hover:to-red-800 hover:border-yellow-400 font-semibold px-4 py-2 rounded-lg shadow-lg"
               onClick={handleBackToDisplay}
-              style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+              style={{ 
+                fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif',
+                background: 'linear-gradient(to right,rgb(65, 10, 10),rgb(170, 36, 36))'
+              }}
             >
               <Sparkles className="w-4 h-4 mr-2 text-yellow-300" />
               Back
-              <Sparkles className="w-4 h-4 ml-2 text-yellow-300" />
             </Button>
+          </div>
 
+          {/* 底部按钮组 */}
+          <div className="p-6 pb-8 bg-gradient-to-t from-black via-black/90 to-transparent">
             {/* 下载和分享按钮 */}
             <div className="flex items-center gap-3">
               <Button
@@ -789,7 +790,7 @@ export function ChristmasHeroMobile() {
 
       {/* Drawer - 从底部弹出 */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="bottom" className="h-[50vh] bg-black/50 backdrop-blur-sm border-none p-0 flex flex-col">
+        <SheetContent side="bottom" className="h-[75vh] bg-black/50 backdrop-blur-sm border-none p-0 flex flex-col">
           <SheetTitle className="sr-only">Create Your Christmas Video</SheetTitle>
           {/* 可滚动内容区 */}
           <div className="flex-1 overflow-y-auto px-6 pt-6 space-y-6">
