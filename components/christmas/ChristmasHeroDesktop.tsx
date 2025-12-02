@@ -102,6 +102,8 @@ const TEMPLATES = [
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t1.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t1.webp',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t1-m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t1-m.png',
     prompt:
       '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater, wearing a red Christmas hat, holding a Christmas card, and standing next to a small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
@@ -111,6 +113,8 @@ const TEMPLATES = [
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t2.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t2.webp',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t2-m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t2-m.png',
     prompt:
       '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone. The character stands at the front, holding a Christmas card, and the width of the character accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
   },
@@ -120,6 +124,8 @@ const TEMPLATES = [
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t3.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t3.webp',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t3-m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t3-m.png',
     prompt:
       '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
@@ -129,6 +135,8 @@ const TEMPLATES = [
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t4.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4.webp',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t4-m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t4-m.png',
     prompt:
       '  A pine forest in the outskirts, covered in snow on the ground, with yellow lights shining from the windows of the small wooden houses on the farm, warm and romantic. Most importantly, countless warm light strings, only white or amber, are wrapped around the pine trees in the forest, outlining their contours. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a red Christmas hat, with a width of 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   }
@@ -794,6 +802,18 @@ export function ChristmasHeroDesktop() {
 
   const renderCreate = () => {
     const isPortrait = imageOrientation === 'portrait';
+    
+    // 判断 templatePreviewVideo 是 desktop 还是 mobile 版本
+    const isTemplateVideoMobile = templatePreviewVideo 
+      ? TEMPLATES.some(t => t.previewVideomobile === templatePreviewVideo)
+      : false;
+    
+    // 判断应该使用哪个容器
+    // 如果设置了 templatePreviewVideo 且是 mobile 版本，或者没有设置 templatePreviewVideo 且是竖图，使用手机容器
+    const shouldUseMobileContainer = (templatePreviewVideo && isTemplateVideoMobile) || 
+                                     (!templatePreviewVideo && isPortrait && imageFile);
+    // 否则使用电脑容器
+    const shouldUseDesktopContainer = !shouldUseMobileContainer;
 
     return (
       <div className="relative min-h-screen flex flex-col items-center justify-center py-20 font-mountains">
@@ -873,16 +893,32 @@ export function ChristmasHeroDesktop() {
                 <div>
                   <h3 className="text-xl font-semibold text-white mb-3 font-mountains">3. Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
-                    {TEMPLATES.map((tpl) => (
+                    {TEMPLATES.map((tpl) => {
+                      // 判断当前应该使用哪个容器
+                      // 如果当前 templatePreviewVideo 是 mobile 版本，或者没有设置 templatePreviewVideo 且是竖图，使用手机容器
+                      const currentIsTemplateVideoMobile = templatePreviewVideo 
+                        ? TEMPLATES.some(t => t.previewVideomobile === templatePreviewVideo)
+                        : false;
+                      const isCurrentlyUsingMobileContainer = (templatePreviewVideo && currentIsTemplateVideoMobile) || 
+                                                             (!templatePreviewVideo && imageOrientation === 'portrait' && imageFile);
+                      return (
                       <button
                         key={tpl.id}
                         type="button"
                         onClick={() => {
                           setSelectedTemplateId(tpl.id);
                           setPrompt(tpl.prompt);
-                          // 设置模板预览视频
-                          if (tpl.previewVideo) {
-                            setTemplatePreviewVideo(tpl.previewVideo);
+                          // 根据当前容器类型设置模板预览视频
+                          if (isCurrentlyUsingMobileContainer) {
+                            // 当前是手机容器：使用 mobile 版本
+                            if (tpl.previewVideomobile) {
+                              setTemplatePreviewVideo(tpl.previewVideomobile);
+                            }
+                          } else {
+                            // 当前是电脑容器：使用桌面版本
+                            if (tpl.previewVideo) {
+                              setTemplatePreviewVideo(tpl.previewVideo);
+                            }
                           }
                         }}
                         className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
@@ -901,7 +937,8 @@ export function ChristmasHeroDesktop() {
                           {tpl.name}
                         </div>
                       </button>
-                    ))}
+                      );
+                    })}
                   </div>
                 </div>
 
@@ -1008,13 +1045,13 @@ export function ChristmasHeroDesktop() {
 
             {/* 右侧：预览区 */}
             <div className={`flex flex-col items-center justify-start sticky top-24 self-center md:self-start ${
-              isPortrait && imageFile && !templatePreviewVideo ? 'gap-4' : 'gap-4'
+              shouldUseMobileContainer ? 'gap-4' : 'gap-4'
             }`}>
               {/* 根据模板选择和图片方向显示不同容器 */}
-              {templatePreviewVideo || (imageFile && !isPortrait) || !imageFile ? (
+              {shouldUseDesktopContainer ? (
                 // 电脑容器：模板预览、横版图片或未上传图片时使用
                 <div 
-                  className="w-[720px] h-[480px] rounded-lg overflow-hidden relative box-content"
+                  className="w-[550px] h-[480px] rounded-lg overflow-hidden relative box-content"
                   style={{
                     backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/pc-wrapper.png)',
                     backgroundSize: 'contain',
@@ -1023,7 +1060,7 @@ export function ChristmasHeroDesktop() {
                   }}
                 >
                   {/* 视频内容区域 - 需要根据实际图片调整 padding */}
-                  <div className="absolute inset-0 pt-5 pl-19 pr-20 pb-30 z-10">
+                  <div className="absolute inset-0 pt-10 pl-4 pr-4 pb-36 z-10">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
                         <div className="flex flex-col items-center mb-6">
@@ -1056,7 +1093,20 @@ export function ChristmasHeroDesktop() {
                           }
                           poster={
                             templatePreviewVideo 
-                              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || sampleVideos[1].videoPoster
+                              ? (() => {
+                                  // 查找匹配的模板（可能是 desktop 或 mobile 版本）
+                                  const template = TEMPLATES.find(t => 
+                                    t.previewVideo === templatePreviewVideo || 
+                                    t.previewVideomobile === templatePreviewVideo
+                                  );
+                                  // 如果是 desktop 版本，使用 videoPoster；如果是 mobile 版本，使用 videoPostermobile
+                                  if (template) {
+                                    return template.previewVideo === templatePreviewVideo 
+                                      ? template.videoPoster 
+                                      : template.videoPostermobile || template.videoPoster;
+                                  }
+                                  return sampleVideos[1].videoPoster;
+                                })()
                               : sampleVideos[1].videoPoster
                           }
                           className={`w-full h-full bg-black ${
@@ -1071,7 +1121,7 @@ export function ChristmasHeroDesktop() {
                         {previewState !== 'result' && (
                           <button
                             onClick={() => setIsPreviewMuted(!isPreviewMuted)}
-                            className="absolute top-8 right-25 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                            className="absolute top-12 right-10 z-10 w-8 h-8 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
                             title={isPreviewMuted ? 'Unmute' : 'Mute'}
                           >
                             {isPreviewMuted ? (
@@ -1120,9 +1170,23 @@ export function ChristmasHeroDesktop() {
                           src={
                             previewState === 'result' && resultVideoUrl 
                               ? resultVideoUrl 
+                              : templatePreviewVideo 
+                              ? templatePreviewVideo 
                               : sampleVideos[2].src
                           }
-                          poster={sampleVideos[2].videoPoster}
+                          poster={
+                            previewState === 'result' && resultVideoUrl 
+                              ? sampleVideos[2].videoPoster
+                              : templatePreviewVideo 
+                              ? (() => {
+                                  // 查找匹配的模板（mobile 版本）
+                                  const template = TEMPLATES.find(t => 
+                                    t.previewVideomobile === templatePreviewVideo
+                                  );
+                                  return template?.videoPostermobile || sampleVideos[2].videoPoster;
+                                })()
+                              : sampleVideos[2].videoPoster
+                          }
                           className={`w-full h-full bg-black ${
                             previewState === 'result' && resultVideoUrl ? 'object-contain' : 'object-cover'
                           }`}
