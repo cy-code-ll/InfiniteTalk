@@ -17,7 +17,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause } from 'lucide-react';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause, Plus } from 'lucide-react';
 
 // 下载媒体文件的函数（从 InfiniteTalkGenerator 复制）
 async function downloadMediaWithCors(
@@ -146,13 +146,16 @@ const MUSIC_TRACKS = [
   { id: 'm9', name: 'Fairytale At Christmas', url: '/music/3.mp3', taglist: [] },
   { id: 'm7', name: 'All I Want For Christmas', url: '/music/1.mp3', taglist: [] },
   { id: 'm8', name: 'Feliz Navidad', url: '/music/2.mp3', taglist: [] },
+  { id: 'm10', name: 'Santa Tell Me', url: '/music/Santa Tell Me.MP3', taglist: [] },
+  { id: 'm11', name: 'Last Christmas', url: '/music/Last Christmas.MP3', taglist: [] },
+  { id: 'm12', name: 'Snowman', url: '/music/Snowman.MP3', taglist: [] },
+  { id: 'm13', name: 'Mistletoe', url: '/music/Mistletoe.MP3', taglist: [] },
   { id: 'm1', name: 'Female Family', url: '/music/fmale_fam.mp3', taglist: ['female'] },
   { id: 'm2', name: 'Female Friend', url: '/music/fmale_fir.mp3', taglist: ['female'] },
   { id: 'm3', name: 'Female Colleague', url: '/music/fmale_work.mp3', taglist: ['female'] },
   { id: 'm4', name: 'Male Family', url: '/music/male_fam.mp3', taglist: ['male'] },
   { id: 'm5', name: 'Male Friend', url: '/music/male_fri.mp3', taglist: ['male'] },
   { id: 'm6', name: 'Male Colleague', url: '/music/male_work.mp3', taglist: ['male'] },
-
 ];
 
 // PC 端下雪覆盖层（只在组件内部覆盖，不影响交互）
@@ -228,6 +231,11 @@ export function ChristmasHeroDesktop() {
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicId, setCurrentMusicId] = useState<string | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  
+  // 自定义音频上传
+  const customAudioInputRef = useRef<HTMLInputElement>(null);
+  const [customAudioFile, setCustomAudioFile] = useState<File | null>(null);
+  const [customAudioDuration, setCustomAudioDuration] = useState<number>(0);
 
   const [audioDuration, setAudioDuration] = useState(0);
   const [previewState, setPreviewState] = useState<'idle' | 'loading' | 'result'>('idle');
@@ -319,6 +327,9 @@ export function ChristmasHeroDesktop() {
 
   // 当筛选改变时，如果当前选中的音乐不在筛选结果中，自动选择第一个可用的音乐
   useEffect(() => {
+    // 自定义音频（custom）不参与预设音乐筛选，直接返回，避免被重置
+    if (selectedMusicId === 'custom') return;
+
     const filteredTracks = MUSIC_TRACKS.filter((track) => {
       if (genderFilter === 'all') return true;
       return track.taglist?.includes(genderFilter);
@@ -369,6 +380,36 @@ export function ChristmasHeroDesktop() {
     if (progressTimerRef.current) {
       window.clearInterval(progressTimerRef.current);
       progressTimerRef.current = null;
+    }
+  };
+
+  // 音频验证函数（从 InfiniteTalkGenerator 复制）
+  const validateAudioFile = async (file: File): Promise<{ isValid: boolean; duration?: number; error?: string }> => {
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const audioContext = new AudioContext();
+
+      try {
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+        const duration = audioBuffer.duration;
+        await audioContext.close();
+
+        return {
+          isValid: true,
+          duration: Math.ceil(duration)
+        };
+      } catch (decodeError) {
+        await audioContext.close();
+        return {
+          isValid: false,
+          error: 'Audio file is corrupted'
+        };
+      }
+    } catch (readError) {
+      return {
+        isValid: false,
+        error: 'Failed to read file'
+      };
     }
   };
 
@@ -426,8 +467,107 @@ export function ChristmasHeroDesktop() {
     }
   };
 
+  // 处理自定义音频上传
+  const handleCustomAudioUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    // 登录检查
+    if (!isSignedIn) {
+      requestAnimationFrame(() => openAuthModal('signin'));
+      // 清空文件输入
+      if (event.target) {
+        event.target.value = '';
+      }
+      return;
+    }
+
+    // 检查音频格式
+    const fileName = file.name.toLowerCase();
+    const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.flac'];
+    const hasValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+
+    if (!hasValidExtension) {
+      toast.error('Invalid audio format. Please upload mp3, wav, m4a, ogg, or flac files.');
+      return;
+    }
+
+    // 验证音频文件
+    const validation = await validateAudioFile(file);
+
+    if (!validation.isValid) {
+      toast.error(validation.error || 'Audio file is corrupted or invalid');
+      return;
+    }
+
+    // 设置自定义音频
+    setCustomAudioFile(file);
+    if (validation.duration) {
+      setCustomAudioDuration(validation.duration);
+    }
+
+    // 自动选中自定义音频（不自动播放）
+    setSelectedMusicId('custom');
+
+    // 停止当前正在播放的预设音乐
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      setIsMusicPlaying(false);
+      setCurrentMusicId(null);
+    }
+  };
+
+  // 删除自定义音频
+  const handleRemoveCustomAudio = () => {
+    setCustomAudioFile(null);
+    setCustomAudioDuration(0);
+    if (customAudioInputRef.current) {
+      customAudioInputRef.current.value = '';
+    }
+    
+    // 如果当前选中的是自定义音频，切换到默认音乐
+    if (selectedMusicId === 'custom') {
+      setSelectedMusicId(MUSIC_TRACKS[0].id);
+    }
+  };
+
   const handleSelectMusic = (id: string) => {
     setSelectedMusicId(id);
+
+    // 如果选择的是自定义音频，播放自定义音频预览
+    if (id === 'custom' && customAudioFile) {
+      if (!musicAudioRef.current) {
+        musicAudioRef.current = new Audio();
+        musicAudioRef.current.crossOrigin = 'anonymous';
+      }
+
+      if (currentMusicId === id && isMusicPlaying) {
+        musicAudioRef.current.pause();
+        setIsMusicPlaying(false);
+        return;
+      }
+
+      musicAudioRef.current.crossOrigin = 'anonymous';
+      musicAudioRef.current.src = URL.createObjectURL(customAudioFile);
+      musicAudioRef.current
+        .play()
+        .then(() => {
+          setCurrentMusicId(id);
+          setIsMusicPlaying(true);
+          // 音乐播放时，自动静音视频
+          setIsPreviewMuted(true);
+          if (desktopResultVideoRef.current) {
+            desktopResultVideoRef.current.muted = true;
+          }
+          if (mobileResultVideoRef.current) {
+            mobileResultVideoRef.current.muted = true;
+          }
+        })
+        .catch(() => {
+          setIsMusicPlaying(false);
+        });
+      return;
+    }
 
     const track = MUSIC_TRACKS.find((m) => m.id === id);
     if (!track) return;
@@ -598,54 +738,65 @@ export function ChristmasHeroDesktop() {
       const processedImageFile = await urlToFile(processedImageUrl, 'processed-image.png');
       console.log('Processed image file created:', processedImageFile);
 
-      // 步骤5: 从音乐 URL 创建 File
-      const music = MUSIC_TRACKS.find((m) => m.id === selectedMusicId);
-      if (!music) {
-        toast.error('Please choose a music');
-        stopFakeProgress();
-        setPreviewState('idle');
-        return;
-      }
-      let musicRes;
-      try {
-        musicRes = await fetch(music.url, { mode: 'cors' });
-      } catch (error: any) {
-        console.error('Failed to fetch music:', error);
-        toast.error('Failed to load music: CORS error. Please check network connection.');
-        stopFakeProgress();
-        setPreviewState('idle');
-        return;
-      }
-      if (!musicRes.ok) {
-        toast.error(`Failed to load music: ${musicRes.status} ${musicRes.statusText}`);
-        stopFakeProgress();
-        setPreviewState('idle');
-        return;
-      }
-      const musicBlob = await musicRes.blob();
-      const audioFile = new File([musicBlob], `${music.id}.mp3`, {
-        type: musicBlob.type || 'audio/mpeg',
-      });
+      // 步骤5: 获取音频文件和时长
+      let audioFile: File;
+      let duration: number;
 
-      // 获取音频时长
-      const duration = await new Promise<number>((resolve) => {
-        try {
-          const audioEl = document.createElement('audio');
-          audioEl.preload = 'metadata';
-          audioEl.onloadedmetadata = () => {
-            const d = Math.ceil(audioEl.duration || 0);
-            URL.revokeObjectURL(audioEl.src);
-            resolve(d || 30);
-          };
-          audioEl.onerror = () => {
-            URL.revokeObjectURL(audioEl.src);
-            resolve(30);
-          };
-          audioEl.src = URL.createObjectURL(audioFile);
-        } catch {
-          resolve(30);
+      if (selectedMusicId === 'custom' && customAudioFile) {
+        // 使用自定义音频
+        audioFile = customAudioFile;
+        duration = customAudioDuration;
+      } else {
+        // 从音乐 URL 创建 File
+        const music = MUSIC_TRACKS.find((m) => m.id === selectedMusicId);
+        if (!music) {
+          toast.error('Please choose a music');
+          stopFakeProgress();
+          setPreviewState('idle');
+          return;
         }
-      });
+        let musicRes;
+        try {
+          musicRes = await fetch(music.url, { mode: 'cors' });
+        } catch (error: any) {
+          console.error('Failed to fetch music:', error);
+          toast.error('Failed to load music: CORS error. Please check network connection.');
+          stopFakeProgress();
+          setPreviewState('idle');
+          return;
+        }
+        if (!musicRes.ok) {
+          toast.error(`Failed to load music: ${musicRes.status} ${musicRes.statusText}`);
+          stopFakeProgress();
+          setPreviewState('idle');
+          return;
+        }
+        const musicBlob = await musicRes.blob();
+        audioFile = new File([musicBlob], `${music.id}.mp3`, {
+          type: musicBlob.type || 'audio/mpeg',
+        });
+
+        // 获取音频时长
+        duration = await new Promise<number>((resolve) => {
+          try {
+            const audioEl = document.createElement('audio');
+            audioEl.preload = 'metadata';
+            audioEl.onloadedmetadata = () => {
+              const d = Math.ceil(audioEl.duration || 0);
+              URL.revokeObjectURL(audioEl.src);
+              resolve(d || 30);
+            };
+            audioEl.onerror = () => {
+              URL.revokeObjectURL(audioEl.src);
+              resolve(30);
+            };
+            audioEl.src = URL.createObjectURL(audioFile);
+          } catch {
+            resolve(30);
+          }
+        });
+      }
+      
       setAudioDuration(duration);
 
       // 积分检查
@@ -999,6 +1150,59 @@ export function ChristmasHeroDesktop() {
                     </div>
                   </div>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
+                    {/* 自定义音频上传按钮 */}
+                    {customAudioFile ? (
+                      <button
+                        type="button"
+                        onClick={() => handleSelectMusic('custom')}
+                        className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${
+                          selectedMusicId === 'custom'
+                            ? 'border-yellow-400 bg-yellow-400/20 text-white shadow-lg'
+                            : 'border-yellow-400/30 bg-black/10 text-white/80 hover:border-yellow-400/60'
+                        }`}
+                        title={customAudioFile.name}
+                      >
+                        {selectedMusicId === 'custom' && currentMusicId === 'custom' && isMusicPlaying ? (
+                          <Pause className="w-4 h-4 mr-1 text-yellow-300" />
+                        ) : (
+                          <Play className={`w-4 h-4 mr-1 ${selectedMusicId === 'custom' ? 'text-yellow-300' : ''}`} />
+                        )}
+                        <span className="text-xs mr-2" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                          {customAudioFile.name.length > 15 
+                            ? customAudioFile.name.substring(0, 15) + '...' 
+                            : customAudioFile.name}
+                        </span>
+                        <span
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveCustomAudio();
+                          }}
+                          className="hover:text-red-400 transition-colors cursor-pointer"
+                          title="Remove custom audio"
+                        >
+                          <X className="w-4 h-4" />
+                        </span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => customAudioInputRef.current?.click()}
+                        className="py-3 px-4 rounded-lg border-2 border-dashed border-yellow-400/30 bg-black/10 text-white/80 hover:border-yellow-400/60 flex items-center justify-center transition-all flex-shrink-0 whitespace-nowrap"
+                        title="Upload custom audio"
+                      >
+                        <Plus className="w-4 h-4 mr-1" />
+                        <span className="text-xs" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Upload Audio</span>
+                      </button>
+                    )}
+                    <input
+                      ref={customAudioInputRef}
+                      type="file"
+                      accept=".mp3,.wav,.m4a,.ogg,.flac"
+                      onChange={handleCustomAudioUpload}
+                      className="hidden"
+                    />
+                    
+                    {/* 预设音乐列表 */}
                     {MUSIC_TRACKS.filter((track) => {
                       if (genderFilter === 'all') return true;
                       return track.taglist?.includes(genderFilter);
@@ -1046,8 +1250,8 @@ export function ChristmasHeroDesktop() {
                     {/* 积分显示 */}
                     {selectedMusicId && (
                       <div className="absolute -top-2 -right-10 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                        {audioDuration > 0 
-                          ? `${calculateCredits(audioDuration, '720p')} Credits`
+                        {(selectedMusicId === 'custom' ? customAudioDuration : audioDuration) > 0 
+                          ? `${calculateCredits(selectedMusicId === 'custom' ? customAudioDuration : audioDuration, '720p')} Credits`
                           : '11 Credits'}
                       </div>
                     )}
