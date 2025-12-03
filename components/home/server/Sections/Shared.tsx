@@ -88,7 +88,7 @@ export const DownloadIcon = () => (
 // Shared UI helpers
 export function SectionShell({ children, className = '' }: React.PropsWithChildren<{ className?: string }>) {
   return (
-    <section className={`py-28 relative ${className}`}>
+    <section className={`py-16 md:py-12 relative ${className}`}>
       <div className="container mx-auto px-6 max-w-7xl relative">{children}</div>
     </section>
   )
