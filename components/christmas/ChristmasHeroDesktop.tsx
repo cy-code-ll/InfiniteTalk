@@ -1271,7 +1271,7 @@ export function ChristmasHeroDesktop() {
                     size="sm"
                     variant="outline"
                     disabled={isDownloading}
-                    className="flex items-center gap-2 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-8 rounded-full shadow-lg"
+                    className="flex items-center gap-2 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-8 rounded-lg shadow-lg"
                     onClick={handleDownload}
                     style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                   >
