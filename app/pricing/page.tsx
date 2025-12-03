@@ -158,6 +158,27 @@ export default function PricingPage() {
       <Script id="ld-json-pricing-faq" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }}
       />
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/pricing#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Pricing',
+              item: 'https://www.infinitetalk.net/pricing'
+            }
+          ]
+        }) }}
+      />
       
       <main className="flex-grow relative">
         {/* Fixed background gradient */}

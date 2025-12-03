@@ -184,6 +184,28 @@ const faqSchemaData = {
 export default function InfiniteTalkMultiPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/infinitetalk-multi#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'InfiniteTalk Multi',
+              item: 'https://www.infinitetalk.net/infinitetalk-multi'
+            }
+          ]
+        }) }}
+      />
       {/* JSON-LD structured data */}
       <Script id="ld-json-infinitetalk-multi" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(infiniteTalkMultiSchemaData) }}

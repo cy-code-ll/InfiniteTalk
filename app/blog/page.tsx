@@ -1,6 +1,7 @@
 import { serverCmsApi, BlogPost } from "../../lib/server-api";
 import Link from "next/link";
 import { Metadata } from "next";
+import Script from "next/script";
 import { Footer } from "../../components/Footer";
 import { Home, ChevronRight } from "lucide-react";
 
@@ -86,6 +87,28 @@ export default async function Blog() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 flex flex-col">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/blog#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Blog',
+              item: 'https://www.infinitetalk.net/blog'
+            }
+          ]
+        }) }}
+      />
       {/* Hero Section */}
       <div className="bg-gradient-to-r from-primary/10 via-muted/20 to-primary/5 pt-24 pb-16">
         <div className="container mx-auto px-6 max-w-7xl">

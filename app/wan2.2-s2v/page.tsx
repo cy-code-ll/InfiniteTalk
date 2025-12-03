@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Wans2vHero } from '@/components/wans2v/Wans2vHero';
 import { Wans2vFeatures } from '@/components/wans2v/Wans2vFeatures';
 import { Wans2vHowToUse } from '@/components/wans2v/Wans2vHowToUse';
@@ -74,9 +75,29 @@ export default function Wans2vPage() {
       {/* Additional gradient overlay for more depth */}
       <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
       
-      <script
-        type="application/ld+json"
+      <Script id="ld-json-wans2v" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/wan2.2-s2v#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'WAN2.2 S2V',
+              item: 'https://www.infinitetalk.net/wan2.2-s2v'
+            }
+          ]
+        }) }}
       />
       <main className="pt-16">
         <Wans2vHero />

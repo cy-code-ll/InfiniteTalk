@@ -1,6 +1,7 @@
 import { serverCmsApi, type BlogPost } from '../../../lib/server-api';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
+import Script from 'next/script';
 import { Footer } from '../../../components/Footer';
 import { Home, ChevronRight } from 'lucide-react';
 import { Metadata } from 'next';
@@ -138,8 +139,39 @@ export default async function BlogPost({ params }: BlogPostPageProps) {
 
   const { post, originalUrl } = result;
 
+  const blogPostUrl = `https://www.infinitetalk.net/blog/${slug}`;
+  const truncatedTitle = truncateTitle(post.title, 50);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': `${blogPostUrl}#breadcrumb`,
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Blog',
+              item: 'https://www.infinitetalk.net/blog'
+            },
+            {
+              '@type': 'ListItem',
+              position: 3,
+              name: truncatedTitle,
+              item: blogPostUrl
+            }
+          ]
+        }) }}
+      />
       {/* 博客浏览统计组件 - 使用列表中的原始 url */}
       <BlogViewTracker url={originalUrl} />
       

@@ -1,4 +1,5 @@
 import { Metadata } from 'next';
+import Script from 'next/script';
 import { Footer } from '@/components/Footer';
 
 export const metadata: Metadata = {
@@ -23,6 +24,27 @@ export const metadata: Metadata = {
 export default function RefundPolicyPage() {
   return (
     <>
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/refund#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Refund Policy',
+              item: 'https://www.infinitetalk.net/refund'
+            }
+          ]
+        }) }}
+      />
       <section className="max-w-4xl mx-auto px-6 py-26">
         <h1 className="text-4xl font-bold text-white mb-6">Refund Policy</h1>
         <p className="text-slate-400 mb-8">Effective Date: October 14, 2025</p>

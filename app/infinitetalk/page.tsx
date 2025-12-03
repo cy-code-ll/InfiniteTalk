@@ -199,6 +199,27 @@ export default function InfiniteTalkPage() {
       <Script id="ld-json-faq" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchemaData) }}
       />
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/infinitetalk#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'InfiniteTalk',
+              item: 'https://www.infinitetalk.net/infinitetalk'
+            }
+          ]
+        }) }}
+      />
       
       <main className="flex-grow relative pt-20">
         {/* Fixed background gradient */}

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { Footer } from '../../components/Footer';
 
 export const metadata: Metadata = {
@@ -26,6 +27,28 @@ export default function AppDownloadPage() {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/app#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'App',
+              item: 'https://www.infinitetalk.net/app'
+            }
+          ]
+        }) }}
+      />
       <main className="flex-grow relative">
         {/* Background gradients for consistency with site styling */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-background via-primary/10 via-primary/20 via-primary/15 to-slate-950 -z-10" />
