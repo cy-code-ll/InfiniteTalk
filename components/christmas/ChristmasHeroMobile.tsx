@@ -175,6 +175,16 @@ export function ChristmasHeroMobile() {
   
   // 模板预览视频状态
   const [templatePreviewVideo, setTemplatePreviewVideo] = useState<string | null>(null);
+  
+  // 结果视频播放状态
+  const resultVideoRef = useRef<HTMLVideoElement | null>(null);
+  const [isResultVideoPlaying, setIsResultVideoPlaying] = useState(false);
+  const [isResultVideoMuted, setIsResultVideoMuted] = useState(false);
+  const [resultVideoProgress, setResultVideoProgress] = useState(0);
+  const [resultVideoDuration, setResultVideoDuration] = useState(0);
+  const [resultVideoCurrentTime, setResultVideoCurrentTime] = useState(0);
+  const [showPlayPauseButton, setShowPlayPauseButton] = useState(false);
+  const playPauseTimeoutRef = useRef<number | null>(null);
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -271,6 +281,9 @@ export function ChristmasHeroMobile() {
       }
       if (progressTimerRef.current) {
         window.clearInterval(progressTimerRef.current);
+      }
+      if (playPauseTimeoutRef.current) {
+        clearTimeout(playPauseTimeoutRef.current);
       }
     };
   }, []);
@@ -751,6 +764,67 @@ export function ChristmasHeroMobile() {
     setResultVideoUrl(null);
     setResultTaskId(null);
     setProgress(0);
+    // 重置视频状态
+    if (resultVideoRef.current) {
+      resultVideoRef.current.pause();
+      resultVideoRef.current.currentTime = 0;
+    }
+    setIsResultVideoPlaying(false);
+    setResultVideoProgress(0);
+    setResultVideoCurrentTime(0);
+    setShowPlayPauseButton(false);
+    if (playPauseTimeoutRef.current) {
+      clearTimeout(playPauseTimeoutRef.current);
+      playPauseTimeoutRef.current = null;
+    }
+  };
+
+  // 处理结果视频播放/暂停
+  const handleResultVideoToggle = () => {
+    if (!resultVideoRef.current) return;
+    if (isResultVideoPlaying) {
+      resultVideoRef.current.pause();
+      setIsResultVideoPlaying(false);
+      setShowPlayPauseButton(false);
+    } else {
+      resultVideoRef.current.play();
+      setIsResultVideoPlaying(true);
+      // 显示暂停按钮，1秒后隐藏
+      setShowPlayPauseButton(true);
+      if (playPauseTimeoutRef.current) {
+        clearTimeout(playPauseTimeoutRef.current);
+      }
+      playPauseTimeoutRef.current = window.setTimeout(() => {
+        setShowPlayPauseButton(false);
+      }, 1000);
+    }
+  };
+
+  // 处理结果视频静音切换
+  const handleResultVideoMuteToggle = () => {
+    if (!resultVideoRef.current) return;
+    resultVideoRef.current.muted = !isResultVideoMuted;
+    setIsResultVideoMuted(!isResultVideoMuted);
+  };
+
+  // 处理结果视频进度条点击
+  const handleResultVideoProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!resultVideoRef.current || !resultVideoDuration) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const newTime = percentage * resultVideoDuration;
+    resultVideoRef.current.currentTime = newTime;
+    setResultVideoCurrentTime(newTime);
+    setResultVideoProgress(percentage * 100);
+  };
+
+  // 格式化时间
+  const formatTime = (seconds: number) => {
+    if (!seconds || isNaN(seconds)) return '0:00';
+    const mins = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const handleCustomizeClick = () => {
@@ -840,93 +914,159 @@ export function ChristmasHeroMobile() {
         </div>
       )}
 
-      {/* Result State - 上下分布展示视频 */}
+      {/* Result State - 全屏展示视频 */}
       {viewState === 'result' && resultVideoUrl && (
-        <div className="fixed inset-0 z-50 bg-black flex flex-col">
-          {/* 视频区域 */}
-          <div className="flex-1 relative flex items-center justify-center">
+        <div className="fixed inset-0 z-50 bg-black">
+          {/* 视频区域 - 全屏 */}
+          <div className="absolute inset-0">
             <video
+              ref={resultVideoRef}
               src={resultVideoUrl}
               className="w-full h-full object-contain"
-              controls
-              autoPlay
               playsInline
+              muted={isResultVideoMuted}
+              onLoadedMetadata={() => {
+                if (resultVideoRef.current) {
+                  setResultVideoDuration(resultVideoRef.current.duration);
+                }
+              }}
+              onTimeUpdate={() => {
+                if (resultVideoRef.current) {
+                  const current = resultVideoRef.current.currentTime;
+                  const duration = resultVideoRef.current.duration;
+                  setResultVideoCurrentTime(current);
+                  if (duration) {
+                    setResultVideoProgress((current / duration) * 100);
+                  }
+                }
+              }}
+              onPlay={() => setIsResultVideoPlaying(true)}
+              onPause={() => setIsResultVideoPlaying(false)}
+              onEnded={() => {
+                setIsResultVideoPlaying(false);
+                setResultVideoProgress(0);
+                setResultVideoCurrentTime(0);
+              }}
             />
             
-            {/* 返回按钮 - 悬浮在视频左上角 */}
-            <Button
-              className="absolute top-4 left-4 z-10 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600 to-red-700 text-yellow-300 hover:from-red-700 hover:to-red-800 hover:border-yellow-400 font-semibold px-4 py-2 rounded-lg shadow-lg"
+            {/* 返回按钮 - 左上角，半透明玻璃背景，白色图标 */}
+            <button
               onClick={handleBackToDisplay}
-              style={{ 
-                fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif',
-                background: 'linear-gradient(to right,rgb(65, 10, 10),rgb(170, 36, 36))'
-              }}
+              className="absolute top-4 left-4 z-20 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 flex items-center justify-center transition-colors"
+              title="Back"
             >
-              <Sparkles className="w-4 h-4 mr-2 text-yellow-300" />
-              Back
-            </Button>
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+            </button>
+
+            {/* 静音按钮 - 右上角，半透明玻璃背景 */}
+            <button
+              onClick={handleResultVideoMuteToggle}
+              className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 flex items-center justify-center transition-colors"
+              title={isResultVideoMuted ? 'Unmute' : 'Mute'}
+            >
+              {isResultVideoMuted ? (
+                <VolumeX className="w-5 h-5 text-white" />
+              ) : (
+                <Volume2 className="w-5 h-5 text-white" />
+              )}
+            </button>
+
+            {/* 播放/暂停按钮 - 居中，点击播放后显示1秒后隐藏，但始终可点击，半透明玻璃背景 */}
+            <button
+              onClick={handleResultVideoToggle}
+              className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"
+            >
+              <div className={`w-16 h-16 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 flex items-center justify-center transition-all hover:scale-110 ${
+                (!isResultVideoPlaying || showPlayPauseButton) ? 'opacity-100' : 'opacity-0'
+              }`}>
+                {isResultVideoPlaying ? (
+                  <Pause className="w-8 h-8 text-white" fill="currentColor" />
+                ) : (
+                  <Play className="w-8 h-8 text-white ml-1" fill="currentColor" />
+                )}
+              </div>
+            </button>
           </div>
 
-          {/* 底部按钮组 */}
-          <div className="p-6 pb-8 bg-gradient-to-t from-black via-black/90 to-transparent">
-            {/* 下载和分享按钮 */}
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                disabled={isDownloading}
-                className="flex-1 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600/30 to-red-700/30 text-yellow-300 hover:from-red-600/50 hover:to-red-700/50 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
-                onClick={handleDownload}
-                style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+          {/* 底部按钮组 - 悬浮展示，半透明玻璃效果 */}
+          <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 z-30">
+            {/* 进度条 - 在按钮组内部，确保不被遮挡 */}
+            <div className="mb-4 px-2">
+              <div 
+                className="w-full h-1 bg-white/30 rounded-full cursor-pointer"
+                onClick={handleResultVideoProgressClick}
               >
-                {isDownloading ? (
+                <div 
+                  className="h-full bg-white rounded-full transition-all"
+                  style={{ width: `${resultVideoProgress}%` }}
+                />
+              </div>
+              <div className="flex justify-between text-white text-xs mt-1">
+                <span>{formatTime(resultVideoCurrentTime)}</span>
+                <span>{formatTime(resultVideoDuration)}</span>
+              </div>
+            </div>
+            <div className="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  disabled={isDownloading}
+                  className="flex-1 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600 to-red-700 text-yellow-300 hover:from-red-700 hover:to-red-800 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
+                  onClick={handleDownload}
+                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+                >
+                  {isDownloading ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin text-yellow-300" />
+                      <span>Downloading...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-5 h-5 text-yellow-300" />
+                      <span>Download</span>
+                    </>
+                  )}
+                </Button>
+                {selectedTemplateId && selectedMusicId && (
                   <>
-                    <Loader2 className="w-5 h-5 animate-spin text-yellow-300" />
-                    <span>Downloading...</span>
-                  </>
-                ) : (
-                  <>
-                    <Download className="w-5 h-5 text-yellow-300" />
-                    <span>Download</span>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-[#1DA1F2] text-white hover:bg-[#1a8cd8] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
+                      title="Share to Twitter"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-[#1877F2] text-white hover:bg-[#166fe5] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
+                      title="Share to Facebook"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-[#25D366] text-white hover:bg-[#20ba5a] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
+                      title="Share to WhatsApp"
+                    >
+                      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                      </svg>
+                    </Button>
                   </>
                 )}
-              </Button>
-              {selectedTemplateId && selectedMusicId && (
-                <>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-blue-500/20 text-white hover:bg-[#1DA1F2] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
-                    title="Share to Twitter"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-blue-600/20 text-white hover:bg-[#1877F2] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
-                    title="Share to Facebook"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-green-600/20 text-white hover:bg-[#25D366] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
-                    title="Share to WhatsApp"
-                  >
-                    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                    </svg>
-                  </Button>
-                </>
-              )}
+              </div>
             </div>
           </div>
         </div>
