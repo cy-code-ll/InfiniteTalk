@@ -39,7 +39,7 @@ export default function MultiHero() {
   const [leftAudioFile, setLeftAudioFile] = useState<File | null>(null);
   const [rightAudioFile, setRightAudioFile] = useState<File | null>(null);
   const [prompt, setPrompt] = useState('');
-  const [order, setOrder] = useState<'meanwhile' | 'left_right' | 'right_left'>('meanwhile');
+  const [order, setOrder] = useState<'meanwhile' | 'left_right' | 'right_left'>('left_right');
   const [resolution, setResolution] = useState<'480p' | '720p' | '1080p'>('720p');
   const [generationState, setGenerationState] = useState<GenerationState>({
     status: 'demo',
@@ -927,6 +927,27 @@ export default function MultiHero() {
                 </div>
               </div>
 
+              {/* Order Selection */}
+              <div>
+                <div className="flex items-center gap-2 mb-3">
+                  <Label className="text-base font-semibold text-foreground">
+                    Order <span className="text-red-500">*</span>
+                  </Label>
+                  <Tooltip content="The order of the two audio sources in the output video, 'meanwhile' means both audio sources will play at the same time, 'left_right' means the left audio will play first then the right audio will play, 'right_left' means the right audio will play first then the left audio will play.">
+                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
+                  </Tooltip>
+                </div>
+                <select
+                  value={order}
+                  onChange={(e) => setOrder(e.target.value as 'meanwhile' | 'left_right' | 'right_left')}
+                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:border-primary/50 hover:bg-white/10 transition-colors"
+                >
+                  <option value="meanwhile" className="bg-slate-900/90 text-white backdrop-blur-sm">Meanwhile</option>
+                  <option value="left_right" className="bg-slate-900/90 text-white backdrop-blur-sm">Left to Right</option>
+                  <option value="right_left" className="bg-slate-900/90 text-white backdrop-blur-sm">Right to Left</option>
+                </select>
+              </div>
+
               {/* Image Upload */}
               <div>
                 <div className="flex items-center gap-2 mb-3">
@@ -1002,27 +1023,6 @@ export default function MultiHero() {
                   placeholder="Describe what you want the characters to express or do..."
                   className="w-full h-24 bg-white/5 border-white/30 text-white placeholder-muted-foreground resize-none"
                 />
-              </div>
-
-              {/* Order Selection */}
-              <div>
-                <div className="flex items-center gap-2 mb-3">
-                  <Label className="text-base font-semibold text-foreground">
-                    Order <span className="text-red-500">*</span>
-                  </Label>
-                  <Tooltip content="The order of the two audio sources in the output video, 'meanwhile' means both audio sources will play at the same time, 'left_right' means the left audio will play first then the right audio will play, 'right_left' means the right audio will play first then the left audio will play.">
-                    <HelpCircle className="h-4 w-4 text-muted-foreground cursor-help" />
-                  </Tooltip>
-                </div>
-                <select
-                  value={order}
-                  onChange={(e) => setOrder(e.target.value as 'meanwhile' | 'left_right' | 'right_left')}
-                  className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:border-primary/50 hover:bg-white/10 transition-colors"
-                >
-                  <option value="meanwhile" className="bg-slate-900/90 text-white backdrop-blur-sm">Meanwhile</option>
-                  <option value="left_right" className="bg-slate-900/90 text-white backdrop-blur-sm">Left to Right</option>
-                  <option value="right_left" className="bg-slate-900/90 text-white backdrop-blur-sm">Right to Left</option>
-                </select>
               </div>
 
               {/* Resolution Selection */}

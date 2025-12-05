@@ -53,6 +53,107 @@ export default function MultiHowToUse() {
               </p>
             </div>
           </div>
+
+          {/* Example Resources Table */}
+          <div className="mt-20">
+            <h3 className="text-2xl md:text-3xl font-bold text-white mb-8 text-center">
+              Example Resources
+            </h3>
+            <div className="overflow-x-auto">
+              <table className="w-full border-collapse table-fixed">
+                {/* Header Row */}
+                <thead>
+                  <tr className="border-b border-slate-700/50">
+                    <th className="w-1/3 p-6 text-left text-white font-semibold text-lg bg-gradient-to-b from-slate-800/60 to-slate-900/60">
+                      Two speakers' audio
+                    </th>
+                    <th className="w-1/3 p-6 text-left text-white font-semibold text-lg bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-l border-slate-700/50">
+                      Image with two people
+                    </th>
+                    <th className="w-1/3 p-6 text-left text-white font-semibold text-lg bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-l border-slate-700/50">
+                      Final outcome
+                    </th>
+                  </tr>
+                </thead>
+                {/* Content Row */}
+                <tbody>
+                  <tr>
+                    {/* Left Cell - Two Audio Players */}
+                    <td className="w-1/3 p-6 bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-b border-slate-700/50">
+                      <div className="flex flex-col justify-center h-full space-y-4">
+                        <div>
+                          <audio
+                            src="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/input-audio.MP3"
+                            controls
+                            className="w-full"
+                          >
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
+                        <div>
+                          <audio
+                            src="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/input-audio2.MP3"
+                            controls
+                            className="w-full"
+                          >
+                            Your browser does not support the audio element.
+                          </audio>
+                        </div>
+                        <div className="mt-6 space-y-3 text-sm text-slate-400">
+                          <p className="text-slate-300 font-medium">* Ensure two audio files same duration.</p>
+                          <div>
+                            <p className="text-slate-300 font-medium mb-2">* Select Play Order:</p>
+                            <ul className="space-y-1.5 ml-4 list-disc list-inside">
+                              <li><span className="text-slate-300">Left to Right:</span> Plays left audio, then right.</li>
+                              <li><span className="text-slate-300">Right to Left:</span> Plays right audio, then left.</li>
+                              <li><span className="text-slate-300">Meanwhile:</span> Plays both simultaneously.</li>
+                            </ul>
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    {/* Middle Cell - Image */}
+                    <td className="w-1/3 p-6 align-top bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-l border-b border-slate-700/50">
+                      <a
+                        href="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/input-image.jpeg"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block group h-full"
+                      >
+                        <div className="relative h-full min-h-[400px] rounded-lg overflow-hidden bg-slate-700/30 border border-slate-600/50 hover:border-primary/50 transition-all duration-300">
+                          <img
+                            src="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/input-image.jpeg"
+                            alt="Input image with two people"
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      </a>
+                    </td>
+                    {/* Right Cell - Video */}
+                    <td className="w-1/3 p-6 align-top bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-l border-b border-slate-700/50">
+                      <a
+                        href="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/output.mp4"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block group h-full"
+                      >
+                        <div className="relative h-full min-h-[400px] rounded-lg overflow-hidden bg-slate-700/30 border border-slate-600/50 hover:border-primary/50 transition-all duration-300">
+                          <video
+                            src="https://cfsource.infinitetalk.net/infinitetalk/multy-videocase/output.mp4"
+                            className="w-full h-full object-cover"
+                            muted
+                            loop
+                            controls
+                            playsInline
+                          />
+                        </div>
+                      </a>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
         </div>
       </div>
     </section>
