@@ -440,40 +440,63 @@ export default function InfiniteTalkGenerator() {
     });
   };
 
-  // 提取视频第一帧
-  const extractVideoFirstFrame = (videoFile: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.muted = true;
-      video.playsInline = true;
+  // 提取视频第一帧 - Safari 兼容版本
+  const extractVideoFirstFrame = async (videoFile: File): Promise<string> => {
+    const blobUrl = URL.createObjectURL(videoFile);
+    const video = document.createElement('video');
 
-      video.onloadedmetadata = () => {
-        video.currentTime = 0;
-      };
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto'; // Safari 需要 'auto' 而不是 'metadata'
+    video.src = blobUrl;
 
-      video.onseeked = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/png');
-          URL.revokeObjectURL(video.src);
-          resolve(dataUrl);
-        } else {
-          reject(new Error('Failed to get canvas context'));
-        }
-      };
+    try {
+      // Safari 兼容性：等待 metadata 加载完成
+      await new Promise<void>((resolve, reject) => {
+        video.onloadedmetadata = () => resolve();
+        video.onerror = () => reject(new Error('Failed to load video metadata'));
+        // 设置超时
+        setTimeout(() => reject(new Error('Video metadata load timeout')), 10000);
+      });
 
-      video.onerror = () => {
-        URL.revokeObjectURL(video.src);
-        reject(new Error('Failed to load video'));
-      };
+      // Safari 兼容性：使用 Promise 等待 seeked 事件
+      return new Promise((resolve, reject) => {
+        video.onseeked = () => {
+          // Safari 兼容性：延迟执行，确保视频帧完全准备好
+          setTimeout(() => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                URL.revokeObjectURL(blobUrl);
+                resolve(dataUrl);
+              } else {
+                URL.revokeObjectURL(blobUrl);
+                reject(new Error('Failed to get canvas context'));
+              }
+            } catch (error) {
+              URL.revokeObjectURL(blobUrl);
+              reject(error);
+            }
+          }, 100); // Safari 需要延迟
+        };
 
-      video.src = URL.createObjectURL(videoFile);
-    });
+        video.onerror = () => {
+          URL.revokeObjectURL(blobUrl);
+          reject(new Error('Failed to load video'));
+        };
+
+        // Safari 兼容性：使用 0.1 秒而不是 0 秒
+        video.currentTime = 0.1;
+      });
+    } catch (error) {
+      URL.revokeObjectURL(blobUrl);
+      throw error;
+    }
   };
 
   // 处理视频上传
@@ -914,7 +937,11 @@ export default function InfiniteTalkGenerator() {
     if (containerRect.width === 0 || containerRect.height === 0) {
       console.warn('Container size is 0, retrying...', { width: containerRect.width, height: containerRect.height });
       // 延迟重试
-      setTimeout(() => initializeCanvas(), 100);
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 100);
       return;
     }
 
@@ -2372,9 +2399,6 @@ export default function InfiniteTalkGenerator() {
             </DialogTitle>
             <p className="text-sm text-muted-foreground text-left">
               Optional mask image to specify the person in the image to animate.
-            </p>
-            <p className="text-xs text-muted-foreground/70 text-left mt-1">
-              If rendering issues occur, please try using Chrome browser.
             </p>
           </DialogHeader>
           <div className="py-3 sm:py-6 px-2 sm:px-0">
