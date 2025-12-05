@@ -831,8 +831,33 @@ export default function InfiniteTalkGenerator() {
   const removeSelectedVideo = () => {
     setSelectedVideo(null);
     setVideoFirstFrame(null);
+    setMaskImageDataForVideo(null);
     if (videoInputRef.current) {
       videoInputRef.current.value = '';
+    }
+  };
+
+  // 统一的删除处理函数：如果有mask先删除mask，否则删除图片/视频
+  const handleRemoveImageOrMask = () => {
+    if (maskImageDataForImage) {
+      // 先删除mask
+      setMaskImageDataForImage(null);
+      toast.showToast('Mask removed', 'info');
+    } else {
+      // 删除图片
+      removeSelectedImage();
+    }
+  };
+
+  // 统一的删除处理函数：如果有mask先删除mask，否则删除视频
+  const handleRemoveVideoOrMask = () => {
+    if (maskImageDataForVideo) {
+      // 先删除mask
+      setMaskImageDataForVideo(null);
+      toast.showToast('Mask removed', 'info');
+    } else {
+      // 删除视频
+      removeSelectedVideo();
     }
   };
 
@@ -1864,20 +1889,12 @@ export default function InfiniteTalkGenerator() {
                         </div>
                       )}
                       <button
-                        onClick={removeSelectedImage}
+                        onClick={handleRemoveImageOrMask}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                        title={maskImageDataForImage ? 'Remove mask (click again to remove image)' : 'Remove image'}
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {maskImageDataForImage && (
-                        <button
-                          onClick={removeMask}
-                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
-                          title="Remove mask"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   ) : (
                     <div
@@ -1921,20 +1938,12 @@ export default function InfiniteTalkGenerator() {
                         </div>
                       )}
                       <button
-                        onClick={removeSelectedVideo}
+                        onClick={handleRemoveVideoOrMask}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                        title={maskImageDataForVideo ? 'Remove mask (click again to remove video)' : 'Remove video'}
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {maskImageDataForVideo && (
-                        <button
-                          onClick={removeMask}
-                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
-                          title="Remove mask"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   ) : (
                     <div
