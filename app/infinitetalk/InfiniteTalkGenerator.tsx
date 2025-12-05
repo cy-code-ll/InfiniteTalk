@@ -891,7 +891,12 @@ export default function InfiniteTalkGenerator() {
     }
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    // Safari 兼容性：使用 willReadFrequently 选项优化性能
+    const ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+      // Safari 可能需要显式设置 alpha
+      alpha: true
+    });
     if (!ctx) {
       console.error('Failed to get canvas 2d context');
       return;
@@ -917,15 +922,55 @@ export default function InfiniteTalkGenerator() {
     const img = document.createElement('img');
     let imageLoadTimeout: NodeJS.Timeout | null = null;
 
+    // Safari 兼容性：设置 crossOrigin 属性（对于 base64 图片不需要，但显式设置更安全）
+    if (imgSrc.startsWith('data:')) {
+      // base64 图片不需要 crossOrigin
+    } else if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://')) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    // Safari 兼容性：确保图片完全加载
     img.onload = () => {
       if (imageLoadTimeout) {
         clearTimeout(imageLoadTimeout);
         imageLoadTimeout = null;
       }
 
-      // 验证图片尺寸
+      // Safari 兼容性：确保图片完全加载
+      // Safari 有时会在图片未完全解码时就触发 onload
       if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-        console.error('Image has invalid dimensions', { width: img.naturalWidth, height: img.naturalHeight });
+        console.warn('Image dimensions not ready, waiting...', {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          complete: img.complete
+        });
+        // 等待图片完全加载
+        setTimeout(() => {
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            // 重新触发初始化
+            if (initializeCanvasRef.current) {
+              initializeCanvasRef.current();
+            }
+          } else {
+            console.error('Image has invalid dimensions after wait', {
+              width: img.naturalWidth,
+              height: img.naturalHeight
+            });
+          }
+        }, 100);
+        return;
+      }
+
+      // Safari 兼容性：额外验证图片是否真的加载完成
+      if (!img.complete) {
+        console.warn('Image not complete, waiting...');
+        setTimeout(() => {
+          if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            if (initializeCanvasRef.current) {
+              initializeCanvasRef.current();
+            }
+          }
+        }, 100);
         return;
       }
 
@@ -990,23 +1035,49 @@ export default function InfiniteTalkGenerator() {
       }
 
       // 设置画布尺寸为优化后的尺寸
+      // Safari 兼容性：先设置尺寸属性，再设置样式
+      // Safari 对 canvas 尺寸的设置顺序很敏感
+      canvas.setAttribute('width', canvasWidth.toString());
+      canvas.setAttribute('height', canvasHeight.toString());
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
       // 设置画布显示尺寸和位置（CSS）
+      // Safari 兼容性：使用 transform 而不是 left/top 可能更可靠
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
       canvas.style.left = `${offsetX}px`;
       canvas.style.top = `${offsetY}px`;
       canvas.style.position = 'absolute';
+      // Safari 兼容性：添加 webkit 前缀和强制硬件加速
+      canvas.style.webkitTransform = 'translateZ(0)';
+      canvas.style.transform = 'translateZ(0)';
+      // Safari 兼容性：确保 canvas 可见
+      canvas.style.opacity = '1';
+      canvas.style.visibility = 'visible';
+      canvas.style.display = 'block';
 
       // 填充透明背景（让原图透过）
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Safari 兼容性：强制刷新 canvas
+      // 在某些情况下，Safari 需要显式触发重绘
+      ctx.save();
+      ctx.restore();
+
       // 保存初始状态
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      setCanvasHistory([imageData]);
-      setHistoryIndex(0);
+      // Safari 兼容性：确保 canvas 有内容后再获取 ImageData
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        setCanvasHistory([imageData]);
+        setHistoryIndex(0);
+      } catch (error) {
+        console.error('Failed to get ImageData in Safari:', error);
+        // 如果失败，创建一个空的 ImageData
+        const emptyImageData = ctx.createImageData(canvas.width, canvas.height);
+        setCanvasHistory([emptyImageData]);
+        setHistoryIndex(0);
+      }
 
       console.log('✅ Canvas initialized successfully', {
         canvasSize: `${canvas.width}x${canvas.height}`,
@@ -1041,7 +1112,25 @@ export default function InfiniteTalkGenerator() {
       }, 200);
     }, 5000); // 5秒超时
 
-    img.src = imgSrc;
+    // Safari 兼容性：确保图片加载完成
+    // 对于 base64 图片，Safari 可能需要额外的处理
+    if (imgSrc.startsWith('data:')) {
+      // base64 图片直接设置 src
+      img.src = imgSrc;
+    } else {
+      // 其他类型的图片
+      img.src = imgSrc;
+    }
+
+    // Safari 兼容性：如果图片已经加载（缓存），手动触发 onload
+    if (img.complete && img.naturalWidth > 0) {
+      // 图片已经加载完成，手动触发 onload
+      setTimeout(() => {
+        if (img.onload) {
+          img.onload(new Event('load'));
+        }
+      }, 0);
+    }
   }, [tabMode, imageUrl, videoFirstFrame]);
 
   // 将 initializeCanvas 存储到 ref 中，供其他函数使用
@@ -1111,7 +1200,11 @@ export default function InfiniteTalkGenerator() {
     }
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    // Safari 兼容性：使用相同的上下文选项
+    const ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+      alpha: true
+    });
     if (!ctx) {
       console.error('Canvas context not available in performDraw');
       return;
@@ -1179,11 +1272,20 @@ export default function InfiniteTalkGenerator() {
 
     // 使用半透明白色绘制，让用户看到绘制效果
     try {
+      // Safari 兼容性：确保上下文状态正确
+      ctx.save();
       ctx.globalCompositeOperation = 'source-over';
       ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
       ctx.beginPath();
       ctx.arc(canvasX, canvasY, actualBrushSize / 2, 0, Math.PI * 2);
       ctx.fill();
+      ctx.restore();
+
+      // Safari 兼容性：强制刷新 canvas（某些情况下需要）
+      // 通过读取一个像素来触发重绘
+      if (canvasX >= 0 && canvasX < canvas.width && canvasY >= 0 && canvasY < canvas.height) {
+        ctx.getImageData(Math.floor(canvasX), Math.floor(canvasY), 1, 1);
+      }
     } catch (error) {
       console.error('Error drawing on canvas', error);
     }
@@ -2271,6 +2373,9 @@ export default function InfiniteTalkGenerator() {
             <p className="text-sm text-muted-foreground text-left">
               Optional mask image to specify the person in the image to animate.
             </p>
+            <p className="text-xs text-muted-foreground/70 text-left mt-1">
+              If rendering issues occur, please try using Chrome browser.
+            </p>
           </DialogHeader>
           <div className="py-3 sm:py-6 px-2 sm:px-0">
             {((tabMode === 'image-to-video' && selectedImage) ||
@@ -2304,7 +2409,19 @@ export default function InfiniteTalkGenerator() {
                         imageRendering: 'pixelated',
                         touchAction: 'none',
                         position: 'absolute',
-                        pointerEvents: 'auto'
+                        pointerEvents: 'auto',
+                        opacity: '1',
+                        visibility: 'visible',
+                        display: 'block',
+                        transform: 'translateZ(0)',
+                        userSelect: 'none',
+                        // Safari 兼容性：使用类型断言添加 webkit 前缀属性
+                        ...({
+                          WebkitImageRendering: 'pixelated',
+                          WebkitTouchCallout: 'none',
+                          WebkitTransform: 'translateZ(0)',
+                          WebkitUserSelect: 'none'
+                        } as React.CSSProperties)
                       }}
                     />
 
