@@ -23,7 +23,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       return opusDetail.origin_image;
     }
     // 如果没有合适的图片，使用默认品牌分享图
-    return `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share-img.png`;
+    return `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.infinitetalk.net'}/share-img.png`;
   };
 
   const thumbnailUrl = getThumbnailUrl();
@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
       title: 'Amazing Video Created with InfiniteTalk',
       description: description,
       type: 'video.other',
-      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://infinitetalk.net'}/share/${id}`,
+      url: `${process.env.NEXT_PUBLIC_SITE_URL || 'https://www.infinitetalk.net'}/share/${id}`,
       images: [
         {
           url: thumbnailUrl,

@@ -9,11 +9,11 @@ const PromotionClient = dynamic(() => import('./PromotionClient'), { ssr: true }
 export const metadata: Metadata = {
   title: 'Infinite Talk AI Video Generator for Free By Referral',
   description: 'Share your referral link and earn credits when friends join Infinite Talk AI.',
-  alternates: { canonical: `${siteUrl}/referral` },
+  alternates: { canonical: `${siteUrl}/free/referral` },
   openGraph: {
     title: 'Infinite Talk AI Video Generator for Free By Referral',
     description: 'Invite friends and earn credits on Infinite Talk AI.',
-    url: `${siteUrl}/referral`,
+    url: `${siteUrl}/free/referral`,
     siteName: 'Infinite Talk AI',
     images: [{ url: `${siteUrl}/og-img.png`, width: 1200, height: 630, alt: 'Infinite Talk AI' }],
     type: 'website',
