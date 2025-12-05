@@ -1,6 +1,7 @@
 import { Metadata } from 'next';
 import Script from 'next/script';
 import { Footer } from '@/components/Footer';
+import { Upload, Sparkles, Share2 } from 'lucide-react';
 import { ChristmasHero } from '@/components/christmas/ChristmasHero';
 
 // SEO metadata - T<60, D<160, K<100
@@ -58,6 +59,28 @@ const christmasSchemaData = {
 export default function ChristmasPage() {
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/christmas#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Christmas',
+              item: 'https://www.infinitetalk.net/christmas'
+            }
+          ]
+        }) }}
+      />
       {/* JSON-LD structured data */}
       <Script id="ld-json-christmas" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(christmasSchemaData) }}

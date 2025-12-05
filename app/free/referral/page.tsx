@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Script from 'next/script';
 import { siteUrl } from '@/lib/seo-config';
 import dynamic from 'next/dynamic';
 import {Footer} from '@/components/Footer';
@@ -32,6 +33,27 @@ export const metadata: Metadata = {
 export default function PromotionPage() {
   return (
     <>
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/free/referral#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Referral',
+              item: 'https://www.infinitetalk.net/free/referral'
+            }
+          ]
+        }) }}
+      />
       <PromotionClient />
       <Footer />
     </>

@@ -29,10 +29,14 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const thumbnailUrl = getThumbnailUrl();
 
   const description = 'Check out this amazing AI-generated video! Create your own at https://www.infinitetalk.net';
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.infinitetalk.net';
 
   return {
     title: 'Amazing Video Created with InfiniteTalk',
     description: description,
+    alternates: {
+      canonical: `${siteUrl}/share/${id}`,
+    },
     openGraph: {
       title: 'Amazing Video Created with InfiniteTalk',
       description: description,

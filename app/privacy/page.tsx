@@ -1,6 +1,25 @@
-'use client';
-
+import { Metadata } from 'next';
+import Script from 'next/script';
 import { Footer } from '../../components/Footer';
+
+export const metadata: Metadata = {
+  title: 'Privacy Policy | InfiniteTalk AI',
+  description: 'Read the Privacy Policy for InfiniteTalk AI. Learn how we collect, use, and protect your information when you use our services.',
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/privacy',
+  },
+  openGraph: {
+    title: 'Privacy Policy | InfiniteTalk AI',
+    description: 'Read the Privacy Policy for InfiniteTalk AI. Learn how we collect, use, and protect your information when you use our services.',
+    type: 'website',
+    url: 'https://www.infinitetalk.net/privacy',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Privacy Policy | InfiniteTalk AI',
+    description: 'Read the Privacy Policy for InfiniteTalk AI.',
+  },
+};
 
 export default function PrivacyPolicyPage() {
   // 定义静态内容
@@ -46,6 +65,28 @@ export default function PrivacyPolicyPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/privacy#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Privacy Policy',
+              item: 'https://www.infinitetalk.net/privacy'
+            }
+          ]
+        }) }}
+      />
       <main className="flex-grow py-12 md:py-16 px-6">
         <div className="container mx-auto max-w-4xl">
           <article className="prose prose-xl lg:prose-2xl max-w-none dark:prose-invert bg-card p-8 md:p-12 rounded-2xl shadow-custom">

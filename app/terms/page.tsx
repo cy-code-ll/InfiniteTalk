@@ -1,7 +1,25 @@
-'use client';
-
+import { Metadata } from 'next';
+import Script from 'next/script';
 import { Footer } from '../../components/Footer';
-import { useState } from 'react';
+
+export const metadata: Metadata = {
+  title: 'Terms of Service | InfiniteTalk AI',
+  description: 'Read the Terms of Service for InfiniteTalk AI. Learn about our service terms, user content policies, and legal agreements.',
+  alternates: {
+    canonical: 'https://www.infinitetalk.net/terms',
+  },
+  openGraph: {
+    title: 'Terms of Service | InfiniteTalk AI',
+    description: 'Read the Terms of Service for InfiniteTalk AI. Learn about our service terms, user content policies, and legal agreements.',
+    type: 'website',
+    url: 'https://www.infinitetalk.net/terms',
+  },
+  twitter: {
+    card: 'summary',
+    title: 'Terms of Service | InfiniteTalk AI',
+    description: 'Read the Terms of Service for InfiniteTalk AI.',
+  },
+};
 
 export default function TermsOfServicePage() {
   // 定义静态内容
@@ -43,6 +61,28 @@ export default function TermsOfServicePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/terms#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Terms of Service',
+              item: 'https://www.infinitetalk.net/terms'
+            }
+          ]
+        }) }}
+      />
       <main className="flex-grow py-12 md:py-16 px-6">
         <div className="container mx-auto max-w-4xl">
           <article className="prose prose-xl lg:prose-2xl max-w-none dark:prose-invert bg-card p-8 md:p-12 rounded-2xl shadow-custom">

@@ -36,6 +36,8 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'FAQPage',
+          '@id': 'https://www.infinitetalk.net/#faq',
+          name: 'InfiniteTalk AI - Frequently Asked Questions',
           mainEntity: [
             {
               '@type': 'Question',
@@ -92,6 +94,7 @@ export default async function Home() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
           '@context': 'https://schema.org',
           '@type': 'HowTo',
+          '@id': 'https://www.infinitetalk.net/#howto',
           name: 'How to Use InfiniteTalk AI',
           description: 'Learn how to create infinite-length talking videos with InfiniteTalk AI in three simple steps.',
           image: 'https://www.infinitetalk.net/og-image.jpg',
@@ -139,6 +142,21 @@ export default async function Home() {
               text: 'Download in 480p/720p and share anywhere. Created with InfiniteTalk AI.',
               url: 'https://www.infinitetalk.net#step3',
               image: 'https://www.infinitetalk.net/step3.jpg'
+            }
+          ]
+        }) }}
+      />
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
             }
           ]
         }) }}

@@ -8,6 +8,26 @@ import { LiteDrawer, LiteDrawerClose } from './LiteDrawer';
 import SmartLink from './SmartLink';
 import { cn } from '../../lib/utils';
 
+// Hook to detect if screen is desktop (lg breakpoint)
+function useIsDesktop() {
+  const [isDesktop, setIsDesktop] = useState(false);
+
+  useEffect(() => {
+    const checkIsDesktop = () => {
+      setIsDesktop(window.innerWidth >= 1024); // lg breakpoint is 1024px
+    };
+
+    // Set initial value
+    checkIsDesktop();
+
+    // Listen for resize events
+    window.addEventListener('resize', checkIsDesktop);
+    return () => window.removeEventListener('resize', checkIsDesktop);
+  }, []);
+
+  return isDesktop;
+}
+
 // Loading spinner component
 const LoadingSpinner = () => (
   <svg className="animate-spin h-4 w-4 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -100,6 +120,7 @@ MobileLinks.displayName = 'MobileLinks';
 export function NavClient() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const isDesktop = useIsDesktop();
 
   // 监听 SmartLink 的关闭事件
   useEffect(() => {
@@ -201,56 +222,60 @@ export function NavClient() {
 
       {/* Right Section */}
       <div className="w-[180px] 2xl:w-[200px] flex items-center justify-end gap-2">
-        {/* Desktop: Auth island */}
-        <div className="hidden lg:flex items-center gap-4">
-          <NavAuthIsland variant="desktop" />
-        </div>
+        {/* Desktop: Auth island - conditionally rendered */}
+        {isDesktop && (
+          <div className="flex items-center gap-4">
+            <NavAuthIsland variant="desktop" />
+          </div>
+        )}
 
-        {/* Mobile: Auth island + Menu */}
-        <div className="flex lg:hidden items-center gap-2">
-          <AuthIslandVisible />
-          
-          {/* Menu Button */}
-          <button
-            onClick={handleOpenMenu}
-            className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:text-primary hover:bg-slate-700/50 transition-colors"
-            aria-label="Open menu"
-            type="button"
-          >
-            <MenuIcon />
-          </button>
+        {/* Mobile: Auth island + Menu - conditionally rendered */}
+        {!isDesktop && (
+          <div className="flex items-center gap-2">
+            <AuthIslandVisible />
+            
+            {/* Menu Button */}
+            <button
+              onClick={handleOpenMenu}
+              className="inline-flex items-center justify-center h-10 w-10 rounded-md text-white hover:text-primary hover:bg-slate-700/50 transition-colors"
+              aria-label="Open menu"
+              type="button"
+            >
+              <MenuIcon />
+            </button>
 
-          {/* Lightweight Drawer */}
-          <LiteDrawer
-            open={isMobileMenuOpen}
-            onOpenChange={setIsMobileMenuOpen}
-            className="w-[300px] sm:w-[340px]"
-          >
-            <div className="flex flex-col h-full px-6 pt-[env(safe-area-inset-top,0)] pb-[env(safe-area-inset-bottom,0)] text-white">
-              {/* Header - 移除 backdrop-blur 优化性能 */}
-              <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-4 bg-slate-900/95 flex items-center justify-between border-b border-white/10">
-                <div className="text-lg font-semibold">Menu</div>
-                <button
-                  type="button"
-                  aria-label="Close menu"
-                  onClick={() => requestAnimationFrame(() => setIsMobileMenuOpen(false))}
-                  className="inline-flex h-10 w-10 items-center justify-center rounded-md text-white/90 hover:text-primary hover:bg-slate-800 transition-colors"
-                >
-                  {/* Close (X) icon */}
-                  <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <line x1="18" y1="6" x2="6" y2="18" />
-                    <line x1="6" y1="6" x2="18" y2="18" />
-                  </svg>
-                </button>
+            {/* Lightweight Drawer */}
+            <LiteDrawer
+              open={isMobileMenuOpen}
+              onOpenChange={setIsMobileMenuOpen}
+              className="w-[300px] sm:w-[340px]"
+            >
+              <div className="flex flex-col h-full px-6 pt-[env(safe-area-inset-top,0)] pb-[env(safe-area-inset-bottom,0)] text-white">
+                {/* Header - 移除 backdrop-blur 优化性能 */}
+                <div className="sticky top-0 z-10 -mx-6 px-6 pt-4 pb-4 bg-slate-900/95 flex items-center justify-between border-b border-white/10">
+                  <div className="text-lg font-semibold">Menu</div>
+                  <button
+                    type="button"
+                    aria-label="Close menu"
+                    onClick={() => requestAnimationFrame(() => setIsMobileMenuOpen(false))}
+                    className="inline-flex h-10 w-10 items-center justify-center rounded-md text-white/90 hover:text-primary hover:bg-slate-800 transition-colors"
+                  >
+                    {/* Close (X) icon */}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18" />
+                      <line x1="6" y1="6" x2="18" y2="18" />
+                    </svg>
+                  </button>
+                </div>
+
+                {/* Links */}
+                <nav className="flex flex-col space-y-4 mt-6 pb-10">
+                  <MobileLinks pathname={pathname} />
+                </nav>
               </div>
-
-              {/* Links */}
-              <nav className="flex flex-col space-y-4 mt-6 pb-10">
-                <MobileLinks pathname={pathname} />
-              </nav>
-            </div>
-          </LiteDrawer>
-        </div>
+            </LiteDrawer>
+          </div>
+        )}
       </div>
     </>
   );

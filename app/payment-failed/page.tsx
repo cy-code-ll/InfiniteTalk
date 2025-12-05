@@ -5,7 +5,7 @@ export const metadata = {
   title: 'Payment Failed | InfiniteTalk',
   description: 'Your payment could not be completed. Please try again or contact support.',
   alternates: {
-    canonical: '/payment-failed',
+    canonical: 'https://www.infinitetalk.net/payment-failed',
   },
   openGraph: {
     title: 'Payment Failed | InfiniteTalk',

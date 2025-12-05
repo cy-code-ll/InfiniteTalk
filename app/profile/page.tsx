@@ -2,6 +2,7 @@
 
 import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
+import Script from 'next/script';
 import { Footer } from '../../components/Footer';
 import Image from 'next/image';
 import { useEffect, useState, useRef, useCallback } from 'react';
@@ -429,6 +430,28 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-background">
+      {/* Breadcrumb structured data */}
+      <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify({
+          '@context': 'https://schema.org',
+          '@type': 'BreadcrumbList',
+          '@id': 'https://www.infinitetalk.net/profile#breadcrumb',
+          itemListElement: [
+            {
+              '@type': 'ListItem',
+              position: 1,
+              name: 'Home',
+              item: 'https://www.infinitetalk.net/'
+            },
+            {
+              '@type': 'ListItem',
+              position: 2,
+              name: 'Profile',
+              item: 'https://www.infinitetalk.net/profile'
+            }
+          ]
+        }) }}
+      />
       <main className="flex-grow pt-20">
         {/* 顶部用户信息卡片 */}
         <div className="container mx-auto mt-8 mb-8">
