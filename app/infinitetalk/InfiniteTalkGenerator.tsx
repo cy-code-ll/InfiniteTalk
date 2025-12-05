@@ -123,6 +123,10 @@ export default function InfiniteTalkGenerator() {
   const drawingRafRef = useRef<number | null>(null);
   const pendingDrawRef = useRef<{ x: number; y: number } | null>(null);
   const originalImageSizeRef = useRef<{ width: number; height: number } | null>(null);
+  // 保存图片的显示尺寸，用于坐标转换
+  const imageDisplaySizeRef = useRef<{ width: number; height: number } | null>(null);
+  // 存储 initializeCanvas 函数引用，避免循环依赖
+  const initializeCanvasRef = useRef<(() => void) | null>(null);
 
   // 缓存图片 URL，避免频繁创建 blob 链接
   const imageUrl = useMemo(() => {
@@ -436,40 +440,63 @@ export default function InfiniteTalkGenerator() {
     });
   };
 
-  // 提取视频第一帧
-  const extractVideoFirstFrame = (videoFile: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const video = document.createElement('video');
-      video.preload = 'metadata';
-      video.muted = true;
-      video.playsInline = true;
+  // 提取视频第一帧 - Safari 兼容版本
+  const extractVideoFirstFrame = async (videoFile: File): Promise<string> => {
+    const blobUrl = URL.createObjectURL(videoFile);
+    const video = document.createElement('video');
 
-      video.onloadedmetadata = () => {
-        video.currentTime = 0;
-      };
+    video.muted = true;
+    video.playsInline = true;
+    video.preload = 'auto'; // Safari 需要 'auto' 而不是 'metadata'
+    video.src = blobUrl;
 
-      video.onseeked = () => {
-        const canvas = document.createElement('canvas');
-        canvas.width = video.videoWidth;
-        canvas.height = video.videoHeight;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/png');
-          URL.revokeObjectURL(video.src);
-          resolve(dataUrl);
-        } else {
-          reject(new Error('Failed to get canvas context'));
-        }
-      };
+    try {
+      // Safari 兼容性：等待 metadata 加载完成
+      await new Promise<void>((resolve, reject) => {
+        video.onloadedmetadata = () => resolve();
+        video.onerror = () => reject(new Error('Failed to load video metadata'));
+        // 设置超时
+        setTimeout(() => reject(new Error('Video metadata load timeout')), 10000);
+      });
 
-      video.onerror = () => {
-        URL.revokeObjectURL(video.src);
-        reject(new Error('Failed to load video'));
-      };
+      // Safari 兼容性：使用 Promise 等待 seeked 事件
+      return new Promise((resolve, reject) => {
+        video.onseeked = () => {
+          // Safari 兼容性：延迟执行，确保视频帧完全准备好
+          setTimeout(() => {
+            try {
+              const canvas = document.createElement('canvas');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              const ctx = canvas.getContext('2d');
+              if (ctx) {
+                ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+                const dataUrl = canvas.toDataURL('image/png');
+                URL.revokeObjectURL(blobUrl);
+                resolve(dataUrl);
+              } else {
+                URL.revokeObjectURL(blobUrl);
+                reject(new Error('Failed to get canvas context'));
+              }
+            } catch (error) {
+              URL.revokeObjectURL(blobUrl);
+              reject(error);
+            }
+          }, 100); // Safari 需要延迟
+        };
 
-      video.src = URL.createObjectURL(videoFile);
-    });
+        video.onerror = () => {
+          URL.revokeObjectURL(blobUrl);
+          reject(new Error('Failed to load video'));
+        };
+
+        // Safari 兼容性：使用 0.1 秒而不是 0 秒
+        video.currentTime = 0.1;
+      });
+    } catch (error) {
+      URL.revokeObjectURL(blobUrl);
+      throw error;
+    }
   };
 
   // 处理视频上传
@@ -757,17 +784,60 @@ export default function InfiniteTalkGenerator() {
     };
   }, []);
 
-  // 初始化画布
+  // 初始化画布（带重试机制）
   useEffect(() => {
     if (isMaskModalOpen) {
       if ((tabMode === 'image-to-video' && selectedImage) ||
         (tabMode === 'video-to-video' && videoFirstFrame)) {
-        // 延迟初始化，确保DOM已渲染
-        setTimeout(() => {
-          initializeCanvas();
-        }, 100);
+        // 延迟初始化，确保DOM已渲染，带重试机制
+        let retryCount = 0;
+        const maxRetries = 5;
+        const retryDelay = 100;
+
+        const tryInitialize = () => {
+          if (!canvasRef.current) {
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(tryInitialize, retryDelay);
+            } else {
+              console.error('Canvas ref not available after retries');
+            }
+            return;
+          }
+
+          const container = canvasRef.current?.parentElement;
+          if (!container) {
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(tryInitialize, retryDelay);
+            } else {
+              console.error('Container not available after retries');
+            }
+            return;
+          }
+
+          const containerRect = container.getBoundingClientRect();
+          // 检查容器尺寸是否有效
+          if (containerRect.width === 0 || containerRect.height === 0) {
+            if (retryCount < maxRetries) {
+              retryCount++;
+              setTimeout(tryInitialize, retryDelay);
+            } else {
+              console.error('Container size is 0 after retries');
+            }
+            return;
+          }
+
+          // 容器和尺寸都准备好了，初始化画布
+          if (initializeCanvasRef.current) {
+            initializeCanvasRef.current();
+          }
+        };
+
+        setTimeout(tryInitialize, retryDelay);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isMaskModalOpen, selectedImage, videoFirstFrame, tabMode]);
 
 
@@ -784,8 +854,33 @@ export default function InfiniteTalkGenerator() {
   const removeSelectedVideo = () => {
     setSelectedVideo(null);
     setVideoFirstFrame(null);
+    setMaskImageDataForVideo(null);
     if (videoInputRef.current) {
       videoInputRef.current.value = '';
+    }
+  };
+
+  // 统一的删除处理函数：如果有mask先删除mask，否则删除图片/视频
+  const handleRemoveImageOrMask = () => {
+    if (maskImageDataForImage) {
+      // 先删除mask
+      setMaskImageDataForImage(null);
+      toast.showToast('Mask removed', 'info');
+    } else {
+      // 删除图片
+      removeSelectedImage();
+    }
+  };
+
+  // 统一的删除处理函数：如果有mask先删除mask，否则删除视频
+  const handleRemoveVideoOrMask = () => {
+    if (maskImageDataForVideo) {
+      // 先删除mask
+      setMaskImageDataForVideo(null);
+      toast.showToast('Mask removed', 'info');
+    } else {
+      // 删除视频
+      removeSelectedVideo();
     }
   };
 
@@ -800,7 +895,10 @@ export default function InfiniteTalkGenerator() {
 
   // 遮罩绘制相关函数
   const initializeCanvas = useCallback(() => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      console.warn('Canvas ref not available');
+      return;
+    }
 
     // 根据模式确定使用哪个图片源
     let imgSrc: string | null = null;
@@ -810,45 +908,142 @@ export default function InfiniteTalkGenerator() {
       imgSrc = videoFirstFrame;
     }
 
-    if (!imgSrc) return;
+    if (!imgSrc) {
+      console.warn('Image source not available');
+      return;
+    }
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Safari 兼容性：使用 willReadFrequently 选项优化性能
+    const ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+      // Safari 可能需要显式设置 alpha
+      alpha: true
+    });
+    if (!ctx) {
+      console.error('Failed to get canvas 2d context');
+      return;
+    }
 
     // 获取容器尺寸
     const container = canvas.parentElement;
-    if (!container) return;
+    if (!container) {
+      console.error('Canvas parent container not found');
+      return;
+    }
+
     const containerRect = container.getBoundingClientRect();
+    // 验证容器尺寸
+    if (containerRect.width === 0 || containerRect.height === 0) {
+      console.warn('Container size is 0, retrying...', { width: containerRect.width, height: containerRect.height });
+      // 延迟重试
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 100);
+      return;
+    }
 
     // 加载图片以获取原始尺寸
     const img = document.createElement('img');
+    let imageLoadTimeout: NodeJS.Timeout | null = null;
+
+    // Safari 兼容性：设置 crossOrigin 属性（对于 base64 图片不需要，但显式设置更安全）
+    if (imgSrc.startsWith('data:')) {
+      // base64 图片不需要 crossOrigin
+    } else if (imgSrc.startsWith('http://') || imgSrc.startsWith('https://')) {
+      img.crossOrigin = 'anonymous';
+    }
+
+    // Safari 兼容性：确保图片完全加载
     img.onload = () => {
+      if (imageLoadTimeout) {
+        clearTimeout(imageLoadTimeout);
+        imageLoadTimeout = null;
+      }
+
+      // Safari 兼容性：确保图片完全加载
+      // Safari 有时会在图片未完全解码时就触发 onload
+      if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+        console.warn('Image dimensions not ready, waiting...', {
+          width: img.naturalWidth,
+          height: img.naturalHeight,
+          complete: img.complete
+        });
+        // 等待图片完全加载
+        setTimeout(() => {
+          if (img.naturalWidth > 0 && img.naturalHeight > 0) {
+            // 重新触发初始化
+            if (initializeCanvasRef.current) {
+              initializeCanvasRef.current();
+            }
+          } else {
+            console.error('Image has invalid dimensions after wait', {
+              width: img.naturalWidth,
+              height: img.naturalHeight
+            });
+          }
+        }, 100);
+        return;
+      }
+
+      // Safari 兼容性：额外验证图片是否真的加载完成
+      if (!img.complete) {
+        console.warn('Image not complete, waiting...');
+        setTimeout(() => {
+          if (img.complete && img.naturalWidth > 0 && img.naturalHeight > 0) {
+            if (initializeCanvasRef.current) {
+              initializeCanvasRef.current();
+            }
+          }
+        }, 100);
+        return;
+      }
+
       // 💾 保存原图尺寸，用于导出遮罩时缩放
       originalImageSizeRef.current = {
         width: img.naturalWidth,
         height: img.naturalHeight
       };
 
+      // 重新获取容器尺寸（可能在图片加载期间发生了变化）
+      const currentContainerRect = container.getBoundingClientRect();
+      if (currentContainerRect.width === 0 || currentContainerRect.height === 0) {
+        console.warn('Container size became 0 during image load, retrying...');
+        setTimeout(() => {
+          if (initializeCanvasRef.current) {
+            initializeCanvasRef.current();
+          }
+        }, 100);
+        return;
+      }
+
       // 计算 object-contain 的实际显示尺寸和位置
       const imgAspect = img.naturalWidth / img.naturalHeight;
-      const containerAspect = containerRect.width / containerRect.height;
+      const containerAspect = currentContainerRect.width / currentContainerRect.height;
 
       let displayWidth, displayHeight, offsetX, offsetY;
 
       if (imgAspect > containerAspect) {
         // 图片更宽，以宽度为准
-        displayWidth = containerRect.width;
-        displayHeight = containerRect.width / imgAspect;
+        displayWidth = currentContainerRect.width;
+        displayHeight = currentContainerRect.width / imgAspect;
         offsetX = 0;
-        offsetY = (containerRect.height - displayHeight) / 2;
+        offsetY = (currentContainerRect.height - displayHeight) / 2;
       } else {
         // 图片更高，以高度为准
-        displayHeight = containerRect.height;
-        displayWidth = containerRect.height * imgAspect;
-        offsetX = (containerRect.width - displayWidth) / 2;
+        displayHeight = currentContainerRect.height;
+        displayWidth = currentContainerRect.height * imgAspect;
+        offsetX = (currentContainerRect.width - displayWidth) / 2;
         offsetY = 0;
       }
+
+      // 💾 保存图片的显示尺寸，用于坐标转换
+      imageDisplaySizeRef.current = {
+        width: displayWidth,
+        height: displayHeight
+      };
 
       // 🚀 性能优化：限制画布最大尺寸为 1920x1080（1080p）
       // 对于 4K 视频，这将减少 4 倍的像素处理量
@@ -867,26 +1062,108 @@ export default function InfiniteTalkGenerator() {
       }
 
       // 设置画布尺寸为优化后的尺寸
+      // Safari 兼容性：先设置尺寸属性，再设置样式
+      // Safari 对 canvas 尺寸的设置顺序很敏感
+      canvas.setAttribute('width', canvasWidth.toString());
+      canvas.setAttribute('height', canvasHeight.toString());
       canvas.width = canvasWidth;
       canvas.height = canvasHeight;
 
       // 设置画布显示尺寸和位置（CSS）
+      // Safari 兼容性：使用 transform 而不是 left/top 可能更可靠
       canvas.style.width = `${displayWidth}px`;
       canvas.style.height = `${displayHeight}px`;
       canvas.style.left = `${offsetX}px`;
       canvas.style.top = `${offsetY}px`;
       canvas.style.position = 'absolute';
+      // Safari 兼容性：添加 webkit 前缀和强制硬件加速
+      canvas.style.webkitTransform = 'translateZ(0)';
+      canvas.style.transform = 'translateZ(0)';
+      // Safari 兼容性：确保 canvas 可见
+      canvas.style.opacity = '1';
+      canvas.style.visibility = 'visible';
+      canvas.style.display = 'block';
 
       // 填充透明背景（让原图透过）
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+      // Safari 兼容性：强制刷新 canvas
+      // 在某些情况下，Safari 需要显式触发重绘
+      ctx.save();
+      ctx.restore();
+
       // 保存初始状态
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      setCanvasHistory([imageData]);
-      setHistoryIndex(0);
+      // Safari 兼容性：确保 canvas 有内容后再获取 ImageData
+      try {
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        setCanvasHistory([imageData]);
+        setHistoryIndex(0);
+      } catch (error) {
+        console.error('Failed to get ImageData in Safari:', error);
+        // 如果失败，创建一个空的 ImageData
+        const emptyImageData = ctx.createImageData(canvas.width, canvas.height);
+        setCanvasHistory([emptyImageData]);
+        setHistoryIndex(0);
+      }
+
+      console.log('✅ Canvas initialized successfully', {
+        canvasSize: `${canvas.width}x${canvas.height}`,
+        displaySize: `${displayWidth}x${displayHeight}`,
+        imageSize: `${img.naturalWidth}x${img.naturalHeight}`
+      });
     };
-    img.src = imgSrc;
+
+    img.onerror = (error) => {
+      if (imageLoadTimeout) {
+        clearTimeout(imageLoadTimeout);
+        imageLoadTimeout = null;
+      }
+      console.error('Failed to load image for canvas initialization', error);
+      // 可以尝试重试
+      setTimeout(() => {
+        console.log('Retrying canvas initialization after image load error...');
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 200);
+    };
+
+    // 设置超时，防止图片加载时间过长
+    imageLoadTimeout = setTimeout(() => {
+      console.warn('Image load timeout, retrying...');
+      img.onerror = null; // 清除错误处理，避免重复触发
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 200);
+    }, 5000); // 5秒超时
+
+    // Safari 兼容性：确保图片加载完成
+    // 对于 base64 图片，Safari 可能需要额外的处理
+    if (imgSrc.startsWith('data:')) {
+      // base64 图片直接设置 src
+      img.src = imgSrc;
+    } else {
+      // 其他类型的图片
+      img.src = imgSrc;
+    }
+
+    // Safari 兼容性：如果图片已经加载（缓存），手动触发 onload
+    if (img.complete && img.naturalWidth > 0) {
+      // 图片已经加载完成，手动触发 onload
+      setTimeout(() => {
+        if (img.onload) {
+          img.onload(new Event('load'));
+        }
+      }, 0);
+    }
   }, [tabMode, imageUrl, videoFirstFrame]);
+
+  // 将 initializeCanvas 存储到 ref 中，供其他函数使用
+  useEffect(() => {
+    initializeCanvasRef.current = initializeCanvas;
+  }, [initializeCanvas]);
 
   const saveCanvasState = () => {
     if (!canvasRef.current) return;
@@ -944,29 +1221,101 @@ export default function InfiniteTalkGenerator() {
 
   // 实际执行绘制的函数
   const performDraw = useCallback((x: number, y: number) => {
-    if (!canvasRef.current) return;
+    if (!canvasRef.current) {
+      console.warn('Canvas ref not available in performDraw');
+      return;
+    }
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
+    // Safari 兼容性：使用相同的上下文选项
+    const ctx = canvas.getContext('2d', {
+      willReadFrequently: true,
+      alpha: true
+    });
+    if (!ctx) {
+      console.error('Canvas context not available in performDraw');
+      return;
+    }
 
-    const rect = canvas.getBoundingClientRect();
+    // 验证画布尺寸
+    if (canvas.width === 0 || canvas.height === 0) {
+      console.warn('Canvas size is 0, attempting to reinitialize...');
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 100);
+      return;
+    }
 
-    // 将显示坐标转换为画布实际坐标
-    const scaleX = canvas.width / rect.width;
-    const scaleY = canvas.height / rect.height;
-    const canvasX = x * scaleX;
-    const canvasY = y * scaleY;
+    // 获取图片的实际尺寸和显示尺寸
+    const originalSize = originalImageSizeRef.current;
+    const displaySize = imageDisplaySizeRef.current;
+
+    if (!originalSize || !displaySize) {
+      console.warn('Image size information not available, attempting to reinitialize...', {
+        hasOriginalSize: !!originalSize,
+        hasDisplaySize: !!displaySize
+      });
+      // 尝试重新初始化
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 100);
+      return;
+    }
+
+    // 验证尺寸有效性
+    if (originalSize.width === 0 || originalSize.height === 0 ||
+      displaySize.width === 0 || displaySize.height === 0) {
+      console.warn('Invalid image size information, attempting to reinitialize...');
+      setTimeout(() => {
+        if (initializeCanvasRef.current) {
+          initializeCanvasRef.current();
+        }
+      }, 100);
+      return;
+    }
+
+    // 将显示坐标转换为图片实际坐标
+    const imageX = x * (originalSize.width / displaySize.width);
+    const imageY = y * (originalSize.height / displaySize.height);
+
+    // 将图片实际坐标转换为 canvas 实际坐标
+    // canvas 的实际尺寸可能被优化缩小了，需要按比例映射
+    const canvasX = (imageX / originalSize.width) * canvas.width;
+    const canvasY = (imageY / originalSize.height) * canvas.height;
+
+    // 验证坐标是否在画布范围内
+    if (canvasX < 0 || canvasX > canvas.width || canvasY < 0 || canvasY > canvas.height) {
+      // 坐标超出范围，但不阻止绘制（可能是边界情况）
+      console.debug('Draw coordinates out of canvas bounds', { canvasX, canvasY, canvasWidth: canvas.width, canvasHeight: canvas.height });
+    }
 
     // 计算实际画布上的画笔大小
-    const actualBrushSize = brushSize * scaleX;
+    // 画笔大小也需要从显示尺寸转换为 canvas 实际尺寸
+    const actualBrushSize = Math.max(1, brushSize * (canvas.width / displaySize.width));
 
     // 使用半透明白色绘制，让用户看到绘制效果
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
-    ctx.beginPath();
-    ctx.arc(canvasX, canvasY, actualBrushSize / 2, 0, Math.PI * 2);
-    ctx.fill();
+    try {
+      // Safari 兼容性：确保上下文状态正确
+      ctx.save();
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+      ctx.beginPath();
+      ctx.arc(canvasX, canvasY, actualBrushSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+
+      // Safari 兼容性：强制刷新 canvas（某些情况下需要）
+      // 通过读取一个像素来触发重绘
+      if (canvasX >= 0 && canvasX < canvas.width && canvasY >= 0 && canvasY < canvas.height) {
+        ctx.getImageData(Math.floor(canvasX), Math.floor(canvasY), 1, 1);
+      }
+    } catch (error) {
+      console.error('Error drawing on canvas', error);
+    }
   }, [brushSize]);
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
@@ -1669,20 +2018,12 @@ export default function InfiniteTalkGenerator() {
                         </div>
                       )}
                       <button
-                        onClick={removeSelectedImage}
+                        onClick={handleRemoveImageOrMask}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                        title={maskImageDataForImage ? 'Remove mask (click again to remove image)' : 'Remove image'}
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {maskImageDataForImage && (
-                        <button
-                          onClick={removeMask}
-                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
-                          title="Remove mask"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   ) : (
                     <div
@@ -1726,20 +2067,12 @@ export default function InfiniteTalkGenerator() {
                         </div>
                       )}
                       <button
-                        onClick={removeSelectedVideo}
+                        onClick={handleRemoveVideoOrMask}
                         className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white p-1.5 rounded-full transition-colors"
+                        title={maskImageDataForVideo ? 'Remove mask (click again to remove video)' : 'Remove video'}
                       >
                         <X className="w-4 h-4" />
                       </button>
-                      {maskImageDataForVideo && (
-                        <button
-                          onClick={removeMask}
-                          className="absolute top-2 right-12 bg-orange-500 hover:bg-orange-600 text-white p-1.5 rounded-full transition-colors"
-                          title="Remove mask"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      )}
                     </div>
                   ) : (
                     <div
@@ -2100,7 +2433,19 @@ export default function InfiniteTalkGenerator() {
                         imageRendering: 'pixelated',
                         touchAction: 'none',
                         position: 'absolute',
-                        pointerEvents: 'auto'
+                        pointerEvents: 'auto',
+                        opacity: '1',
+                        visibility: 'visible',
+                        display: 'block',
+                        transform: 'translateZ(0)',
+                        userSelect: 'none',
+                        // Safari 兼容性：使用类型断言添加 webkit 前缀属性
+                        ...({
+                          WebkitImageRendering: 'pixelated',
+                          WebkitTouchCallout: 'none',
+                          WebkitTransform: 'translateZ(0)',
+                          WebkitUserSelect: 'none'
+                        } as React.CSSProperties)
                       }}
                     />
 
