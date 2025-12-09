@@ -128,7 +128,7 @@
                   Infinite Talk
                 </p>
                 <h1 class="text-lg font-semibold text-white">
-                  Noel Vibes Playlist
+                  Christmas Song Playlist
                 </h1>
               </div>
             </div>
@@ -242,10 +242,29 @@
                     ></div>
                   </div>
                   <div
-                    class="flex justify-between text-xs text-green-100/60 font-medium font-mono"
+                    class="flex items-center justify-between text-xs text-green-100/60 font-medium font-mono"
                   >
-                    <span id="current-time">0:00</span>
-                    <span id="total-time">0:00</span>
+                    <div class="flex items-center gap-4">
+                      <span id="current-time">0:00</span>
+                      <span id="total-time">0:00</span>
+                    </div>
+                    <!-- Desktop download button, aligned to the right -->
+                    <button
+                      id="btn-download"
+                      class="hidden md:inline-flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 rounded-full p-2 transition-colors"
+                      title="Download"
+                    >
+                      <svg
+                        class="w-5 h-5"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path
+                          d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 13.59V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z"
+                        />
+                      </svg>
+                    </button>
                   </div>
                 </div>
 
@@ -308,23 +327,6 @@
                       fill="currentColor"
                     >
                       <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
-                    </svg>
-                  </button>
-                  <button
-                    id="btn-download"
-                    class="text-white/70 hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full active:scale-90"
-                    title="Download"
-                  >
-                    <!-- Download icon -->
-                    <svg
-                      class="w-7 h-7 md:w-8 md:h-8"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="currentColor"
-                    >
-                      <path
-                        d="M12 3a1 1 0 0 1 1 1v9.59l2.3-2.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 1.4-1.42L11 13.59V4a1 1 0 0 1 1-1Zm-7 14a1 1 0 0 1 1 1v1h12v-1a1 1 0 1 1 2 0v2a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-2a1 1 0 0 1 1-1Z"
-                      />
                     </svg>
                   </button>
                 </div>
@@ -805,7 +807,6 @@
           link.href = song.src;
           const safeTitle = (song.title || "song").replace(/[^\w\-]+/g, "_");
           link.download = safeTitle + ".mp3";
-          link.target = "_blank";
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
