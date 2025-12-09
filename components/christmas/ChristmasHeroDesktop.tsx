@@ -1043,7 +1043,7 @@ export function ChristmasHeroDesktop() {
         {/* 整个组件的下雪效果 */}
         <SnowOverlay density={120} />
 
-        <div className="relative z-25 w-full max-w-6xl mx-auto px-6 flex flex-col items-center justify-center flex-1">
+        <div className="relative z-25 w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-6 flex flex-col items-center justify-center flex-1">
           <h1 className="text-5xl md:text-6xl text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             <span className="text-yellow-300">Christmas</span>{' '}
             <span className="text-white">Greeting Video Ideas</span>
@@ -1052,9 +1052,9 @@ export function ChristmasHeroDesktop() {
             Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
           </p>
 
-          <div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 w-full max-w-7xl items-center md:items-center justify-center">
+          <div className="flex flex-col md:flex-row gap-8 md:gap-12 lg:gap-16 w-full max-w-7xl 2xl:max-w-[1600px] items-center md:items-center justify-center">
             {/* 左侧：工具区 */}
-            <div className="space-y-4 w-full md:w-[45%] md:flex-shrink-0">
+            <div className="space-y-4 w-full md:w-[45%] 2xl:w-[40%] md:flex-shrink-0">
               {/* 上传图片 + 提示词 + 模板选择 + 音乐 + 生成按钮 */}
               <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
@@ -1347,7 +1347,7 @@ export function ChristmasHeroDesktop() {
               {shouldUseDesktopContainer ? (
                 // 电脑容器：模板预览、横版图片或未上传图片时使用
                 <div 
-                  className="w-[550px] h-[480px] rounded-lg overflow-hidden relative box-content"
+                  className="w-[550px] h-[480px] 2xl:w-[700px] 2xl:h-[600px] rounded-lg overflow-hidden relative box-content"
                   style={{
                     backgroundImage: 'url(https://cfsource.infinitetalk.net/infinitetalk/christmas/pc-wrapper.png)',
                     backgroundSize: 'contain',
@@ -1462,7 +1462,7 @@ export function ChristmasHeroDesktop() {
                 </div>
               ) : (
                 // 手机容器：竖版图片时使用
-                <div className="relative w-[320px] h-[640px] rounded-[32px] bg-black/80 border-[4px] border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
+                <div className="relative w-[320px] h-[640px] 2xl:w-[360px] 2xl:h-[720px] rounded-[32px] bg-black/80 border-[4px] border-slate-200 shadow-[0_24px_80px_rgba(0,0,0,0.8)]">
                   {/* 顶部听筒 */}
                   <div className="z-100 absolute top-2 left-1/2 -translate-x-1/2 w-24 h-6 rounded-full bg-black/80 flex items-center justify-center">
                     <div className="w-12 h-1 rounded-full bg-slate-800" />
