@@ -84,7 +84,7 @@ const MobileLinks = memo(({ pathname }: { pathname: string }) => {
     { href: '/infinitetalk', label: 'Infinitetalk' },
     { href: '/infinitetalk-multi', label: 'InfiniteTalk Multi' },
     { href: '/wan2.2-s2v', label: 'WAN2.2 S2V' },
-    { href: '/christmas', label: 'Christmas' },
+    { href: '/infinitetalk-comfyui', label: 'ComfyUI Guide' },
     { href: '/pricing', label: 'Pricing' },
     { href: '/free/referral', label: 'Referral' },
     { href: '/app', label: 'App' },
@@ -182,13 +182,13 @@ export function NavClient() {
             WAN2.2 S2V
           </Link>
           <Link
-            href="/christmas"
+            href="/infinitetalk-comfyui"
             className={cn(
               'nav-link-item px-4 py-2 rounded-md transition-colors',
-              pathname === '/christmas' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
+              pathname === '/infinitetalk-comfyui' ? 'text-primary font-medium' : 'text-foreground/80 hover:text-primary'
             )}
           >
-            Christmas
+            ComfyUI Guide
           </Link>
           <Link
             href="/pricing"
