@@ -109,14 +109,14 @@
       class="min-h-screen bg-gradient-to-br flex flex-col items-stretch md:items-center justify-start md:justify-center relative z-10"
     >
       <!-- Root content wrapper: full-screen on mobile, auto on desktop -->
-      <div class="max-w-5xl w-full mx-auto relative flex flex-col h-screen md:h-auto min-h-0">
+      <div class="max-w-5xl xl:max-w-6xl 2xl:max-w-7xl w-full mx-auto relative flex flex-col h-screen md:h-auto min-h-0">
         <!-- Glass container (top area on mobile, left+right on desktop) -->
         <div
-          class="flex-1 md:h-[560px] min-h-0 backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl rounded-none md:rounded-3xl flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-white/5 via-white/0 to-white/5"
+          class="flex-1 md:h-[580px] lg:h-[640px] 2xl:h-[720px] min-h-0 backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl rounded-none md:rounded-3xl flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-white/5 via-white/0 to-white/5"
         >
           <!-- Left: Song list (full width on mobile, left column on desktop) -->
           <div
-            class="w-full md:w-2/5 flex-1 md:h-[560px] min-h-0 border-b md:border-b-0 md:border-r border-white/10 flex flex-col"
+            class="w-full md:w-2/5 flex-1 md:h-[580px] lg:h-[640px] 2xl:h-[720px] min-h-0 border-b md:border-b-0 md:border-r border-white/10 flex flex-col"
           >
             <div
               class="px-4 pt-4 pb-2 flex items-center justify-between flex-shrink-0"
@@ -132,6 +132,33 @@
                 </h1>
               </div>
             </div>
+            <!-- Filter tabs -->
+            <div
+              id="filter-tabs"
+              class="px-4 pb-2 flex items-center gap-2 flex-wrap text-xs font-medium"
+            >
+              <button
+                id="tab-all"
+                data-filter="all"
+                class="px-3 py-1 rounded-full bg-white/20 text-white shadow-sm"
+              >
+                all
+              </button>
+              <button
+                id="tab-male"
+                data-filter="male"
+                class="px-3 py-1 rounded-full bg-white/5 text-green-100/80 hover:bg-white/10 transition-colors"
+              >
+                male
+              </button>
+              <button
+                id="tab-fmale"
+                data-filter="fmale"
+                class="px-3 py-1 rounded-full bg-white/5 text-green-100/80 hover:bg-white/10 transition-colors"
+              >
+                fmale
+              </button>
+            </div>
             <div
               id="song-list"
               class="flex flex-col gap-2 flex-1 overflow-y-auto p-2 min-h-0 pb-24 md:pb-2"
@@ -140,7 +167,7 @@
 
           <!-- Right: Player (desktop only) -->
           <div
-            class="hidden md:flex md:w-3/5 md:h-[560px] flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-white/10/0 to-white/10"
+            class="hidden md:flex md:w-3/5 md:h-[580px] lg:h-[640px] 2xl:h-[720px] flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-white/10/0 to-white/10"
           >
             <!-- Cover art -->
             <div class="flex flex-col items-center gap-4">
@@ -391,6 +418,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "male",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -401,6 +429,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "male",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -411,6 +440,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "male",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -421,6 +451,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "male",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -431,6 +462,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "male",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -441,6 +473,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "fmale",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -451,6 +484,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "fmale",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -461,6 +495,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "fmale",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -471,6 +506,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "fmale",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -481,6 +517,7 @@
           title: "Cozy Fireplace",
           artist: "Infinite Talk Christmas",
           duration: 184,
+          category: "fmale",
           // TODO: 替换为你自己的音频地址
           src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
@@ -491,6 +528,7 @@
           title: "Snowy Night Walk",
           artist: "Infinite Talk Christmas",
           duration: 212,
+          category: "all",
           src: "https://cdn.pixabay.com/download/audio/2021/12/20/audio_c5e8d09d1c.mp3?filename=quiet-christmas-ambient-hip-hop-12635.mp3",
           coverUrl:
             "https://images.pexels.com/photos/6886607/pexels-photo-6886607.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -500,6 +538,7 @@
           title: "Warm Lights",
           artist: "Infinite Talk Christmas",
           duration: 205,
+          category: "all",
           src: "https://cdn.pixabay.com/download/audio/2022/12/16/audio_1f7ee80440.mp3?filename=christmas-magic-12974.mp3",
           coverUrl:
             "https://images.pexels.com/photos/5727889/pexels-photo-5727889.jpeg?auto=compress&cs=tinysrgb&w=600",
@@ -531,9 +570,39 @@
       const miniPlayIcon = document.getElementById("mini-play-icon");
       const miniPauseIcon = document.getElementById("mini-pause-icon");
       const miniNextBtn = document.getElementById("mini-next");
+      const tabAll = document.getElementById("tab-all");
+      const tabMale = document.getElementById("tab-male");
+      const tabFmale = document.getElementById("tab-fmale");
 
       let currentIndex = 0;
       let isPlaying = false;
+      let currentFilter = "all";
+
+      function updateFilterTabs() {
+        const tabs = [
+          { el: tabAll, filter: "all" },
+          { el: tabMale, filter: "male" },
+          { el: tabFmale, filter: "fmale" },
+        ];
+
+        tabs.forEach(({ el, filter }) => {
+          if (!el) return;
+          if (filter === currentFilter) {
+            el.classList.add("bg-white/20", "text-white", "shadow-sm");
+            el.classList.remove(
+              "bg-white/5",
+              "text-green-100/80",
+              "text-green-900"
+            );
+          } else {
+            el.classList.remove("bg-white/20", "text-white", "shadow-sm");
+            el.classList.add(
+              "bg-white/5",
+              "text-green-100/80"
+            );
+          }
+        });
+      }
 
       function formatTime(sec) {
         if (!isFinite(sec)) return "0:00";
@@ -547,6 +616,9 @@
       function renderSongList() {
         songListEl.innerHTML = "";
         songs.forEach((song, index) => {
+          if (currentFilter !== "all" && song.category !== currentFilter) {
+            return;
+          }
           const isActive = index === currentIndex;
           const row = document.createElement("div");
           row.className =
@@ -567,7 +639,7 @@
             </div>
             <div class="flex-1 min-w-0">
               <h4 class="text-sm font-semibold truncate ${isActive ? "text-white" : "text-gray-200"}">${song.title}</h4>
-              <p class="text-xs text-gray-400 truncate">${song.artist}</p>
+              <p class="text-xs ${isActive ? "text-green-100/90" : "text-green-100/70"} truncate">${song.artist}</p>
             </div>
             <div class="text-xs text-gray-400 ml-2">
               ${Math.floor(song.duration / 60)}:${String(song.duration % 60).padStart(2, "0")}
@@ -710,6 +782,24 @@
         handleNext();
       });
 
+      if (tabAll && tabMale && tabFmale) {
+        tabAll.addEventListener("click", () => {
+          currentFilter = "all";
+          updateFilterTabs();
+          renderSongList();
+        });
+        tabMale.addEventListener("click", () => {
+          currentFilter = "male";
+          updateFilterTabs();
+          renderSongList();
+        });
+        tabFmale.addEventListener("click", () => {
+          currentFilter = "fmale";
+          updateFilterTabs();
+          renderSongList();
+        });
+      }
+
       // Create snowflakes
       function createSnowFlakes(count) {
         const snowOverlay = document.getElementById('snowOverlay');
@@ -747,6 +837,7 @@
       if (songs.length) {
         loadSong(0, false);
       }
+      updateFilterTabs();
       renderSongList();
     </script>
   </body>
