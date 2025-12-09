@@ -38,7 +38,52 @@
       body {
         background-color: #022c22;
         color: white;
+        position: relative;
+        overflow-x: hidden;
       }
+      
+      /* Background image */
+      .background {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: url('https://www.infinitetalk2.com/infinitetalk/bg03.jpg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        z-index: -1;
+      }
+      
+      /* Snow overlay */
+      .snow-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 5;
+      }
+      
+      .snowflake {
+        position: absolute;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        box-shadow: 0 0 10px rgba(255, 255, 255, 0.8);
+      }
+      
+      @keyframes snow-fall {
+        0% {
+          transform: translateY(-10vh) translateX(0);
+        }
+        100% {
+          transform: translateY(110vh) translateX(0);
+        }
+      }
+      
       /* Custom Scrollbar for Webkit */
       ::-webkit-scrollbar {
         width: 6px;
@@ -56,22 +101,25 @@
     </style>
   </head>
   <body class="font-sans antialiased">
+    <div class="background"></div>
+    <div id="snowOverlay" class="snow-overlay"></div>
     <audio id="audio"></audio>
 
     <div
-      class="min-h-screen bg-gradient-to-br from-christmas-dark via-christmas-base to-black flex items-center justify-center py-6 px-4"
+      class="min-h-screen bg-gradient-to-br flex flex-col items-stretch md:items-center justify-start md:justify-center relative z-10"
     >
-      <div class="max-w-5xl w-full relative">
-        <!-- Glass container -->
+      <!-- Root content wrapper: full-screen on mobile, auto on desktop -->
+      <div class="max-w-5xl w-full mx-auto relative flex flex-col h-screen md:h-auto min-h-0">
+        <!-- Glass container (top area on mobile, left+right on desktop) -->
         <div
-          class="backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl rounded-3xl flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-white/5 via-white/0 to-white/5"
+          class="flex-1 md:h-[560px] min-h-0 backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl rounded-none md:rounded-3xl flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-white/5 via-white/0 to-white/5"
         >
-          <!-- Left: Song list -->
+          <!-- Left: Song list (full width on mobile, left column on desktop) -->
           <div
-            class="md:w-1/2 border-b md:border-b-0 md:border-r border-white/10 max-h-[420px] md:max-h-[480px]"
+            class="w-full md:w-2/5 flex-1 md:h-[560px] min-h-0 border-b md:border-b-0 md:border-r border-white/10 flex flex-col"
           >
             <div
-              class="px-4 pt-4 pb-2 flex items-center justify-between"
+              class="px-4 pt-4 pb-2 flex items-center justify-between flex-shrink-0"
             >
               <div>
                 <p
@@ -86,13 +134,13 @@
             </div>
             <div
               id="song-list"
-              class="flex flex-col gap-2 h-full overflow-y-auto p-2"
+              class="flex flex-col gap-2 flex-1 overflow-y-auto p-2 min-h-0 pb-24 md:pb-2"
             ></div>
           </div>
 
-          <!-- Right: Player -->
+          <!-- Right: Player (desktop only) -->
           <div
-            class="md:w-1/2 flex flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-white/10/0 to-white/10"
+            class="hidden md:flex md:w-3/5 md:h-[560px] flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-white/10/0 to-white/10"
           >
             <!-- Cover art -->
             <div class="flex flex-col items-center gap-4">
@@ -148,7 +196,7 @@
 
                 <!-- Progress bar -->
                 <div
-                  class="w-full space-y-2 px-2"
+                  class="w-full space-y-2 group px-2"
                   id="progress-container"
                 >
                   <div
@@ -162,7 +210,7 @@
                     ></div>
                     <div
                       id="progress-thumb"
-                      class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-200 scale-0 group-active:scale-100"
+                      class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-200 scale-0 group-hover:scale-100 group-active:scale-100"
                       style="left: 0%; margin-left: -8px"
                     ></div>
                   </div>
@@ -182,16 +230,14 @@
                     id="btn-prev"
                     class="text-white/70 hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full active:scale-90"
                   >
-                    <!-- Backward icon -->
+                    <!-- Previous icon -->
                     <svg
                       class="w-8 h-8 md:w-10 md:h-10"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
-                      <path
-                        d="M10.25 5.5a1 1 0 0 1 1.53-.85l7.5 4.5a1 1 0 0 1 0 1.7l-7.5 4.5A1 1 0 0 1 10 14.5V13H5.75v5.25a1 1 0 1 1-2 0v-12.5a1 1 0 0 1 2 0V11H10V5.5Z"
-                      />
+                      <path d="M6 6h2v12H6V6zm3.5 6l8.5 6V6l-8.5 6z" />
                     </svg>
                   </button>
 
@@ -227,16 +273,14 @@
                     id="btn-next"
                     class="text-white/70 hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full active:scale-90"
                   >
-                    <!-- Forward icon -->
+                    <!-- Next icon -->
                     <svg
                       class="w-8 h-8 md:w-10 md:h-10"
                       xmlns="http://www.w3.org/2000/svg"
                       viewBox="0 0 24 24"
                       fill="currentColor"
                     >
-                      <path
-                        d="M13.75 5.5a1 1 0 0 0-1.53-.85l-7.5 4.5a1 1 0 0 0 0 1.7l7.5 4.5a1 1 0 0 0 1.5-.85V11h4.25v7.25a1 1 0 1 0 2 0v-12.5a1 1 0 0 0-2 0V10H13.75V5.5Z"
-                      />
+                      <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
                     </svg>
                   </button>
                 </div>
@@ -245,13 +289,13 @@
           </div>
         </div>
 
-        <!-- Mobile mini player -->
-        <div
-          id="mini-player"
-          class="md:hidden absolute bottom-0 left-0 right-0 z-40 px-4 pb-6 pointer-events-none"
-        >
+         <!-- Mobile mini player (bottom area on mobile) -->
+         <div
+           id="mini-player"
+           class="md:hidden h-20 z-40"
+         >
           <div
-            class="pointer-events-auto relative bg-christmas-dark/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex items-center p-3 h-20 cursor-pointer overflow-hidden group active:scale-95 transition-all duration-200"
+            class="relative bg-christmas-dark/80 backdrop-blur-2xl border border-white/10 rounded-none md:rounded-2xl shadow-2xl shadow-black/50 flex items-center p-3 h-20 cursor-pointer overflow-hidden group active:scale-95 transition-all duration-200"
           >
             <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
               <div
@@ -331,9 +375,7 @@
                   viewBox="0 0 24 24"
                   fill="currentColor"
                 >
-                  <path
-                    d="M13.75 5.5a1 1 0 0 0-1.53-.85l-7.5 4.5a1 1 0 0 0 0 1.7l7.5 4.5a1 1 0 0 0 1.5-.85V11h4.25v7.25a1 1 0 1 0 2 0v-12.5a1 1 0 0 0-2 0V10H13.75V5.5Z"
-                  />
+                  <path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
                 </svg>
               </button>
             </div>
@@ -350,7 +392,97 @@
           artist: "Infinite Talk Christmas",
           duration: 184,
           // TODO: 替换为你自己的音频地址
-          src: "https://cdn.pixabay.com/download/audio/2022/11/09/audio_c1b6b9a3c4.mp3?filename=christmas-village-126735.mp3",
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://www.infinitetalk2.com/infinitetalk/3.mp3",
           coverUrl:
             "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
         },
@@ -578,7 +710,40 @@
         handleNext();
       });
 
+      // Create snowflakes
+      function createSnowFlakes(count) {
+        const snowOverlay = document.getElementById('snowOverlay');
+        if (!snowOverlay) return;
+        
+        // Clear existing snowflakes
+        snowOverlay.innerHTML = '';
+        
+        for (let i = 0; i < count; i++) {
+          const flake = document.createElement('div');
+          flake.className = 'snowflake';
+          
+          const left = Math.random() * 100;
+          const delay = Math.random() * 12;
+          const duration = 8 + Math.random() * 8;
+          const size = 4 + Math.random() * 6;
+          const opacity = 0.4 + Math.random() * 0.5;
+          
+          flake.style.left = left + '%';
+          flake.style.top = '-10%';
+          flake.style.width = size + 'px';
+          flake.style.height = size + 'px';
+          flake.style.opacity = opacity;
+          flake.style.animation = 'snow-fall ' + duration + 's linear infinite';
+          flake.style.animationDelay = delay + 's';
+          
+          snowOverlay.appendChild(flake);
+        }
+      }
+
       // Init
+      // Initialize snow effect
+      createSnowFlakes(120);
+      
       if (songs.length) {
         loadSong(0, false);
       }
