@@ -22,6 +22,7 @@ import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial } from './share-utils';
+import Link from 'next/link';
 import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause, Plus } from 'lucide-react';
 
 type ImageOrientation = 'portrait' | 'landscape' | null;
@@ -166,6 +167,7 @@ export function ChristmasHeroMobile() {
   const [resultVideoUrl, setResultVideoUrl] = useState<string | null>(null);
   const [resultTaskId, setResultTaskId] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const progressTimerRef = useRef<number | null>(null);
@@ -287,6 +289,16 @@ export function ChristmasHeroMobile() {
       }
     };
   }, []);
+
+  // Drawer 关闭时，停止音乐播放，避免与背景视频或结果视频重叠
+  useEffect(() => {
+    if (!isDrawerOpen && musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      musicAudioRef.current.currentTime = 0;
+      setIsMusicPlaying(false);
+      setCurrentMusicId(null);
+    }
+  }, [isDrawerOpen]);
 
   const startFakeProgress = () => {
     setProgress(0);
@@ -482,6 +494,8 @@ export function ChristmasHeroMobile() {
         .then(() => {
           setCurrentMusicId(id);
           setIsMusicPlaying(true);
+          // 播放音频时自动将背景视频静音，避免音视频声音重叠
+          setIsBackgroundVideoMuted(true);
         })
         .catch(() => {
           setIsMusicPlaying(false);
@@ -525,6 +539,8 @@ export function ChristmasHeroMobile() {
       .then(() => {
         setCurrentMusicId(id);
         setIsMusicPlaying(true);
+        // 播放音频时自动将背景视频静音，避免音视频声音重叠
+        setIsBackgroundVideoMuted(true);
       })
       .catch(() => {
         setIsMusicPlaying(false);
@@ -613,6 +629,7 @@ export function ChristmasHeroMobile() {
       setViewState('loading');
       setResultVideoUrl(null);
       setResultTaskId(null);
+      setTaskCreated(false);
       startFakeProgress();
 
       // 使用用户输入的 prompt
@@ -735,6 +752,7 @@ export function ChristmasHeroMobile() {
       }
 
       const taskId = createResult.data.task_id;
+      setTaskCreated(true);
 
       const result = await api.infiniteTalk.pollTaskStatus(taskId, () => {}, undefined);
 
@@ -881,6 +899,17 @@ export function ChristmasHeroMobile() {
               <div className="w-full max-w-sm">
                 <Progress value={progress} className="w-full mb-2" />
                 <p className="text-slate-400 text-sm text-center" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>{Math.round(progress)}% complete</p>
+                {taskCreated && (
+                  <div className="mt-4 p-3 bg-black/50 border border-white/10 rounded-lg">
+                    <p className="text-xs text-slate-200 text-center leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                      You don&apos;t need to wait here. Check your work in the{' '}
+                      <Link href="/profile" className="text-primary underline underline-offset-2 hover:text-primary/80">
+                        Profile Center
+                      </Link>{' '}
+                      after 5 minutes.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1034,7 +1063,7 @@ export function ChristmasHeroMobile() {
                     <Button
                       size="icon"
                       variant="outline"
-                      className="border-2 border-yellow-400/50 bg-[#1DA1F2] text-white hover:bg-[#1a8cd8] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
+                      className="border-2 border-yellow-400/50 bg-black text-white hover:bg-gray-900 hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
                       onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
                       title="Share to Twitter"
                     >
@@ -1074,7 +1103,7 @@ export function ChristmasHeroMobile() {
 
       {/* Drawer - 从底部弹出 */}
       <Sheet open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
-        <SheetContent side="bottom" className="h-[75vh] bg-black/50 backdrop-blur-sm border-none p-0 flex flex-col">
+        <SheetContent side="bottom" className="h-[75vh] bg-black/50 backdrop-blur-sm border-none p-0 flex flex-col rounded-t-3xl overflow-hidden">
           <SheetTitle className="sr-only">Create Your Christmas Video</SheetTitle>
           {/* 可滚动内容区 */}
           <div className="flex-1 overflow-y-auto px-6 pt-6 space-y-6">
@@ -1082,7 +1111,10 @@ export function ChristmasHeroMobile() {
             <div className="space-y-6">
               {/* 上传图片 */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-4 font-mountains">1. Upload photo</h3>
+                <h3 className="text-2xl tracking-wide font-semibold text-white mb-4 font-mountains">
+                  1. Upload photo
+                  <span className="ml-1 text-red-400">*</span>
+                </h3>
                 <div className="relative">
                   <div
                     onClick={() => imageInputRef.current?.click()}
@@ -1122,22 +1154,9 @@ export function ChristmasHeroMobile() {
                 </div>
               </div>
 
-              {/* 提示词输入 */}
-              <div>
-                <h3 className="text-xl font-semibold text-white mb-3 font-mountains">2. Prompt</h3>
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  placeholder="Describe what you want the character to express or do..."
-                  rows={3}
-                  className="w-full bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60 p-0 px-3 py-1"
-                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
-                />
-              </div>
-
               {/* Template Selection */}
               <div>
-                <h3 className="text-xl font-semibold text-white mb-3 font-mountains">3. Template Selection</h3>
+                <h3 className="text-2xl tracking-wide font-semibold text-white mb-3 font-mountains">2. Template Selection</h3>
                 <div className="flex gap-3 overflow-x-auto pb-2 custom-scrollbar scroll-smooth">
                   {TEMPLATES.map((tpl) => (
                     <button
@@ -1171,10 +1190,23 @@ export function ChristmasHeroMobile() {
                 </div>
               </div>
 
+              {/* 提示词输入 */}
+              <div>
+                <h3 className="text-2xl tracking-wide font-semibold text-white mb-3 font-mountains">3. Prompt</h3>
+                <Textarea
+                  value={prompt}
+                  onChange={(e) => setPrompt(e.target.value)}
+                  placeholder="Describe what you want the character to express or do..."
+                  rows={3}
+                  className="w-full bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60 p-0 px-3 py-1"
+                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+                />
+              </div>
+
               {/* Choose music */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-xl font-semibold text-white font-mountains">4. Choose music</h3>
+                  <h3 className="text-2xl tracking-wide font-semibold text-white font-mountains">4. Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"

@@ -16,8 +16,9 @@ import { useUser } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
-import { shareChristmasToSocial } from './share-utils';
-import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause, Plus } from 'lucide-react';
+import { shareChristmasToSocial, copyChristmasShareLink, generateChristmasShareUrl } from './share-utils';
+import { Upload, Music2, Download, X, Loader2, Sparkles, Volume2, VolumeX, Play, Pause, Plus, Copy, Check } from 'lucide-react';
+import Link from 'next/link';
 
 // 下载媒体文件的函数（从 InfiniteTalkGenerator 复制）
 async function downloadMediaWithCors(
@@ -245,6 +246,8 @@ export function ChristmasHeroDesktop() {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isDownloading, setIsDownloading] = useState(false);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
+  const [taskCreated, setTaskCreated] = useState(false);
+  const [isLinkCopied, setIsLinkCopied] = useState(false);
   const progressTimerRef = useRef<number | null>(null);
   
   // 静音状态管理
@@ -699,6 +702,7 @@ export function ChristmasHeroDesktop() {
       setPreviewState('loading');
       setResultVideoUrl(null);
       setResultTaskId(null);
+      setTaskCreated(false);
       setTemplatePreviewVideo(null); // 清除模板预览视频
       startFakeProgress();
 
@@ -826,6 +830,7 @@ export function ChristmasHeroDesktop() {
       }
 
       const taskId = createResult.data.task_id;
+      setTaskCreated(true);
 
       const result = await api.infiniteTalk.pollTaskStatus(taskId, () => {}, undefined);
 
@@ -847,6 +852,18 @@ export function ChristmasHeroDesktop() {
       setPreviewState('idle');
     } finally {
       setIsGenerating(false);
+    }
+  };
+
+  const handleCopyShareLink = async () => {
+    if (!resultVideoUrl || !selectedTemplateId || !selectedMusicId) return;
+    const ok = await copyChristmasShareLink(resultVideoUrl, selectedTemplateId, selectedMusicId);
+    if (ok) {
+      setIsLinkCopied(true);
+      toast.success('Link copied!');
+      setTimeout(() => setIsLinkCopied(false), 1500);
+    } else {
+      toast.error('Failed to copy link');
     }
   };
 
@@ -1001,7 +1018,10 @@ export function ChristmasHeroDesktop() {
               <div className="bg-black/40 backdrop-blur-md rounded-2xl border border-yellow-400/30 shadow-[0_18px_60px_rgba(0,0,0,0.5)] p-6 space-y-6">
                 {/* 上传图片 */}
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-4 font-mountains">1. Upload photo</h3>
+                  <h3 className="text-2xl tracking-wide font-semibold text-white mb-4 font-mountains">
+                    1. Upload photo
+                    <span className="ml-1 text-red-400">*</span>
+                  </h3>
                   <div className="relative">
                     <div
                       onClick={() => imageInputRef.current?.click()}
@@ -1041,21 +1061,9 @@ export function ChristmasHeroDesktop() {
                   />
                 </div>
 
-                {/* 提示词输入 */}
-                <div>
-                  <h3 className="text-xl font-semibold text-white mb-3 font-mountains">2. Prompt</h3>
-                  <Textarea
-                    value={prompt}
-                    onChange={(e) => setPrompt(e.target.value)}
-                    placeholder="Describe what you want the character to express or do..."
-                    className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
-                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
-                  />
-                </div>
-
                 {/* Template Selection */}
                 <div>
-                  <h3 className="text-xl font-semibold text-white mb-3 font-mountains">3. Template Selection</h3>
+                  <h3 className="text-2xl tracking-wide font-semibold text-white mb-3 font-mountains">2. Template Selection</h3>
                   <div className="flex gap-3 overflow-x-auto pb-3 custom-scrollbar scroll-smooth">
                     {TEMPLATES.map((tpl) => {
                       // 判断当前应该使用哪个容器
@@ -1106,10 +1114,22 @@ export function ChristmasHeroDesktop() {
                   </div>
                 </div>
 
+                {/* 提示词输入 */}
+                <div>
+                  <h3 className="text-2xl tracking-wide font-semibold text-white mb-3 font-mountains">3. Prompt</h3>
+                  <Textarea
+                    value={prompt}
+                    onChange={(e) => setPrompt(e.target.value)}
+                    placeholder="Describe what you want the character to express or do..."
+                    className="w-full h-24 bg-black/20 border-yellow-400/30 text-white placeholder-white/50 resize-none focus:border-yellow-400/60"
+                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+                  />
+                </div>
+
                 {/* Choose music */}
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="text-xl font-semibold text-white font-mountains">4. Choose music</h3>
+                    <h3 className="text-2xl tracking-wide font-semibold text-white font-mountains">4. Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                       <button
                         type="button"
@@ -1238,13 +1258,13 @@ export function ChristmasHeroDesktop() {
                   <div className="relative">
                     <Button
                       variant="outline"
-                      disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim()}
+                      disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
                       onClick={handleGenerateClick}
                       className="w-auto px-8 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
                       style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       <Sparkles className="w-4 h-4 text-yellow-300" />
-                      Create the video
+                      {isGenerating ? 'Generating...' : 'Create the video'}
                       <Sparkles className="w-4 h-4 text-yellow-300" />
                     </Button>
                     {/* 积分显示 */}
@@ -1280,16 +1300,16 @@ export function ChristmasHeroDesktop() {
                   <div className="absolute inset-0 pt-10 pl-4 pr-4 pb-36 z-10">
                     {previewState === 'loading' ? (
                       <div className="w-full h-full flex flex-col items-center justify-center bg-black/80 rounded-lg">
-                        <div className="flex flex-col items-center mb-6">
-                          <div className="relative flex flex-col items-center">
-                            <div className="absolute -top-4 flex items-center justify-center">
-                              <div className="w-4 h-4 rounded-full bg-yellow-300 shadow-[0_0_15px_rgba(250,204,21,0.9)]" />
-                              <div className="absolute w-4 h-4 rounded-full border border-yellow-100 animate-ping" />
+                        <div className="flex flex-col items-center mb-5">
+                          <div className="relative flex flex-col items-center scale-90">
+                            <div className="absolute -top-3 flex items-center justify-center">
+                              <div className="w-3 h-3 rounded-full bg-yellow-300 shadow-[0_0_12px_rgba(250,204,21,0.9)]" />
+                              <div className="absolute w-3 h-3 rounded-full border border-yellow-100 animate-ping" />
                             </div>
-                            <div className="w-0 h-0 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[46px] border-b-emerald-500 animate-pulse" />
-                            <div className="w-0 h-0 -mt-4 border-l-[38px] border-l-transparent border-r-[38px] border-r-transparent border-b-[54px] border-b-emerald-600 animate-pulse delay-150" />
-                            <div className="w-0 h-0 -mt-4 border-l-[46px] border-l-transparent border-r-[46px] border-r-transparent border-b-[62px] border-b-emerald-700 animate-pulse delay-300" />
-                            <div className="w-5 h-6 bg-amber-800 mt-1 rounded-sm" />
+                            <div className="w-0 h-0 border-l-[24px] border-l-transparent border-r-[24px] border-r-transparent border-b-[38px] border-b-emerald-500 animate-pulse" />
+                            <div className="w-0 h-0 -mt-3 border-l-[30px] border-l-transparent border-r-[30px] border-r-transparent border-b-[46px] border-b-emerald-600 animate-pulse delay-150" />
+                            <div className="w-0 h-0 -mt-3 border-l-[36px] border-l-transparent border-r-[36px] border-r-transparent border-b-[54px] border-b-emerald-700 animate-pulse delay-300" />
+                            <div className="w-4 h-5 bg-amber-800 mt-1 rounded-sm" />
                           </div>
                           <p className="text-xs text-white/80 mt-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                             Santa is preparing your Christmas video...
@@ -1297,6 +1317,17 @@ export function ChristmasHeroDesktop() {
                         </div>
                         <Progress value={progress} className="w-40" />
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
+                        {taskCreated && (
+                          <div className="mt-4 px-4 py-3 bg-black/70 border border-white/10 rounded-lg">
+                            <p className="text-[11px] text-slate-100 text-center leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                              You don&apos;t need to wait here. Check your work in the{' '}
+                              <Link href="/profile" className="text-yellow-300 underline underline-offset-2 hover:text-yellow-200">
+                                Profile Center
+                              </Link>{' '}
+                              after 5 minutes.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <>
@@ -1398,6 +1429,17 @@ export function ChristmasHeroDesktop() {
                         </div>
                         <Progress value={progress} className="w-28" />
                         <p className="text-white text-xs mt-2">{Math.round(progress)}% complete</p>
+                        {taskCreated && (
+                          <div className="mt-4 px-4 py-3 bg-black/70 border border-white/10 rounded-lg">
+                            <p className="text-[11px] text-slate-100 text-center leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                              You don&apos;t need to wait here. Check your work in the{' '}
+                              <Link href="/profile" className="text-yellow-300 underline underline-offset-2 hover:text-yellow-200">
+                                Profile Center
+                              </Link>{' '}
+                              after 5 minutes.
+                            </p>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <>
@@ -1470,60 +1512,79 @@ export function ChristmasHeroDesktop() {
 
               {/* 结果分享区 */}
               {previewState === 'result' && resultVideoUrl && selectedTemplateId && selectedMusicId && (
-                <div className="flex items-center gap-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    disabled={isDownloading}
-                    className="flex items-center gap-2 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-3 px-8 rounded-lg shadow-lg"
-                    onClick={handleDownload}
-                    style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
-                  >
-                    {isDownloading ? (
-                      <>
+                <div className="mt-4 w-full space-y-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                  {/* 分享按钮一行展示 */}
+                  <div className="flex items-center justify-center gap-3">
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-black text-white hover:bg-gray-900 hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
+                      title="Share to Twitter"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-[#1877F2] text-white hover:bg-[#166FE5] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
+                      title="Share to Facebook"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                      </svg>
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      className="border-2 border-yellow-400/50 bg-[#25D366] text-white hover:bg-[#20BA5A] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
+                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
+                      title="Share to WhatsApp"
+                    >
+                      <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
+                      </svg>
+                    </Button>
+                  </div>
+
+                  {/* 链接 & 下载行：左侧复制分享链接，右侧下载按钮 */}
+                  <div className="flex w-full items-center justify-center gap-3">
+                    <div className="w-70 flex items-center gap-2 px-3 py-2 rounded-lg bg-black/40 border border-white/10">
+                      <span className="flex-1 min-w-0 text-[11px] md:text-xs text-white/80 truncate">
+                        {generateChristmasShareUrl(resultVideoUrl, selectedTemplateId, selectedMusicId)}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleCopyShareLink}
+                        className="flex-shrink-0 inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+                        title={isLinkCopied ? 'Copied' : 'Copy link'}
+                      >
+                        {isLinkCopied ? (
+                          <Check className="w-4 h-4 text-emerald-400" />
+                        ) : (
+                          <Copy className="w-4 h-4 text-white" />
+                        )}
+                      </button>
+                    </div>
+
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      disabled={isDownloading}
+                      className="border-2 border-yellow-400/50 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] hover:border-yellow-400 text-white disabled:opacity-50 disabled:cursor-not-allowed w-10 h-10 rounded-lg shadow-lg"
+                      onClick={handleDownload}
+                      title={isDownloading ? 'Downloading...' : 'Download'}
+                    >
+                      {isDownloading ? (
                         <Loader2 className="w-4 h-4 animate-spin text-white" />
-                        <span>Downloading...</span>
-                      </>
-                    ) : (
-                      <>
+                      ) : (
                         <Download className="w-4 h-4 text-white" />
-                        <span>Download</span>
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-blue-500/20 text-white hover:bg-[#1DA1F2] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
-                    title="Share to Twitter"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-blue-600/20 text-white hover:bg-[#1877F2] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
-                    title="Share to Facebook"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                    </svg>
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="outline"
-                    className="border-2 border-yellow-400/50 bg-green-600/20 text-white hover:bg-[#25D366] hover:border-yellow-400 w-10 h-10 rounded-lg shadow-lg"
-                    onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
-                    title="Share to WhatsApp"
-                  >
-                    <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
-                      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
-                    </svg>
-                  </Button>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               )}
             </div>

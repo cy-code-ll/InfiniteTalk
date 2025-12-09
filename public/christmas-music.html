@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Infinite Talk – Christmas Music Player</title>
+
+    <!-- Tailwind via CDN (same config as Noel Vibes components) -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ["Inter", "sans-serif"],
+            },
+            colors: {
+              christmas: {
+                dark: "#022c22", // Deep green
+                base: "#064e3b", // Base green
+                light: "#059669", // Accent
+                gold: "#d97706", // Gold accent
+              },
+            },
+            animation: {
+              "spin-slow": "spin 8s linear infinite",
+            },
+          },
+        },
+      };
+    </script>
+
+    <style>
+      body {
+        background-color: #022c22;
+        color: white;
+      }
+      /* Custom Scrollbar for Webkit */
+      ::-webkit-scrollbar {
+        width: 6px;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 3px;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(255, 255, 255, 0.3);
+      }
+    </style>
+  </head>
+  <body class="font-sans antialiased">
+    <audio id="audio"></audio>
+
+    <div
+      class="min-h-screen bg-gradient-to-br from-christmas-dark via-christmas-base to-black flex items-center justify-center py-6 px-4"
+    >
+      <div class="max-w-5xl w-full relative">
+        <!-- Glass container -->
+        <div
+          class="backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl rounded-3xl flex flex-col md:flex-row overflow-hidden bg-gradient-to-br from-white/5 via-white/0 to-white/5"
+        >
+          <!-- Left: Song list -->
+          <div
+            class="md:w-1/2 border-b md:border-b-0 md:border-r border-white/10 max-h-[420px] md:max-h-[480px]"
+          >
+            <div
+              class="px-4 pt-4 pb-2 flex items-center justify-between"
+            >
+              <div>
+                <p
+                  class="text-xs uppercase tracking-[0.2em] text-green-200/70"
+                >
+                  Infinite Talk
+                </p>
+                <h1 class="text-lg font-semibold text-white">
+                  Noel Vibes Playlist
+                </h1>
+              </div>
+            </div>
+            <div
+              id="song-list"
+              class="flex flex-col gap-2 h-full overflow-y-auto p-2"
+            ></div>
+          </div>
+
+          <!-- Right: Player -->
+          <div
+            class="md:w-1/2 flex flex-col items-center justify-between p-4 md:p-6 bg-gradient-to-br from-white/10/0 to-white/10"
+          >
+            <!-- Cover art -->
+            <div class="flex flex-col items-center gap-4">
+              <div
+                class="relative w-40 h-40 md:w-56 md:h-56 rounded-3xl overflow-hidden shadow-[0_30px_80px_rgba(0,0,0,0.7)] border border-white/10"
+              >
+                <img
+                  id="cover-img"
+                  src=""
+                  alt="Cover"
+                  class="w-full h-full object-cover hidden"
+                />
+                <div
+                  id="cover-placeholder"
+                  class="w-full h-full flex items-center justify-center bg-white/5"
+                >
+                  <svg
+                    class="w-12 h-12 text-white/40"
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M9 19V6.83a3 3 0 0 1 1.17-2.37l1.66-1.25A1 1 0 0 1 14 4v9.09A4 4 0 1 1 12 17v-7h-1v9a1 1 0 0 1-2 0Z"
+                    />
+                  </svg>
+                </div>
+                <div
+                  class="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent"
+                ></div>
+              </div>
+            </div>
+
+            <!-- Title / artist -->
+            <div class="w-full mt-4">
+              <div
+                class="flex flex-col items-center justify-end w-full gap-6 md:gap-8 pb-2 group"
+              >
+                <div class="text-center space-y-2 mb-2">
+                  <h2
+                    id="song-title"
+                    class="text-2xl md:text-3xl font-bold text-white drop-shadow-md truncate max-w-[300px] md:max-w-md mx-auto leading-tight"
+                  >
+                    Select a song
+                  </h2>
+                  <p
+                    id="song-artist"
+                    class="text-lg text-green-200/80 font-medium truncate max-w-[280px] mx-auto"
+                  >
+                    Christmas Collection
+                  </p>
+                </div>
+
+                <!-- Progress bar -->
+                <div
+                  class="w-full space-y-2 px-2"
+                  id="progress-container"
+                >
+                  <div
+                    id="progress-track"
+                    class="relative h-1.5 w-full bg-white/10 rounded-full cursor-pointer touch-none"
+                  >
+                    <div
+                      id="progress-bar"
+                      class="absolute top-0 left-0 h-full bg-white/40 rounded-full transition-all duration-100"
+                      style="width: 0%"
+                    ></div>
+                    <div
+                      id="progress-thumb"
+                      class="absolute top-1/2 -translate-y-1/2 w-4 h-4 bg-white rounded-full shadow-lg transition-transform duration-200 scale-0 group-active:scale-100"
+                      style="left: 0%; margin-left: -8px"
+                    ></div>
+                  </div>
+                  <div
+                    class="flex justify-between text-xs text-green-100/60 font-medium font-mono"
+                  >
+                    <span id="current-time">0:00</span>
+                    <span id="total-time">0:00</span>
+                  </div>
+                </div>
+
+                <!-- Controls -->
+                <div
+                  class="flex items-center justify-center gap-10 md:gap-12 w-full mt-2 md:mb-4"
+                >
+                  <button
+                    id="btn-prev"
+                    class="text-white/70 hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full active:scale-90"
+                  >
+                    <!-- Backward icon -->
+                    <svg
+                      class="w-8 h-8 md:w-10 md:h-10"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M10.25 5.5a1 1 0 0 1 1.53-.85l7.5 4.5a1 1 0 0 1 0 1.7l-7.5 4.5A1 1 0 0 1 10 14.5V13H5.75v5.25a1 1 0 1 1-2 0v-12.5a1 1 0 0 1 2 0V11H10V5.5Z"
+                      />
+                    </svg>
+                  </button>
+
+                  <button
+                    id="btn-play"
+                    class="w-16 h-16 md:w-20 md:h-20 flex flex-shrink-0 items-center justify-center bg-white text-green-900 rounded-full shadow-xl hover:scale-105 transition-transform active:scale-95"
+                  >
+                    <!-- Play icon -->
+                    <svg
+                      id="play-icon"
+                      class="w-8 h-8 md:w-10 md:h-10 ml-1"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M5.25 5.5a1 1 0 0 1 1.53-.85l11 6.5a1 1 0 0 1 0 1.7l-11 6.5A1 1 0 0 1 5.25 18.5v-13Z"
+                      />
+                    </svg>
+                    <!-- Pause icon (hidden by default) -->
+                    <svg
+                      id="pause-icon"
+                      class="w-8 h-8 md:w-10 md:h-10 ml-0.5 hidden"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path d="M6.75 4.5A1.25 1.25 0 0 0 5.5 5.75v12.5a1.25 1.25 0 0 0 2.5 0V5.75A1.25 1.25 0 0 0 6.75 4.5Zm10 0A1.25 1.25 0 0 0 15.5 5.75v12.5a1.25 1.25 0 0 0 2.5 0V5.75a1.25 1.25 0 0 0-1.25-1.25Z" />
+                    </svg>
+                  </button>
+
+                  <button
+                    id="btn-next"
+                    class="text-white/70 hover:text-white transition-colors p-3 hover:bg-white/5 rounded-full active:scale-90"
+                  >
+                    <!-- Forward icon -->
+                    <svg
+                      class="w-8 h-8 md:w-10 md:h-10"
+                      xmlns="http://www.w3.org/2000/svg"
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                    >
+                      <path
+                        d="M13.75 5.5a1 1 0 0 0-1.53-.85l-7.5 4.5a1 1 0 0 0 0 1.7l7.5 4.5a1 1 0 0 0 1.5-.85V11h4.25v7.25a1 1 0 1 0 2 0v-12.5a1 1 0 0 0-2 0V10H13.75V5.5Z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Mobile mini player -->
+        <div
+          id="mini-player"
+          class="md:hidden absolute bottom-0 left-0 right-0 z-40 px-4 pb-6 pointer-events-none"
+        >
+          <div
+            class="pointer-events-auto relative bg-christmas-dark/80 backdrop-blur-2xl border border-white/10 rounded-2xl shadow-2xl shadow-black/50 flex items-center p-3 h-20 cursor-pointer overflow-hidden group active:scale-95 transition-all duration-200"
+          >
+            <div class="absolute bottom-0 left-0 right-0 h-[3px] bg-white/10">
+              <div
+                id="mini-progress"
+                class="h-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.5)] transition-all duration-300 ease-linear"
+                style="width: 0%"
+              ></div>
+            </div>
+
+            <div
+              class="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 shadow-lg mr-4 border border-white/5"
+            >
+              <img
+                id="mini-cover"
+                src=""
+                alt="Cover"
+                class="w-full h-full object-cover hidden"
+              />
+              <div
+                class="absolute inset-0 flex items-center justify-center"
+              >
+                <div
+                  class="w-2 h-2 bg-christmas-dark rounded-full"
+                ></div>
+              </div>
+            </div>
+
+            <div class="flex-1 min-w-0 mr-4 flex flex-col justify-center">
+              <h4
+                id="mini-title"
+                class="text-white font-semibold text-base truncate leading-tight"
+              >
+                Select a song
+              </h4>
+              <p
+                id="mini-artist"
+                class="text-green-200/70 text-sm truncate"
+              >
+                Christmas Collection
+              </p>
+            </div>
+
+            <div class="flex items-center gap-5 mr-2">
+              <button
+                id="mini-play"
+                class="text-white hover:text-green-300 transition-colors p-1"
+              >
+                <!-- Play icon -->
+                <svg
+                  id="mini-play-icon"
+                  class="w-8 h-8 drop-shadow-md"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M5.25 5.5a1 1 0 0 1 1.53-.85l11 6.5a1 1 0 0 1 0 1.7l-11 6.5A1 1 0 0 1 5.25 18.5v-13Z"
+                  />
+                </svg>
+                <svg
+                  id="mini-pause-icon"
+                  class="w-8 h-8 drop-shadow-md hidden"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M6.75 4.5A1.25 1.25 0 0 0 5.5 5.75v12.5a1.25 1.25 0 0 0 2.5 0V5.75A1.25 1.25 0 0 0 6.75 4.5Zm10 0A1.25 1.25 0 0 0 15.5 5.75v12.5a1.25 1.25 0 0 0 2.5 0V5.75a1.25 1.25 0 0 0-1.25-1.25Z" />
+                </svg>
+              </button>
+              <button
+                id="mini-next"
+                class="text-white/60 hover:text-white transition-colors"
+              >
+                <svg
+                  class="w-8 h-8"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M13.75 5.5a1 1 0 0 0-1.53-.85l-7.5 4.5a1 1 0 0 0 0 1.7l7.5 4.5a1 1 0 0 0 1.5-.85V11h4.25v7.25a1 1 0 1 0 2 0v-12.5a1 1 0 0 0-2 0V10H13.75V5.5Z"
+                  />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const songs = [
+        {
+          id: 1,
+          title: "Cozy Fireplace",
+          artist: "Infinite Talk Christmas",
+          duration: 184,
+          // TODO: 替换为你自己的音频地址
+          src: "https://cdn.pixabay.com/download/audio/2022/11/09/audio_c1b6b9a3c4.mp3?filename=christmas-village-126735.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/3184360/pexels-photo-3184360.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 2,
+          title: "Snowy Night Walk",
+          artist: "Infinite Talk Christmas",
+          duration: 212,
+          src: "https://cdn.pixabay.com/download/audio/2021/12/20/audio_c5e8d09d1c.mp3?filename=quiet-christmas-ambient-hip-hop-12635.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/6886607/pexels-photo-6886607.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+        {
+          id: 3,
+          title: "Warm Lights",
+          artist: "Infinite Talk Christmas",
+          duration: 205,
+          src: "https://cdn.pixabay.com/download/audio/2022/12/16/audio_1f7ee80440.mp3?filename=christmas-magic-12974.mp3",
+          coverUrl:
+            "https://images.pexels.com/photos/5727889/pexels-photo-5727889.jpeg?auto=compress&cs=tinysrgb&w=600",
+        },
+      ];
+
+      const audio = document.getElementById("audio");
+      const songListEl = document.getElementById("song-list");
+      const coverImgEl = document.getElementById("cover-img");
+      const coverPlaceholderEl = document.getElementById("cover-placeholder");
+      const songTitleEl = document.getElementById("song-title");
+      const songArtistEl = document.getElementById("song-artist");
+      const currentTimeEl = document.getElementById("current-time");
+      const totalTimeEl = document.getElementById("total-time");
+      const progressTrackEl = document.getElementById("progress-track");
+      const progressBarEl = document.getElementById("progress-bar");
+      const progressThumbEl = document.getElementById("progress-thumb");
+      const btnPrev = document.getElementById("btn-prev");
+      const btnPlay = document.getElementById("btn-play");
+      const btnNext = document.getElementById("btn-next");
+      const playIconEl = document.getElementById("play-icon");
+      const pauseIconEl = document.getElementById("pause-icon");
+
+      const miniCoverEl = document.getElementById("mini-cover");
+      const miniTitleEl = document.getElementById("mini-title");
+      const miniArtistEl = document.getElementById("mini-artist");
+      const miniProgressEl = document.getElementById("mini-progress");
+      const miniPlayBtn = document.getElementById("mini-play");
+      const miniPlayIcon = document.getElementById("mini-play-icon");
+      const miniPauseIcon = document.getElementById("mini-pause-icon");
+      const miniNextBtn = document.getElementById("mini-next");
+
+      let currentIndex = 0;
+      let isPlaying = false;
+
+      function formatTime(sec) {
+        if (!isFinite(sec)) return "0:00";
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60)
+          .toString()
+          .padStart(2, "0");
+        return m + ":" + s;
+      }
+
+      function renderSongList() {
+        songListEl.innerHTML = "";
+        songs.forEach((song, index) => {
+          const isActive = index === currentIndex;
+          const row = document.createElement("div");
+          row.className =
+            "group flex items-center p-3 rounded-xl cursor-pointer transition-all duration-300 " +
+            (isActive ? "bg-white/20 shadow-lg" : "hover:bg-white/10");
+          row.dataset.index = index;
+
+          row.innerHTML = `
+            <div class="relative w-12 h-12 rounded-lg overflow-hidden flex-shrink-0 mr-4">
+              <img src="${song.coverUrl}" alt="${song.title}" class="w-full h-full object-cover" />
+              <div class="absolute inset-0 flex items-center justify-center bg-black/30 ${isActive ? "opacity-100" : "opacity-0 group-hover:opacity-100"}">
+                ${
+                  isActive && isPlaying
+                    ? '<div class="flex gap-0.5 items-end h-4"><span class="w-1 bg-white animate-[bounce_1s_infinite] h-2"></span><span class="w-1 bg-white animate-[bounce_1.2s_infinite] h-3"></span><span class="w-1 bg-white animate-[bounce_0.8s_infinite] h-1"></span></div>'
+                    : '<svg class="w-6 h-6 text-white" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor"><path d="M5.25 5.5a1 1 0 0 1 1.53-.85l11 6.5a1 1 0 0 1 0 1.7l-11 6.5A1 1 0 0 1 5.25 18.5v-13Z"/></svg>'
+                }
+              </div>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h4 class="text-sm font-semibold truncate ${isActive ? "text-white" : "text-gray-200"}">${song.title}</h4>
+              <p class="text-xs text-gray-400 truncate">${song.artist}</p>
+            </div>
+            <div class="text-xs text-gray-400 ml-2">
+              ${Math.floor(song.duration / 60)}:${String(song.duration % 60).padStart(2, "0")}
+            </div>
+          `;
+
+          row.addEventListener("click", () => {
+            loadSong(index, true);
+          });
+
+          songListEl.appendChild(row);
+        });
+      }
+
+      function updatePlayIcons() {
+        if (isPlaying) {
+          playIconEl.classList.add("hidden");
+          pauseIconEl.classList.remove("hidden");
+          miniPlayIcon.classList.add("hidden");
+          miniPauseIcon.classList.remove("hidden");
+        } else {
+          playIconEl.classList.remove("hidden");
+          pauseIconEl.classList.add("hidden");
+          miniPlayIcon.classList.remove("hidden");
+          miniPauseIcon.classList.add("hidden");
+        }
+        renderSongList();
+      }
+
+      function loadSong(index, autoPlay) {
+        if (index < 0 || index >= songs.length) return;
+        currentIndex = index;
+        const song = songs[index];
+        audio.src = song.src;
+        songTitleEl.textContent = song.title;
+        songArtistEl.textContent = song.artist;
+        miniTitleEl.textContent = song.title;
+        miniArtistEl.textContent = song.artist;
+
+        coverImgEl.src = song.coverUrl;
+        coverImgEl.classList.remove("hidden");
+        coverPlaceholderEl.classList.add("hidden");
+
+        miniCoverEl.src = song.coverUrl;
+        miniCoverEl.classList.remove("hidden");
+
+        if (autoPlay) {
+          audio
+            .play()
+            .then(() => {
+              isPlaying = true;
+              updatePlayIcons();
+            })
+            .catch(() => {
+              isPlaying = false;
+              updatePlayIcons();
+            });
+        } else {
+          isPlaying = false;
+          updatePlayIcons();
+        }
+
+        renderSongList();
+      }
+
+      audio.addEventListener("timeupdate", () => {
+        const current = audio.currentTime || 0;
+        const dur = audio.duration || 0;
+        currentTimeEl.textContent = formatTime(current);
+        totalTimeEl.textContent = formatTime(dur || songs[currentIndex].duration);
+        const percent = dur ? (current / dur) * 100 : 0;
+        progressBarEl.style.width = percent + "%";
+        progressThumbEl.style.left = percent + "%";
+        miniProgressEl.style.width = percent + "%";
+      });
+
+      audio.addEventListener("loadedmetadata", () => {
+        const dur = audio.duration || songs[currentIndex].duration;
+        totalTimeEl.textContent = formatTime(dur);
+      });
+
+      audio.addEventListener("ended", () => {
+        handleNext();
+      });
+
+      function handlePlayPause() {
+        if (!songs.length) return;
+        if (!audio.src) {
+          loadSong(currentIndex, true);
+          return;
+        }
+        if (audio.paused) {
+          audio
+            .play()
+            .then(() => {
+              isPlaying = true;
+              updatePlayIcons();
+            })
+            .catch(() => {
+              isPlaying = false;
+              updatePlayIcons();
+            });
+        } else {
+          audio.pause();
+          isPlaying = false;
+          updatePlayIcons();
+        }
+      }
+
+      function handleNext() {
+        if (!songs.length) return;
+        const nextIndex = (currentIndex + 1) % songs.length;
+        loadSong(nextIndex, true);
+      }
+
+      function handlePrev() {
+        if (!songs.length) return;
+        const prevIndex = (currentIndex - 1 + songs.length) % songs.length;
+        loadSong(prevIndex, true);
+      }
+
+      progressTrackEl.addEventListener("click", (e) => {
+        const rect = progressTrackEl.getBoundingClientRect();
+        const percent = (e.clientX - rect.left) / rect.width;
+        const dur = audio.duration || songs[currentIndex].duration;
+        const time = percent * dur;
+        audio.currentTime = time;
+      });
+
+      btnPlay.addEventListener("click", handlePlayPause);
+      btnNext.addEventListener("click", handleNext);
+      btnPrev.addEventListener("click", handlePrev);
+
+      miniPlayBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handlePlayPause();
+      });
+      miniNextBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        handleNext();
+      });
+
+      // Init
+      if (songs.length) {
+        loadSong(0, false);
+      }
+      renderSongList();
+    </script>
+  </body>
+</html>
+
+
