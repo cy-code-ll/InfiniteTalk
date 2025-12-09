@@ -1240,7 +1240,7 @@ export function ChristmasHeroMobile() {
 
               {/* 提示词输入 */}
               <div>
-                <p className="text-sm text-slate-200 mb-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                <p className="text-sm text-yellow-300 mb-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
                   Use a prompt to transform your photo into the scene you like.
                 </p>
                 <Textarea
