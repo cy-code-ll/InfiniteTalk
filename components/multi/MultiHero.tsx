@@ -69,6 +69,38 @@ export default function MultiHero() {
   const { openAuthModal } = useAuthModal();
   const { userInfo } = useUserInfo();
 
+  // 优惠券 / 试用相关计算（480p/720p 且音频时长 <= 15s）
+  const totalCredits = userInfo?.total_credits ?? 0;
+  const freeTimes = userInfo?.free_times ?? 0;
+
+  const maxDuration = Math.max(leftAudioDuration || 0, rightAudioDuration || 0);
+  const roundedMaxDuration = Math.ceil(maxDuration || 0);
+  const hasDurations = roundedMaxDuration > 0;
+
+  const isTrialResolution = resolution === '480p' || resolution === '720p';
+  const isTrialDuration = hasDurations && roundedMaxDuration <= 15;
+
+  const hasVouchers = freeTimes > 0;
+  const hasNoCredits = totalCredits === 0;
+
+  // 满足条件时可以使用优惠券免积分
+  const canUseVoucher =
+    hasVouchers &&
+    hasNoCredits &&
+    isTrialResolution &&
+    isTrialDuration;
+
+  // 不符合试用条件但有券且无积分 → 显示 Upgrade Plan 按钮
+  const isNonTrialResolution = !isTrialResolution;
+  const isAudioTooLong = hasDurations && roundedMaxDuration > 15;
+
+  const isUpgradeMode =
+    isSignedIn &&
+    hasVouchers &&
+    hasNoCredits &&
+    hasDurations &&
+    (isNonTrialResolution || isAudioTooLong);
+
   // 组件卸载时清理轮询
   useEffect(() => {
     return () => {
@@ -648,7 +680,22 @@ export default function MultiHero() {
     }
 
     const requiredCredits = calculateCredits();
-    if (userInfo.total_credits < requiredCredits) {
+
+    // 重新计算一次本地状态，确保使用最新值
+    const totalCredits = userInfo.total_credits ?? 0;
+    const freeTimes = userInfo.free_times ?? 0;
+    const maxDuration = Math.max(leftAudioDuration || 0, rightAudioDuration || 0);
+    const roundedMaxDuration = Math.ceil(maxDuration || 0);
+    const isTrialResolution = resolution === '480p' || resolution === '720p';
+    const isTrialDuration = roundedMaxDuration > 0 && roundedMaxDuration <= 15;
+
+    const canUseVoucher =
+      freeTimes > 0 &&
+      totalCredits === 0 &&
+      isTrialResolution &&
+      isTrialDuration;
+
+    if (!canUseVoucher && totalCredits < requiredCredits) {
       setIsInsufficientCreditsModalOpen(true);
       // CNZZ 事件追踪 - 积分不足弹窗出现
       if (typeof window !== 'undefined' && (window as any)._czc) {
@@ -1077,38 +1124,69 @@ export default function MultiHero() {
 
               {/* Generate Button */}
               <div className="space-y-3 relative">
-                {/* Estimated Credits Label */}
-                <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                  {(() => {
-                    if (leftAudioFile && rightAudioFile && (leftAudioDuration > 0 || rightAudioDuration > 0)) {
-                      const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
-                      // 新规则：5秒以下固定积分，5秒以上按秒计算
-                      if (maxDuration <= 5) {
+                {/* Estimated Credits / Free Label - Upgrade 模式下不显示 */}
+                {!isUpgradeMode && (
+                  <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                    {(() => {
+                      if (
+                        hasVouchers &&
+                        hasNoCredits &&
+                        isTrialResolution &&
+                        isTrialDuration
+                      ) {
+                        return 'Free';
+                      }
+
+                      if (
+                        leftAudioFile &&
+                        rightAudioFile &&
+                        (leftAudioDuration > 0 || rightAudioDuration > 0)
+                      ) {
+                        const maxDuration = Math.max(leftAudioDuration, rightAudioDuration);
+                        // 新规则：5秒以下固定积分，5秒以上按秒计算
+                        if (maxDuration <= 5) {
+                          if (resolution === '480p') return '5 Credits';
+                          if (resolution === '720p') return '10 Credits';
+                          return '15 Credits'; // 1080p
+                        } else {
+                          const creditsPerSecond =
+                            resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
+                          return `${maxDuration * creditsPerSecond} Credits`;
+                        }
+                      } else {
+                        // 没有音频文件时显示最低积分消耗
                         if (resolution === '480p') return '5 Credits';
                         if (resolution === '720p') return '10 Credits';
                         return '15 Credits'; // 1080p
-                      } else {
-                        const creditsPerSecond = resolution === '480p' ? 1 : resolution === '720p' ? 2 : 3;
-                        return `${maxDuration * creditsPerSecond} Credits`;
                       }
-                    } else {
-                      // 没有音频文件时显示最低积分消耗
-                      if (resolution === '480p') return '5 Credits';
-                      if (resolution === '720p') return '10 Credits';
-                      return '15 Credits'; // 1080p
-                    }
-                  })()}
-                </div>
-            
+                    })()}
+                  </div>
+                )}
+
                 <Button
-                  onClick={handleGenerate}
-                  className="w-full h-12 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground"
+                  onClick={() => {
+                    if (isGenerating) return;
+
+                    if (isUpgradeMode) {
+                      window.location.href = '/pricing';
+                      return;
+                    }
+
+                    handleGenerate();
+                  }}
+                  className={
+                    isUpgradeMode
+                      ? 'w-full h-12 text-lg font-semibold bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700 text-white'
+                      : 'w-full h-12 text-lg font-semibold bg-primary hover:bg-primary/90 text-primary-foreground'
+                  }
                 >
                   {isGenerating ? (
                     <>
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                       Generating...
                     </>
+                  ) : isUpgradeMode ? (
+                    'Upgrade Plan'
                   ) : (
                     'Generate Now'
                   )}

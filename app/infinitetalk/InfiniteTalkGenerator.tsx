@@ -6,7 +6,7 @@ import { Textarea } from '../../components/ui/textarea';
 import { Progress } from '../../components/ui/progress';
 import { useToast } from '../../components/ui/toast-provider';
 import { useUser } from '@clerk/nextjs';
-import { useUserInfo } from '@/lib/providers';
+import { useUserInfo, useTrialAccess } from '@/lib/providers';
 import { Upload, X, Download, Play, Pause, FileAudio } from 'lucide-react';
 import { api } from '@/lib/api';
 import { cn, isMobileDevice } from '@/lib/utils';
@@ -1596,6 +1596,27 @@ export default function InfiniteTalkGenerator() {
   // 缓存积分计算结果，避免每次渲染都计算
   const creditsCost = useMemo(() => calculateCredits(), [calculateCredits]);
 
+  // Trial access: InfiniteTalk trial allows 480p/720p and audio length <= 15s when user has free_times and no credits
+  const trialAccess = useTrialAccess('infinitetalk', {
+    resolution,
+    duration: audioDuration > 0 ? Math.ceil(audioDuration) : 0,
+  });
+
+  // Upgrade 按钮判定逻辑（参考 Jxp，但阈值改为 480p/720p + 15s）
+  const hasVouchers = (userInfo?.free_times ?? 0) > 0;
+  const hasNoCredits = (userInfo?.total_credits ?? 0) === 0;
+  const hasAudio = audioDuration > 0;
+  const isTrialResolution = resolution === '480p' || resolution === '720p';
+  const isNonTrialResolution = !isTrialResolution;
+  const isAudioTooLong = hasAudio && Math.ceil(audioDuration) > 15;
+
+  const isUpgradeMode =
+    isSignedIn &&
+    hasVouchers &&
+    hasNoCredits &&
+    hasAudio &&
+    (isNonTrialResolution || isAudioTooLong);
+
   // 验证表单 - 使用 useCallback 优化性能
   const validateForm = useCallback((): string | null => {
     // 快速路径检查，避免不必要的计算
@@ -1643,9 +1664,32 @@ export default function InfiniteTalkGenerator() {
       return;
     }
 
-    // 使用缓存的积分计算结果，避免同步计算
+    const totalCredits = userInfo.total_credits ?? 0;
+    const freeTimes = userInfo.free_times ?? 0;
+
+    // locked 模式：无积分且无可用试用
+    if (trialAccess.mode === 'locked') {
+      if (totalCredits === 0 && freeTimes === 0) {
+        // 已登录、无积分、无优惠券：弹积分不足弹窗，而不是直接跳转 Pricing
+        startTransition(() => {
+          setIsInsufficientCreditsModalOpen(true);
+        });
+        // CNZZ 事件追踪 - 积分不足弹窗出现
+        if (typeof window !== 'undefined' && (window as any)._czc) {
+          setTimeout(() => {
+            (window as any)._czc.push(['_trackEvent', '系统弹窗', '积分不足弹窗', '/infinitetalk', 1, '']);
+          }, 0);
+        }
+      } else {
+        // 其他 locked 场景（例如有券但当前配置不符合）→ 跳转 Pricing
+        window.location.href = '/pricing';
+      }
+      return;
+    }
+
+    // 有积分模式：按原逻辑检查积分是否足够
     const requiredCredits = creditsCost;
-    if (userInfo.total_credits < requiredCredits) {
+    if (trialAccess.mode === 'credits' && totalCredits < requiredCredits) {
       // 使用 startTransition 包装非紧急状态更新
       startTransition(() => {
         setIsInsufficientCreditsModalOpen(true);
@@ -1773,6 +1817,7 @@ export default function InfiniteTalkGenerator() {
     isSignedIn,
     userInfo,
     creditsCost,
+    trialAccess,
     validationError,
     toast,
     tabMode,
@@ -2270,9 +2315,23 @@ export default function InfiniteTalkGenerator() {
             {/* Generate Button */}
             <div className="relative">
               <Button
-                onClick={handleGenerate}
+                onClick={() => {
+                  if (isGenerating) return;
+
+                  if (isUpgradeMode) {
+                    window.location.href = '/pricing';
+                    return;
+                  }
+
+                  handleGenerate();
+                }}
                 disabled={isGenerating}
-                className="w-full bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white py-3 font-semibold disabled:opacity-50 will-change-transform active:scale-[0.98] touch-manipulation"
+                className={cn(
+                  'w-full py-3 font-semibold text-white disabled:opacity-50 will-change-transform active:scale-[0.98] touch-manipulation',
+                  isUpgradeMode
+                    ? 'bg-gradient-to-r from-orange-500 to-orange-600 hover:from-orange-600 hover:to-orange-700'
+                    : 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70'
+                )}
                 style={{
                   // 优化渲染性能 - 使用 CSS containment
                   contain: 'layout style paint',
@@ -2284,13 +2343,28 @@ export default function InfiniteTalkGenerator() {
                   transition: 'transform 75ms ease-out, opacity 75ms ease-out',
                 } as React.CSSProperties}
               >
-                {isGenerating ? 'Generating...' : 'Generate Video'}
+                {isGenerating
+                  ? 'Generating...'
+                  : isUpgradeMode
+                  ? 'Upgrade Plan'
+                  : 'Generate Video'}
               </Button>
-              {/* Credit cost label */}
-              <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                {audioDuration > 0 ? `${creditsCost} Credits` :
-                  `${resolution === '480p' ? '5' : resolution === '720p' ? '10' : '15'} Credits`}
-              </div>
+              {/* Credit cost label - Upgrade 模式下不显示 */}
+              {!isUpgradeMode && (
+                <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+                  {trialAccess.mode === 'trial' && isSignedIn
+                    ? 'Free'
+                    : audioDuration > 0
+                    ? `${creditsCost} Credits`
+                    : `${
+                        resolution === '480p'
+                          ? '5'
+                          : resolution === '720p'
+                          ? '10'
+                          : '15'
+                      } Credits`}
+                </div>
+              )}
             </div>
 
             {/* InfiniteTalk Multi CTA */}

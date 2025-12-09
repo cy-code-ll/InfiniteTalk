@@ -1,6 +1,6 @@
 // API 基础配置
 const API_CONFIG = {
-  VIDOR_AI_BASE: 'https://svc.infinitetalk.net',
+  VIDOR_AI_BASE: 'https://api.infinitetalk.net',
   APP_ID: 'infinitetalk',
 };
 

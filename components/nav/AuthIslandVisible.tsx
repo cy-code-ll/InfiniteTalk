@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useMemo } from 'react';
 import { useUser } from '@clerk/nextjs';
 import { useUserInfo } from '@/lib/providers';
 
@@ -22,6 +22,24 @@ const CoinsIcon = ({ className }: { className: string }) => (
   </svg>
 );
 
+// 优惠券图标
+const TicketIcon = ({ className }: { className: string }) => (
+  <svg
+    className={className}
+    fill="none"
+    stroke="currentColor"
+    viewBox="0 0 24 24"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"
+    />
+  </svg>
+);
+
 // 静态占位骨架
 const AuthSkeleton = () => (
   <div className="flex items-center gap-2">
@@ -36,6 +54,38 @@ export default function AuthIslandVisible() {
   const containerRef = useRef<HTMLDivElement>(null);
   const { isSignedIn } = useUser();
   const { userInfo, isLoadingUserInfo } = useUserInfo();
+
+  // 显示逻辑：有积分显示积分，没有积分显示优惠券，都没有显示0
+  const displayInfo = useMemo(() => {
+    if (!isSignedIn || isLoadingUserInfo || !userInfo) {
+      return null;
+    }
+
+    const totalCredits = userInfo.total_credits ?? 0;
+    const freeTimes = userInfo.free_times ?? 0;
+    const hasCredits = totalCredits > 0;
+    const hasFreeVouchers = freeTimes > 0;
+
+    if (hasCredits) {
+      return {
+        type: 'credits' as const,
+        value: totalCredits,
+        icon: CoinsIcon,
+      };
+    } else if (hasFreeVouchers) {
+      return {
+        type: 'voucher' as const,
+        value: freeTimes,
+        icon: TicketIcon,
+      };
+    } else {
+      return {
+        type: 'credits' as const,
+        value: 0,
+        icon: CoinsIcon,
+      };
+    }
+  }, [isSignedIn, isLoadingUserInfo, userInfo]);
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -68,10 +118,16 @@ export default function AuthIslandVisible() {
 
   return (
     <div ref={containerRef} className="flex items-center gap-2">
-      {isSignedIn && (
+      {isSignedIn && displayInfo && (
         <div className="flex items-center gap-1 text-sm text-muted-foreground">
-          <CoinsIcon className="h-3 w-3" />
-          <span>{isLoadingUserInfo ? '...' : userInfo?.total_credits || '0'}</span>
+          <displayInfo.icon className="h-3 w-3" />
+          <span>
+            {isLoadingUserInfo 
+              ? '...' 
+              : displayInfo.type === 'voucher' 
+                ? `${displayInfo.value} Free`
+                : displayInfo.value.toString()}
+          </span>
         </div>
       )}
       {isVisible && AuthButton ? (

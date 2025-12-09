@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/dialog';
 import { useToast } from '@/components/ui/toast-provider';
 import { useUser } from '@clerk/nextjs';
-import { useUserInfo } from '@/lib/providers';
+import { useUserInfo, useTrialAccess } from '@/lib/providers';
 import { useAuthModal } from '@/components/auth/auth-modal-provider';
 import { api } from '@/lib/api';
 import { shareChristmasToSocial, copyChristmasShareLink, generateChristmasShareUrl } from './share-utils';
@@ -262,6 +262,27 @@ export function ChristmasHeroDesktop() {
   // 视频 ref（用于 result 状态）
   const desktopResultVideoRef = useRef<HTMLVideoElement | null>(null);
   const mobileResultVideoRef = useRef<HTMLVideoElement | null>(null);
+
+  // 试用/升级按钮判定（与 InfiniteTalkGenerator 规则对齐：720p + 音频 <= 15s 可用券）
+  const effectiveDuration =
+    (selectedMusicId === 'custom' ? customAudioDuration : audioDuration) || 0;
+
+  const trialAccess = useTrialAccess('infinitetalk', {
+    resolution: '720p',
+    duration: effectiveDuration > 0 ? Math.ceil(effectiveDuration) : 0,
+  });
+
+  const hasVouchers = (userInfo?.free_times ?? 0) > 0;
+  const hasNoCredits = (userInfo?.total_credits ?? 0) === 0;
+  const hasAudio = effectiveDuration > 0;
+  const isAudioTooLong = hasAudio && Math.ceil(effectiveDuration) > 15;
+
+  const isUpgradeMode =
+    isSignedIn &&
+    hasVouchers &&
+    hasNoCredits &&
+    hasAudio &&
+    isAudioTooLong;
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -697,6 +718,14 @@ export function ChristmasHeroDesktop() {
       return;
     }
 
+    // 已登录但完全没有积分也没有优惠券：直接弹积分不足（与 InfiniteTalk 主页面对齐）
+    const totalCreditsInitial = userInfo.total_credits ?? 0;
+    const freeTimesInitial = userInfo.free_times ?? 0;
+    if (totalCreditsInitial === 0 && freeTimesInitial === 0) {
+      setIsInsufficientCreditsModalOpen(true);
+      return;
+    }
+
     try {
       setIsGenerating(true);
       setPreviewState('loading');
@@ -803,10 +832,22 @@ export function ChristmasHeroDesktop() {
       
       setAudioDuration(duration);
 
-      // 积分检查
+      // 积分 / 优惠券检查（与 InfiniteTalkGenerator 逻辑对齐）
       const resolution: Resolution = '720p';
       const requiredCredits = calculateCredits(duration, resolution);
-      if (userInfo.total_credits < requiredCredits) {
+      const totalCredits = userInfo.total_credits ?? 0;
+      const freeTimes = userInfo.free_times ?? 0;
+      const roundedDuration = Math.ceil(duration || 0);
+      const isTrialResolution = true; // resolution 固定为 '720p'，直接视为试用分辨率
+      const isTrialDuration = roundedDuration > 0 && roundedDuration <= 15;
+
+      const canUseVoucher =
+        freeTimes > 0 &&
+        totalCredits === 0 &&
+        isTrialResolution &&
+        isTrialDuration;
+
+      if (!canUseVoucher && totalCredits < requiredCredits) {
         setIsInsufficientCreditsModalOpen(true);
         stopFakeProgress();
         setPreviewState('idle');
@@ -1259,19 +1300,35 @@ export function ChristmasHeroDesktop() {
                     <Button
                       variant="outline"
                       disabled={!imageFile || !selectedMusicId || !prompt || !prompt.trim() || isGenerating}
-                      onClick={handleGenerateClick}
+                      onClick={() => {
+                        if (isGenerating) return;
+                        if (isUpgradeMode) {
+                          window.location.href = '/pricing';
+                          return;
+                        }
+                        handleGenerateClick();
+                      }}
                       className="w-auto px-8 bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white rounded-full py-4 text-base font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg flex items-center justify-center gap-2"
                       style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       <Sparkles className="w-4 h-4 text-yellow-300" />
-                      {isGenerating ? 'Generating...' : 'Create the video'}
+                      {isGenerating
+                        ? 'Generating...'
+                        : isUpgradeMode
+                        ? 'Upgrade Plan'
+                        : 'Create the video'}
                       <Sparkles className="w-4 h-4 text-yellow-300" />
                     </Button>
-                    {/* 积分显示 */}
-                    {selectedMusicId && (
-                      <div className="absolute -top-2 -right-10 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                        {(selectedMusicId === 'custom' ? customAudioDuration : audioDuration) > 0 
-                          ? `${calculateCredits(selectedMusicId === 'custom' ? customAudioDuration : audioDuration, '720p')} Credits`
+                    {/* 积分显示 - Upgrade 模式下不显示，Trial 模式显示 Free */}
+                    {!isUpgradeMode && selectedMusicId && (
+                      <div
+                        className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg"
+                        style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
+                      >
+                        {trialAccess.mode === 'trial' && isSignedIn
+                          ? 'Free'
+                          : effectiveDuration > 0
+                          ? `${calculateCredits(effectiveDuration, '720p')} Credits`
                           : '11 Credits'}
                       </div>
                     )}

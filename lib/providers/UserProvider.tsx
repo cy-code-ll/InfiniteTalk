@@ -1,9 +1,10 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useEffect, useState, useRef, ReactNode, useCallback } from 'react';
 import { useUser, useAuth, useClerk } from '@clerk/nextjs';
 import { api } from '../api';
 import { useToast } from '@/components/ui/toast-provider';
+import { VoucherToast } from '@/components/ui/voucher-toast';
 
 export interface UserInfo {
   uuid: string;
@@ -21,6 +22,7 @@ export interface UserInfo {
   updated_at: number;
   status: number;
   id: number;
+  free_times: number; // 免费试用券次数
   total_credits: number; // 计算字段：free_limit + remaining_limit
 }
 
@@ -79,6 +81,9 @@ export function UserProvider({ children }: UserProviderProps) {
   const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
   const [isLoadingUserInfo, setIsLoadingUserInfo] = useState(false);
   const { error: showErrorToast } = useToast();
+  const [voucherCount, setVoucherCount] = useState<number>(0);
+  const [showVoucherToast, setShowVoucherToast] = useState(false);
+  const hasShownVoucherRef = useRef(false);
 
 
 
@@ -278,6 +283,9 @@ export function UserProvider({ children }: UserProviderProps) {
       const result = await api.user.getUserInfo();
 
       if (result.code === 200 && result.data) {
+        const freeTimes =
+          typeof result.data.free_times === 'number' ? result.data.free_times : 0;
+
         const userInfoData: UserInfo = {
           uuid: result.data.uuid,
           email: result.data.email,
@@ -294,9 +302,23 @@ export function UserProvider({ children }: UserProviderProps) {
           updated_at: result.data.updated_at,
           status: result.data.status,
           id: result.data.id,
+          free_times: freeTimes,
           total_credits: result.data.free_limit + result.data.remaining_limit
         };
         setUserInfo(userInfoData);
+
+        const hasCredits = userInfoData.total_credits > 0;
+        const hasFreeVouchers = userInfoData.free_times > 0;
+
+        // 弹窗规则：
+        // 1. 只在当前会话中弹一次（useRef 记录，避免轮询多次弹出）
+        // 2. 用户有积分时不弹
+        // 3. 用户没有积分且 free_times 不为 0 时才弹
+        if (!hasCredits && hasFreeVouchers && !hasShownVoucherRef.current) {
+          setVoucherCount(userInfoData.free_times);
+          setShowVoucherToast(true);
+          hasShownVoucherRef.current = true;
+        }
       } else {
         console.warn("User info API returned success code but no data for:", user.id);
         setUserInfo(null);
@@ -326,6 +348,8 @@ export function UserProvider({ children }: UserProviderProps) {
     if (isSignedIn && user?.id) {
       // 清空之前的用户信息
       setUserInfo(null);
+      // 每次用户登录或切换账号时重置本次会话的弹窗标记
+      hasShownVoucherRef.current = false;
 
       // 先同步用户数据，确保token可用
       syncUserToBackend();
@@ -373,6 +397,12 @@ export function UserProvider({ children }: UserProviderProps) {
   return (
     <UserContext.Provider value={value}>
       {children}
+      {showVoucherToast && (
+        <VoucherToast
+          count={voucherCount}
+          onClose={() => setShowVoucherToast(false)}
+        />
+      )}
     </UserContext.Provider>
   );
 }
