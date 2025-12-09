@@ -653,6 +653,13 @@ export function ChristmasHeroMobile() {
     // 关闭 Drawer
     setIsDrawerOpen(false);
 
+    // 停止音乐播放（loading 状态下音频要静音）
+    if (musicAudioRef.current) {
+      musicAudioRef.current.pause();
+      setIsMusicPlaying(false);
+      setCurrentMusicId(null);
+    }
+
     try {
       setIsGenerating(true);
       setViewState('loading');
@@ -910,7 +917,7 @@ export function ChristmasHeroMobile() {
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
             loop
-            muted={isBackgroundVideoMuted}
+            muted={viewState === 'loading' || isBackgroundVideoMuted}
             playsInline
           />
           
@@ -1233,7 +1240,9 @@ export function ChristmasHeroMobile() {
 
               {/* 提示词输入 */}
               <div>
-                <h3 className="text-2xl tracking-wide font-semibold text-white mb-3 font-mountains">3. Prompt</h3>
+                <p className="text-sm text-slate-200 mb-3" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+                  Use a prompt to transform your photo into the scene you like.
+                </p>
                 <Textarea
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
@@ -1247,7 +1256,7 @@ export function ChristmasHeroMobile() {
               {/* Choose music */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <h3 className="text-2xl tracking-wide font-semibold text-white font-mountains">4. Choose music</h3>
+                  <h3 className="text-2xl tracking-wide font-semibold text-white font-mountains">3. Choose music</h3>
                     <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"
