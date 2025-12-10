@@ -360,7 +360,8 @@
             
             // Show "Create the same video" button if template ID and music ID are provided
             if (params.tid && params.mid) {
-                const redirectUrl = `https://www.infinitetalk.net/christmas?tid=${encodeURIComponent(params.tid)}&mid=${encodeURIComponent(params.mid)}`;
+                // When user clicks, go to main Christmas page and directly open the create view (ismake=1)
+                const redirectUrl = `https://www.infinitetalk.net/christmas?tid=${encodeURIComponent(params.tid)}&mid=${encodeURIComponent(params.mid)}&ismake=1`;
                 createButton.href = redirectUrl;
                 createButton.style.display = 'inline-block';
             } else {

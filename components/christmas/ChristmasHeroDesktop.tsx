@@ -302,6 +302,7 @@ export function ChristmasHeroDesktop() {
     const tid = searchParams.get('tid');
     const mid = searchParams.get('mid');
     const v = searchParams.get('v'); // 视频 URL
+    const isMake = searchParams.get('ismake');
 
     // 设置模板
     if (tid) {
@@ -357,6 +358,12 @@ export function ChristmasHeroDesktop() {
       setResultVideoUrl(v);
       setViewState('create');
       setPreviewState('result');
+      return;
+    }
+
+    // 如果没有视频 URL，但存在 ismake 参数，则进入制作（create）视图
+    if (isMake) {
+      setViewState('create');
     }
   }, [searchParams]);
 
