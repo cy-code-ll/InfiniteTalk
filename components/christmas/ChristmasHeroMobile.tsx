@@ -115,7 +115,19 @@ const TEMPLATES = [
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4-m.png',
     prompt:
       '  A pine forest in the outskirts, covered in snow on the ground, with yellow lights shining from the windows of the small wooden houses on the farm, warm and romantic. Most importantly, countless warm light strings, only white or amber, are wrapped around the pine trees in the forest, outlining their contours. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a red Christmas hat, with a width of 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
+  },
+  {
+    id: 't5',
+    name: 'Merry Christmas',
+    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/5.png',
+    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/5_pc.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/5_pc.png',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/5-m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/5-m.png',
+    prompt:
+      'The background is a simple texture of Christmas red, with a large white artistic font "Merry Christmas" designed on top of it, which accounts for 80% of the width of the page. The artistic font is divided into two lines, one line displays "Merry" and the other line displays "Christmas", with the same font style. There is a real-life Christmas tree with gifts and colorful lights hanging on it. The background space is decorated with fewer Christmas elements, and the layout is coordinated. The overall style is simple and atmospheric, with the character standing at the front wearing a green Christmas sweater. The character width accounts for 70% of the page. The proportion of height on the page is about 80%, making people instantly feel the color impact and vibrant atmosphere of the festival.',
   }
+
 ];
 
 const MUSIC_TRACKS = [
@@ -156,7 +168,7 @@ export function ChristmasHeroMobile() {
   const musicAudioRef = useRef<HTMLAudioElement | null>(null);
   const [currentMusicId, setCurrentMusicId] = useState<string | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
-  
+
   // 自定义音频上传
   const customAudioInputRef = useRef<HTMLInputElement>(null);
   const [customAudioFile, setCustomAudioFile] = useState<File | null>(null);
@@ -171,13 +183,13 @@ export function ChristmasHeroMobile() {
   const [isDownloading, setIsDownloading] = useState(false);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const progressTimerRef = useRef<number | null>(null);
-  
+
   // 背景视频静音状态，默认静音
   const [isBackgroundVideoMuted, setIsBackgroundVideoMuted] = useState(true);
-  
+
   // 模板预览视频状态
   const [templatePreviewVideo, setTemplatePreviewVideo] = useState<string | null>(null);
-  
+
   // 结果视频播放状态
   const resultVideoRef = useRef<HTMLVideoElement | null>(null);
   const [isResultVideoPlaying, setIsResultVideoPlaying] = useState(false);
@@ -282,7 +294,7 @@ export function ChristmasHeroMobile() {
       if (genderFilter === 'all') return true;
       return track.taglist?.includes(genderFilter);
     });
-    
+
     const currentTrack = filteredTracks.find((track) => track.id === selectedMusicId);
     if (!currentTrack && filteredTracks.length > 0) {
       setSelectedMusicId(filteredTracks[0].id);
@@ -485,7 +497,7 @@ export function ChristmasHeroMobile() {
     if (customAudioInputRef.current) {
       customAudioInputRef.current.value = '';
     }
-    
+
     // 如果当前选中的是自定义音频，切换到默认音乐
     if (selectedMusicId === 'custom') {
       setSelectedMusicId(MUSIC_TRACKS[0].id);
@@ -584,7 +596,7 @@ export function ChristmasHeroMobile() {
       const poll = async () => {
         try {
           const result = await api.nanoBanana.checkTaskStatus(taskId);
-          
+
           if (result.code !== 200) {
             reject(new Error(result.msg || 'Task check failed'));
             return;
@@ -759,7 +771,7 @@ export function ChristmasHeroMobile() {
           }
         });
       }
-      
+
       setAudioDuration(duration);
 
       // 积分 / 优惠券检查（与 InfiniteTalkGenerator 逻辑对齐）
@@ -802,7 +814,7 @@ export function ChristmasHeroMobile() {
       const taskId = createResult.data.task_id;
       setTaskCreated(true);
 
-      const result = await api.infiniteTalk.pollTaskStatus(taskId, () => {}, undefined);
+      const result = await api.infiniteTalk.pollTaskStatus(taskId, () => { }, undefined);
 
       stopFakeProgress();
       setProgress(100);
@@ -911,7 +923,7 @@ export function ChristmasHeroMobile() {
           <video
             key={templatePreviewVideo || 'default'}
             src={templatePreviewVideo || "https://www.infinitetalk2.com/infinitetalk/h2.mp4"}
-            poster={templatePreviewVideo 
+            poster={templatePreviewVideo
               ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://www.infinitetalk2.com/infinitetalk/h2.webp'
               : 'https://www.infinitetalk2.com/infinitetalk/h2.webp'}
             className="absolute inset-0 w-full h-full object-cover"
@@ -920,7 +932,7 @@ export function ChristmasHeroMobile() {
             muted={viewState === 'loading' || isBackgroundVideoMuted}
             playsInline
           />
-          
+
           {/* 静音开关 */}
           {viewState === 'display' && (
             <button
@@ -935,7 +947,7 @@ export function ChristmasHeroMobile() {
               )}
             </button>
           )}
-          
+
           {/* 渐变遮罩 */}
           <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
 
@@ -1025,7 +1037,7 @@ export function ChristmasHeroMobile() {
                 setResultVideoCurrentTime(0);
               }}
             />
-            
+
             {/* 返回按钮 - 左上角，半透明玻璃背景，白色图标 */}
             <button
               onClick={handleBackToDisplay}
@@ -1055,9 +1067,8 @@ export function ChristmasHeroMobile() {
               onClick={handleResultVideoToggle}
               className="absolute inset-0 z-10 flex items-center justify-center bg-black/0 hover:bg-black/10 transition-colors cursor-pointer"
             >
-              <div className={`w-16 h-16 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 flex items-center justify-center transition-all hover:scale-110 ${
-                (!isResultVideoPlaying || showPlayPauseButton) ? 'opacity-100' : 'opacity-0'
-              }`}>
+              <div className={`w-16 h-16 rounded-full bg-black/30 backdrop-blur-md border border-white/10 hover:bg-black/40 flex items-center justify-center transition-all hover:scale-110 ${(!isResultVideoPlaying || showPlayPauseButton) ? 'opacity-100' : 'opacity-0'
+                }`}>
                 {isResultVideoPlaying ? (
                   <Pause className="w-8 h-8 text-white" fill="currentColor" />
                 ) : (
@@ -1071,11 +1082,11 @@ export function ChristmasHeroMobile() {
           <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 z-30">
             {/* 进度条 - 在按钮组内部，确保不被遮挡 */}
             <div className="mb-4 px-2">
-              <div 
+              <div
                 className="w-full h-1 bg-white/30 rounded-full cursor-pointer"
                 onClick={handleResultVideoProgressClick}
               >
-                <div 
+                <div
                   className="h-full bg-white rounded-full transition-all"
                   style={{ width: `${resultVideoProgress}%` }}
                 />
@@ -1086,44 +1097,46 @@ export function ChristmasHeroMobile() {
               </div>
             </div>
             <div className="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10">
-              <div className="flex items-center gap-3">
-                <Button
-                  variant="outline"
-                  disabled={isDownloading}
-                  className="flex-1 border-2 border-yellow-400/50 bg-gradient-to-r from-red-600 to-red-700 text-yellow-300 hover:from-red-700 hover:to-red-800 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed font-semibold py-6 rounded-lg shadow-lg flex items-center justify-center gap-2"
-                  onClick={handleDownload}
-                  style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
-                >
-                  {isDownloading ? (
-                    <>
-                      <Loader2 className="w-5 h-5 animate-spin text-yellow-300" />
-                      <span>Downloading...</span>
-                    </>
-                  ) : (
-                    <>
-                      <Download className="w-5 h-5 text-yellow-300" />
-                      <span>Download</span>
-                    </>
-                  )}
-                </Button>
+              <div className="flex items-center gap-3 justify-around">
                 {selectedTemplateId && selectedMusicId && (
-                  <>
+                  <div className="flex items-center gap-3">
                     <Button
-                      size="icon"
                       variant="outline"
-                      className="border-2 border-yellow-400/50 bg-black text-white hover:bg-gray-900 hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'twitter')}
-                      title="Share to Twitter"
+                      className="border-2 border-yellow-400/50 bg-black text-white hover:bg-gray-900 hover:border-yellow-400 h-14 px-4 rounded-lg shadow-lg flex items-center gap-2"
+                      onClick={() =>
+                        shareChristmasToSocial(
+                          resultVideoUrl,
+                          selectedTemplateId,
+                          selectedMusicId,
+                          'twitter'
+                        )
+                      }
+                      title="Share to X"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                       </svg>
+                      <span
+                        className="text-xs"
+                        style={{
+                          fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif',
+                        }}
+                      >
+                        Share on X
+                      </span>
                     </Button>
                     <Button
                       size="icon"
                       variant="outline"
                       className="border-2 border-yellow-400/50 bg-[#1877F2] text-white hover:bg-[#166fe5] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'facebook')}
+                      onClick={() =>
+                        shareChristmasToSocial(
+                          resultVideoUrl,
+                          selectedTemplateId,
+                          selectedMusicId,
+                          'facebook'
+                        )
+                      }
                       title="Share to Facebook"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
@@ -1134,15 +1147,38 @@ export function ChristmasHeroMobile() {
                       size="icon"
                       variant="outline"
                       className="border-2 border-yellow-400/50 bg-[#25D366] text-white hover:bg-[#20ba5a] hover:border-yellow-400 w-14 h-14 rounded-lg shadow-lg"
-                      onClick={() => shareChristmasToSocial(resultVideoUrl, selectedTemplateId, selectedMusicId, 'whatsapp')}
+                      onClick={() =>
+                        shareChristmasToSocial(
+                          resultVideoUrl,
+                          selectedTemplateId,
+                          selectedMusicId,
+                          'whatsapp'
+                        )
+                      }
                       title="Share to WhatsApp"
                     >
                       <svg className="h-5 w-5" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z" />
                       </svg>
                     </Button>
-                  </>
+                    <Button
+                      size="icon"
+                      variant="outline"
+                      disabled={isDownloading}
+                      className="border-2 border-yellow-400/50 bg-gradient-to-r from-red-600 to-red-700 text-yellow-300 hover:from-red-700 hover:to-red-800 hover:border-yellow-400 disabled:opacity-50 disabled:cursor-not-allowed w-14 h-14 rounded-lg shadow-lg flex items-center justify-center"
+                      onClick={handleDownload}
+                      title={isDownloading ? 'Downloading...' : 'Download'}
+                    >
+                      {isDownloading ? (
+                        <Loader2 className="w-5 h-5 animate-spin text-yellow-300" />
+                      ) : (
+                        <Download className="w-5 h-5 text-yellow-300" />
+                      )}
+                    </Button>
+                  </div>
                 )}
+
+
               </div>
             </div>
           </div>
@@ -1185,7 +1221,7 @@ export function ChristmasHeroMobile() {
                       </>
                     ) : (
                       <>
-                          <div className="w-14 h-14 rounded-full border border-yellow-400/40 flex items-center justify-center mb-3">
+                        <div className="w-14 h-14 rounded-full border border-yellow-400/40 flex items-center justify-center mb-3">
                           <Upload className="w-7 h-7 text-white/80" />
                         </div>
                         <p className="text-white/80 text-sm" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Tap to upload photo</p>
@@ -1218,11 +1254,10 @@ export function ChristmasHeroMobile() {
                           setTemplatePreviewVideo(tpl.previewVideo);
                         }
                       }}
-                      className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${
-                        selectedTemplateId === tpl.id
+                      className={`relative rounded-lg border-2 overflow-hidden flex-shrink-0 transition-all ${selectedTemplateId === tpl.id
                           ? 'border-yellow-400 shadow-lg'
                           : 'border-yellow-400/30 hover:border-yellow-400/60'
-                      }`}
+                        }`}
                       style={{ aspectRatio: '2/1', width: '180px' }}
                     >
                       <img
@@ -1257,15 +1292,14 @@ export function ChristmasHeroMobile() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-2xl tracking-wide font-semibold text-white font-mountains">3. Choose music</h3>
-                    <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
+                  <div className="flex items-center gap-2 bg-black/20 rounded-full p-1 border border-yellow-400/30">
                     <button
                       type="button"
                       onClick={() => setGenderFilter('all')}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                        genderFilter === 'all'
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${genderFilter === 'all'
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
-                      }`}
+                        }`}
                       style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       All
@@ -1273,11 +1307,10 @@ export function ChristmasHeroMobile() {
                     <button
                       type="button"
                       onClick={() => setGenderFilter('male')}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                        genderFilter === 'male'
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${genderFilter === 'male'
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
-                      }`}
+                        }`}
                       style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       Male
@@ -1285,11 +1318,10 @@ export function ChristmasHeroMobile() {
                     <button
                       type="button"
                       onClick={() => setGenderFilter('female')}
-                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${
-                        genderFilter === 'female'
+                      className={`px-3 py-1 rounded-full text-xs font-medium transition-all ${genderFilter === 'female'
                           ? 'bg-yellow-400/20 text-white border border-yellow-400/50'
                           : 'text-white/60 hover:text-white/80'
-                      }`}
+                        }`}
                       style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                     >
                       Female
@@ -1302,11 +1334,10 @@ export function ChristmasHeroMobile() {
                     <button
                       type="button"
                       onClick={() => handleSelectMusic('custom')}
-                      className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${
-                        selectedMusicId === 'custom'
+                      className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 ${selectedMusicId === 'custom'
                           ? 'border-yellow-400 bg-yellow-400/20 text-white shadow-lg'
                           : 'border-yellow-400/30 bg-black/10 text-white/80 hover:border-yellow-400/60'
-                      }`}
+                        }`}
                       title={customAudioFile.name}
                     >
                       {selectedMusicId === 'custom' && currentMusicId === 'custom' && isMusicPlaying ? (
@@ -1315,8 +1346,8 @@ export function ChristmasHeroMobile() {
                         <Play className={`w-4 h-4 mr-1 ${selectedMusicId === 'custom' ? 'text-yellow-300' : ''}`} />
                       )}
                       <span className="text-xs mr-2" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                        {customAudioFile.name.length > 15 
-                          ? customAudioFile.name.substring(0, 15) + '...' 
+                        {customAudioFile.name.length > 15
+                          ? customAudioFile.name.substring(0, 15) + '...'
                           : customAudioFile.name}
                       </span>
                       <span
@@ -1348,7 +1379,7 @@ export function ChristmasHeroMobile() {
                     onChange={handleCustomAudioUpload}
                     className="hidden"
                   />
-                  
+
                   {/* 预设音乐列表 */}
                   {MUSIC_TRACKS.filter((track) => {
                     if (genderFilter === 'all') return true;
@@ -1361,11 +1392,10 @@ export function ChristmasHeroMobile() {
                         key={track.id}
                         type="button"
                         onClick={() => handleSelectMusic(track.id)}
-                        className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 whitespace-nowrap ${
-                          isActive
+                        className={`py-3 px-4 rounded-lg border-2 flex items-center justify-center transition-all flex-shrink-0 whitespace-nowrap ${isActive
                             ? 'border-yellow-400 bg-yellow-400/20 text-white shadow-lg'
                             : 'border-yellow-400/30 bg-black/10 text-white/80 hover:border-yellow-400/60'
-                        }`}
+                          }`}
                         title={track.name}
                       >
                         {isPlaying ? (
@@ -1381,7 +1411,7 @@ export function ChristmasHeroMobile() {
               </div>
             </div>
           </div>
-          
+
           {/* 固定在底部的生成按钮 */}
           <div className="px-6 pb-6 pt-4 border-t border-yellow-400/20 bg-black/50 flex justify-center">
             <Button
@@ -1401,8 +1431,8 @@ export function ChristmasHeroMobile() {
               {isGenerating
                 ? 'Generating...'
                 : isUpgradeMode
-                ? 'Upgrade Plan'
-                : 'Create the video'}
+                  ? 'Upgrade Plan'
+                  : 'Create the video'}
               <Sparkles className="w-4 h-4 text-yellow-300" />
               {/* 积分显示 - Upgrade 模式下不显示，Trial 模式显示 Free */}
               {!isUpgradeMode && selectedMusicId && (
@@ -1413,8 +1443,8 @@ export function ChristmasHeroMobile() {
                   {trialAccess.mode === 'trial' && isSignedIn
                     ? 'Free'
                     : effectiveDuration > 0
-                    ? `${calculateCredits(effectiveDuration, '720p')} Credits`
-                    : '11 Credits'}
+                      ? `${calculateCredits(effectiveDuration, '720p')} Credits`
+                      : '11 Credits'}
                 </div>
               )}
             </Button>
