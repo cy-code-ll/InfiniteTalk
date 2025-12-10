@@ -147,8 +147,8 @@ const TEMPLATES = [
     thumbnail: 'https://www.infinitetalk2.com/infinitetalk/5.png',
     previewVideo: 'https://www.infinitetalk2.com/infinitetalk/5_pc.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/5_pc.png',
-    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/5-m.mp4',
-    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/5-m.png',
+    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/5_m.mp4',
+    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/5_m.png',
     prompt:
       'The background is a simple texture of Christmas red, with a large white artistic font "Merry Christmas" designed on top of it, which accounts for 80% of the width of the page. The artistic font is divided into two lines, one line displays "Merry" and the other line displays "Christmas", with the same font style. There is a real-life Christmas tree with gifts and colorful lights hanging on it. The background space is decorated with fewer Christmas elements, and the layout is coordinated. The overall style is simple and atmospheric, with the character standing at the front wearing a green Christmas sweater. The character width accounts for 70% of the page. The proportion of height on the page is about 80%, making people instantly feel the color impact and vibrant atmosphere of the festival.',
   }
