@@ -91,6 +91,7 @@ export default function RootLayout({
           }
           html {
             scroll-behavior: smooth;
+            overflow-x: hidden;
           }
           body {
             background-color: var(--background);
@@ -98,6 +99,7 @@ export default function RootLayout({
             font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
+            overflow-x: hidden;
           }
           .font-poppins {
             font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;

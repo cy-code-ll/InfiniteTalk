@@ -25,6 +25,7 @@ export const LiteDrawer: React.FC<LiteDrawerProps> = ({
       
       requestAnimationFrame(() => {
         document.body.style.overflow = 'hidden';
+        document.documentElement.style.overflowX = 'hidden';
         if (!isMobile) {
           const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
           document.body.style.paddingRight = `${scrollbarWidth}px`;
@@ -36,6 +37,7 @@ export const LiteDrawer: React.FC<LiteDrawerProps> = ({
       requestAnimationFrame(() => {
         document.body.style.overflow = '';
         document.body.style.paddingRight = '';
+        document.documentElement.style.overflowX = '';
       });
     }
   }, [open]);
@@ -83,8 +85,10 @@ export const LiteDrawer: React.FC<LiteDrawerProps> = ({
         role="dialog"
         aria-modal="false"
         aria-hidden={!open}
-        className={`fixed top-0 right-0 bottom-0 h-dvh max-h-dvh w-[85vw] sm:w-[340px] bg-slate-900 shadow-2xl transition-transform duration-200 ease-out z-50 overflow-y-auto overscroll-contain touch-pan-y ${
-          open ? 'translate-x-0' : 'translate-x-full'
+        className={`fixed top-0 bottom-0 h-dvh max-h-dvh w-[85vw] sm:w-[340px] bg-slate-900 shadow-2xl transition-transform duration-200 ease-out z-50 overflow-y-auto overscroll-contain touch-pan-y ${
+          open 
+            ? 'translate-x-0 pointer-events-auto right-0' 
+            : 'translate-x-full pointer-events-none right-0'
         } [will-change:transform] ${className}`}
       >
         {children}
