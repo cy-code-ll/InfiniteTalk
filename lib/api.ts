@@ -399,6 +399,7 @@ export const infiniteTalkApi = {
     duration: number;
     resolution: string;
     mask?: string;
+    topic_tag?: string;
   }) => {
     const formData = new FormData();
     formData.append('image', params.image);
@@ -410,6 +411,11 @@ export const infiniteTalkApi = {
     // 如果有遮罩图，添加到FormData中
     if (params.mask) {
       formData.append('mask_image', params.mask);
+    }
+
+    // 如果有 topic_tag，添加到FormData中
+    if (params.topic_tag) {
+      formData.append('topic_tag', params.topic_tag);
     }
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）

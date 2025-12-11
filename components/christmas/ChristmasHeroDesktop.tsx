@@ -881,6 +881,7 @@ export function ChristmasHeroDesktop() {
         prompt: '', // prompt 为空
         duration: Math.ceil(duration),
         resolution,
+        topic_tag: '1',
       });
 
       if (createResult.code !== 200 || !createResult.data?.task_id) {
@@ -945,7 +946,7 @@ export function ChristmasHeroDesktop() {
       <SnowOverlay density={120} />
 
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1 mb-10">
-        <h1 className="text-5xl md:text-6xl text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
+        <h1 className="pt-16 text-5xl md:text-6xl text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           <span className="text-yellow-300">Christmas</span>{' '}
           <span className="text-white">Greeting Video Ideas</span>
         </h1>

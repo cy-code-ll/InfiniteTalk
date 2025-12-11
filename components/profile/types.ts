@@ -48,6 +48,7 @@ export interface GenerationHistoryItem {
   created_at: number;
   updated_at: number;
   model?: string;
+  topic_tag?: number;
 }
 
 // 定义图片历史记录 API 返回的数据结构

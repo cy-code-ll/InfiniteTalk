@@ -20,6 +20,7 @@ import {
   isAudioFile 
 } from './utils';
 import { shareToSocial } from '@/lib/share-utils';
+import { shareChristmasToSocial } from '@/components/christmas/share-utils';
 import { useToast } from '@/components/ui/toast-provider';
 import { DeleteConfirmDialog } from './DeleteConfirmDialog';
 
@@ -109,7 +110,13 @@ export function VideoDetailDialog({ open, onOpenChange, videoDetail, onDeleteSuc
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => shareToSocial(videoDetail.task_id, 'twitter')}
+                    onClick={() => {
+                      if (videoDetail.topic_tag === 1) {
+                        shareChristmasToSocial(videoDetail.generate_image, 't1', 'm1', 'twitter');
+                      } else {
+                        shareToSocial(videoDetail.task_id, 'twitter');
+                      }
+                    }}
                     title="Share to Twitter"
                     className="hover:bg-[#1DA1F2] hover:text-white hover:border-[#1DA1F2] flex-1 sm:flex-none"
                   >
@@ -122,7 +129,13 @@ export function VideoDetailDialog({ open, onOpenChange, videoDetail, onDeleteSuc
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => shareToSocial(videoDetail.task_id, 'facebook')}
+                    onClick={() => {
+                      if (videoDetail.topic_tag === 1) {
+                        shareChristmasToSocial(videoDetail.generate_image, 't1', 'm1', 'facebook');
+                      } else {
+                        shareToSocial(videoDetail.task_id, 'facebook');
+                      }
+                    }}
                     title="Share to Facebook"
                     className="hover:bg-[#1877F2] hover:text-white hover:border-[#1877F2] flex-1 sm:flex-none"
                   >
@@ -135,7 +148,13 @@ export function VideoDetailDialog({ open, onOpenChange, videoDetail, onDeleteSuc
                   <Button
                     variant="outline"
                     size="icon"
-                    onClick={() => shareToSocial(videoDetail.task_id, 'whatsapp')}
+                    onClick={() => {
+                      if (videoDetail.topic_tag === 1) {
+                        shareChristmasToSocial(videoDetail.generate_image, 't1', 'm1', 'whatsapp');
+                      } else {
+                        shareToSocial(videoDetail.task_id, 'whatsapp');
+                      }
+                    }}
                     title="Share to WhatsApp"
                     className="hover:bg-[#25D366] hover:text-white hover:border-[#25D366] flex-1 sm:flex-none"
                   >

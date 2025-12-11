@@ -804,6 +804,7 @@ export function ChristmasHeroMobile() {
         prompt: '', // prompt 为空
         duration: Math.ceil(duration),
         resolution,
+        topic_tag: '1',
       });
 
       if (createResult.code !== 200 || !createResult.data?.task_id) {
