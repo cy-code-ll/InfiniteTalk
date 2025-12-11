@@ -1,6 +1,9 @@
 import './globals.css'
 import Script from 'next/script';
 import { Navbar } from '@/components/Navbar';
+import { MaintenanceBanner } from '@/components/MaintenanceBanner';
+import { MaintenanceModalWrapper } from '@/components/MaintenanceModalWrapper';
+import { MaintenanceBannerProvider } from '@/components/MaintenanceBannerContext';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
@@ -120,10 +123,14 @@ export default function RootLayout({
           <ToastProvider>
             <UserProvider>
               <AuthModalProvider>
-                <Navbar />
-                <main className="min-h-[calc(100vh-80px)]">
-                  {children}
-                </main>
+                <MaintenanceBannerProvider>
+                  <MaintenanceBanner />
+                  <Navbar />
+                  <MaintenanceModalWrapper />
+                  <main className="min-h-[calc(100vh-80px)]">
+                    {children}
+                  </main>
+                </MaintenanceBannerProvider>
               </AuthModalProvider>
             </UserProvider>
           </ToastProvider>

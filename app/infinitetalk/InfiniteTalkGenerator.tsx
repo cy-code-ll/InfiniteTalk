@@ -398,7 +398,7 @@ export default function InfiniteTalkGenerator() {
         if (cache.resolution) setResolution(cache.resolution);
         if (cache.tabMode) setTabMode(cache.tabMode);
 
-        toast.success('Form data restored!');
+        // toast.success('Form data restored!');
       }
 
       // 4️⃣ 处理 AudioTools 返回的新音频（这会在下面的 useEffect 中执行）

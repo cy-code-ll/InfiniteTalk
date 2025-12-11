@@ -194,7 +194,7 @@ export function Wans2vHero() {
         if (cache.prompt) setPrompt(cache.prompt);
         if (cache.resolution) setResolution(cache.resolution);
 
-        toast.showToast('Form data restored!', 'success');
+        // toast.showToast('Form data restored!', 'success');
       }
 
       // 4️⃣ 处理 AudioTools 返回的新音频（这会在下面的 useEffect 中执行）
