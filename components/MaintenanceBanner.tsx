@@ -61,15 +61,15 @@ export function MaintenanceBanner() {
     fetchConfig();
   }, []);
 
-  // Format UTC time for display
-  const formatUTCTime = (isoString: string): string => {
+  // Format UTC time to local time for display
+  const formatLocalTime = (isoString: string): string => {
     try {
       const date = new Date(isoString);
-      // Get UTC components
-      const month = date.getUTCMonth();
-      const day = date.getUTCDate();
-      const hours = date.getUTCHours().toString().padStart(2, '0');
-      const minutes = date.getUTCMinutes().toString().padStart(2, '0');
+      // Get local time components
+      const month = date.getMonth();
+      const day = date.getDate();
+      const hours = date.getHours().toString().padStart(2, '0');
+      const minutes = date.getMinutes().toString().padStart(2, '0');
       
       // Month names
       const monthNames = [
@@ -77,7 +77,7 @@ export function MaintenanceBanner() {
         'July', 'August', 'September', 'October', 'November', 'December'
       ];
       
-      // Format as "December 25, 10:00"
+      // Format as "December 25, 10:00" (local time)
       return `${monthNames[month]} ${day}, ${hours}:${minutes}`;
     } catch {
       return isoString;
@@ -88,8 +88,8 @@ export function MaintenanceBanner() {
   const formatMessage = (message: string): string => {
     if (!config) return message;
     
-    const startTimeDisplay = formatUTCTime(config.startTime);
-    const endTimeDisplay = formatUTCTime(config.endTime);
+    const startTimeDisplay = formatLocalTime(config.startTime);
+    const endTimeDisplay = formatLocalTime(config.endTime);
     
     return message
       .replace('{startTime}', startTimeDisplay)
