@@ -90,6 +90,11 @@ const nextConfig: NextConfig = {
         hostname: 'cf.framepola.com',
         pathname: '/**',
       },
+      {
+        protocol: 'https',
+        hostname: 'cfsource.infinitetalk.net',
+        pathname: '/**',
+      },
     ],
   },
   // Headers 优化缓存

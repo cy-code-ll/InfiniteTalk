@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Button } from '../../ui/button';
 
 // Icon component matching Sections.tsx style
@@ -19,13 +20,22 @@ export default function Hero() {
 
       <div className="container mx-auto px-6 md:px-8 max-w-7xl relative">
         <div className="mx-auto max-w-4xl text-center">
-          {/* Badge */}
-          <div className="inline-flex items-center gap-2 md:gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs md:text-sm font-medium backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-            </span>
-            <span className="tracking-wide">AI‑Powered Sparse‑Frame Dubbing</span>
+          {/* Badge - Christmas Image */}
+          <div className="mb-10 md:mb-12 w-full max-w-2xl mx-auto">
+            <Link href="/christmas" aria-label="Go to Christmas page">
+              <div className="relative w-full rounded-lg overflow-hidden shadow-2xl transition-transform hover:scale-[1.02]">
+                <Image
+                  src="https://cfsource.infinitetalk.net/infinitetalk/christmas/christmas.png"
+                  alt="Christmas"
+                  width={0}
+                  height={0}
+                  sizes="100vw"
+                  style={{ width: '100%', height: 'auto' }}
+                  className="object-contain"
+                  priority
+                />
+              </div>
+            </Link>
           </div>
 
           {/* Title */}
