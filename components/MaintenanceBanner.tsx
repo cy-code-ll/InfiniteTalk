@@ -1,9 +1,10 @@
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
-import { AlertCircle } from 'lucide-react';
+import { AlertCircle, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useMaintenanceBanner } from './MaintenanceBannerContext';
+import { useUser } from '@clerk/nextjs';
 
 interface MaintenanceConfig {
   enabled: boolean;
@@ -24,12 +25,43 @@ export function MaintenanceBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const bannerRef = useRef<HTMLDivElement>(null);
   const { setBannerVisible, setBannerHeight } = useMaintenanceBanner();
+  const { isSignedIn, user } = useUser();
+  const siteId = 'infinitetalk';
+
+  // Check if banner was dismissed by this user
+  const getDismissalKey = () => {
+    if (!user?.id) return null;
+    return `maintenance-banner-dismissed-${siteId}-${user.id}`;
+  };
+
+  const isDismissed = () => {
+    if (typeof window === 'undefined') return false;
+    const key = getDismissalKey();
+    if (!key) return false;
+    return localStorage.getItem(key) === 'true';
+  };
+
+  const handleDismiss = () => {
+    const key = getDismissalKey();
+    if (key && typeof window !== 'undefined') {
+      localStorage.setItem(key, 'true');
+      setIsVisible(false);
+      setBannerVisible(false);
+    }
+  };
 
   useEffect(() => {
     const fetchConfig = async () => {
       try {
-        // Get site ID from environment variable or default to 'infinitetalk'
-        const siteId = 'infinitetalk';
+        // Only show banner for signed-in users
+        if (!isSignedIn || !user?.id) {
+          return;
+        }
+
+        // Check if user has dismissed the banner
+        if (isDismissed()) {
+          return;
+        }
         
         const response = await fetch('https://cysource.jxp.com/public/maintenance-notice.json', {
           cache: 'no-store', // Always fetch fresh data
@@ -59,7 +91,7 @@ export function MaintenanceBanner() {
     };
 
     fetchConfig();
-  }, []);
+  }, [isSignedIn, user?.id]);
 
   // Format UTC time to local time for display
   const formatLocalTime = (isoString: string): string => {
@@ -128,9 +160,16 @@ export function MaintenanceBanner() {
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center py-3 text-sm">
           <AlertCircle className="h-4 w-4 mr-2 flex-shrink-0" />
-          <span className="text-center">
+          <span className="text-center flex-1">
             {formatMessage(config.message)}
           </span>
+          <button
+            onClick={handleDismiss}
+            className="ml-4 flex-shrink-0 p-1 rounded-md hover:bg-white/20 transition-colors"
+            aria-label="Close maintenance notice"
+          >
+            <X className="h-4 w-4" />
+          </button>
         </div>
       </div>
     </div>
