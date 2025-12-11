@@ -18,7 +18,7 @@ export const VoucherToast: React.FC<VoucherToastProps> = ({ count, onClose }) =>
   }, [onClose]);
 
   return (
-    <div className="fixed top-4 right-4 z-[60]">
+    <div className="fixed top-4 right-4 z-[80]">
       <div className="relative flex items-start gap-3 rounded-2xl bg-slate-900/95 px-4 py-3 shadow-xl border border-slate-700/70 backdrop-blur-md min-w-[280px] max-w-[360px]">
         <div className="absolute inset-x-0 -top-[1px] h-[2px] rounded-t-2xl bg-gradient-to-r from-lime-300 via-emerald-300 to-sky-300" />
 

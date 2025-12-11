@@ -31,7 +31,7 @@ export const Toast = ({ message, type, onClose }: ToastProps) => {
                    'text-blue-500';
 
   return (
-    <div className={`fixed top-4 right-4 z-[70] flex items-center p-4 mb-4 rounded-lg shadow-lg border-l-4 ${bgColor}`} role="alert">
+    <div className={`fixed top-4 right-4 z-[80] flex items-center p-4 mb-4 rounded-lg shadow-lg border-l-4 ${bgColor}`} role="alert">
       <div className={`text-sm font-medium ${textColor}`}>{message}</div>
       <button 
         type="button" 
