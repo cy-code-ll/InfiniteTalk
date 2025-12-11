@@ -11,7 +11,7 @@ const RocketIcon = () => (
 export default function Hero() {
   return (
     <section
-      className="relative overflow-hidden min-h-[100vh] flex items-center pt-16"
+      className="relative overflow-hidden min-h-[100vh] flex items-center"
       aria-labelledby="hero-title"
     >
       {/* Background gradient overlay */}

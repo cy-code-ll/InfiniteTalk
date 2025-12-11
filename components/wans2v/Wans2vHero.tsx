@@ -618,7 +618,7 @@ export function Wans2vHero() {
   };
 
   return (
-    <section className="py-28 relative">
+    <section className="relative">
       <div className="container mx-auto px-6 max-w-7xl relative">
         {/* Header */}
         <div className="text-center mb-16">

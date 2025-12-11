@@ -99,7 +99,7 @@ export default function Wans2vPage() {
           ]
         }) }}
       />
-      <main className="pt-16">
+      <main className="pt-30">
         <Wans2vHero />
         <Wans2vHowToUse />
         <Wans2vFeatures />
