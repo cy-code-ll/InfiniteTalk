@@ -744,6 +744,64 @@ export function ChristmasHeroDesktop() {
       return;
     }
 
+    // 先获取音频时长，用于积分校验（在开始图片处理之前）
+    let duration: number;
+    if (selectedMusicId === 'custom' && customAudioFile) {
+      // 使用自定义音频的时长
+      duration = customAudioDuration;
+    } else {
+      // 从预设音乐获取时长（只获取 metadata，不下载完整文件）
+      const music = MUSIC_TRACKS.find((m) => m.id === selectedMusicId);
+      if (!music) {
+        toast.error('Please choose a music');
+        return;
+      }
+      try {
+        duration = await new Promise<number>((resolve, reject) => {
+          const audioEl = new Audio();
+          audioEl.crossOrigin = 'anonymous';
+          audioEl.preload = 'metadata';
+          audioEl.onloadedmetadata = () => {
+            const d = Math.ceil(audioEl.duration || 0);
+            URL.revokeObjectURL(audioEl.src);
+            resolve(d || 30);
+          };
+          audioEl.onerror = () => {
+            URL.revokeObjectURL(audioEl.src);
+            reject(new Error('Failed to load audio metadata'));
+          };
+          audioEl.src = music.url;
+        });
+      } catch (error: any) {
+        console.error('Failed to get audio duration:', error);
+        toast.error('Failed to load music metadata. Please check network connection.');
+        return;
+      }
+    }
+
+    setAudioDuration(duration);
+
+    // 积分 / 优惠券检查（在开始图片处理之前进行）
+    const resolution: Resolution = '720p';
+    const requiredCredits = calculateCredits(duration, resolution);
+    const totalCredits = userInfo.total_credits ?? 0;
+    const freeTimes = userInfo.free_times ?? 0;
+    const roundedDuration = Math.ceil(duration || 0);
+    const isTrialResolution = true; // resolution 固定为 '720p'，直接视为试用分辨率
+    const isTrialDuration = roundedDuration > 0 && roundedDuration <= 15;
+
+    const canUseVoucher =
+      freeTimes > 0 &&
+      totalCredits === 0 &&
+      isTrialResolution &&
+      isTrialDuration;
+
+    if (!canUseVoucher && totalCredits < requiredCredits) {
+      setIsInsufficientCreditsModalOpen(true);
+      return;
+    }
+
+    // 积分校验通过，开始生成流程
     try {
       setIsGenerating(true);
       setPreviewState('loading');
@@ -789,14 +847,12 @@ export function ChristmasHeroDesktop() {
       const processedImageFile = await urlToFile(processedImageUrl, 'processed-image.png');
       console.log('Processed image file created:', processedImageFile);
 
-      // 步骤5: 获取音频文件和时长
+      // 步骤5: 获取音频文件（用于生成视频）
       let audioFile: File;
-      let duration: number;
 
       if (selectedMusicId === 'custom' && customAudioFile) {
         // 使用自定义音频
         audioFile = customAudioFile;
-        duration = customAudioDuration;
       } else {
         // 从音乐 URL 创建 File
         const music = MUSIC_TRACKS.find((m) => m.id === selectedMusicId);
@@ -826,51 +882,6 @@ export function ChristmasHeroDesktop() {
         audioFile = new File([musicBlob], `${music.id}.mp3`, {
           type: musicBlob.type || 'audio/mpeg',
         });
-
-        // 获取音频时长
-        duration = await new Promise<number>((resolve) => {
-          try {
-            const audioEl = document.createElement('audio');
-            audioEl.preload = 'metadata';
-            audioEl.onloadedmetadata = () => {
-              const d = Math.ceil(audioEl.duration || 0);
-              URL.revokeObjectURL(audioEl.src);
-              resolve(d || 30);
-            };
-            audioEl.onerror = () => {
-              URL.revokeObjectURL(audioEl.src);
-              resolve(30);
-            };
-            audioEl.src = URL.createObjectURL(audioFile);
-          } catch {
-            resolve(30);
-          }
-        });
-      }
-      
-      setAudioDuration(duration);
-
-      // 积分 / 优惠券检查（与 InfiniteTalkGenerator 逻辑对齐）
-      const resolution: Resolution = '720p';
-      const requiredCredits = calculateCredits(duration, resolution);
-      const totalCredits = userInfo.total_credits ?? 0;
-      const freeTimes = userInfo.free_times ?? 0;
-      const roundedDuration = Math.ceil(duration || 0);
-      const isTrialResolution = true; // resolution 固定为 '720p'，直接视为试用分辨率
-      const isTrialDuration = roundedDuration > 0 && roundedDuration <= 15;
-
-      const canUseVoucher =
-        freeTimes > 0 &&
-        totalCredits === 0 &&
-        isTrialResolution &&
-        isTrialDuration;
-
-      if (!canUseVoucher && totalCredits < requiredCredits) {
-        setIsInsufficientCreditsModalOpen(true);
-        stopFakeProgress();
-        setPreviewState('idle');
-        setIsGenerating(false);
-        return;
       }
 
       // 步骤6: 调用 InfiniteTalk image-to-video 接口
