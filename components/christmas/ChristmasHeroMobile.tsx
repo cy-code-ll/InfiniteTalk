@@ -930,7 +930,7 @@ export function ChristmasHeroMobile() {
     <>
       {/* Display State - 背景视频 + 底部按钮 */}
       {(viewState === 'display' || viewState === 'loading') && (
-        <div className="relative w-full h-[calc(100vh-4rem)] overflow-hidden flex flex-col items-center justify-center">
+        <div className="relative w-full h-[calc(100dvh-4rem)] overflow-hidden flex flex-col items-center justify-center">
           {/* 背景视频 */}
           <video
             key={templatePreviewVideo || 'default'}
