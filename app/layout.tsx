@@ -133,7 +133,7 @@ export default function RootLayout({
                     <MaintenanceBanner />
                     <Navbar />
                     <MaintenanceModalWrapper />
-                    <main className="min-h-[calc(100vh-80px)]">
+                    <main>
                       {children}
                     </main>
                   </MaintenanceBannerProvider>

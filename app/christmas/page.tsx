@@ -3,16 +3,15 @@ import Script from 'next/script';
 import { Footer } from '@/components/Footer';
 import { Upload, Sparkles, Share2 } from 'lucide-react';
 import { ChristmasHero } from '@/components/christmas/ChristmasHero';
-import { ChristmasPageWrapper } from '@/components/christmas/ChristmasPageWrapper';
 
 // SEO metadata - T<60, D<160, K<100
 export const metadata: Metadata = {
-  title: 'Christmas Greeting Video Ideas | AI Video Generator',
-  description: 'Create amazing Christmas greeting videos with AI. Generate personalized holiday video messages with lip-sync technology.',
-  keywords: 'Christmas greeting video ideas, holiday video maker, AI Christmas videos, personalized videos',
+  title: 'Merry Christmas ai video Marker | AI Video Generator',
+  description: 'Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.',
+  keywords: 'Merry Christmas ai video Marker, Christmas video maker, AI Christmas videos, free Christmas video clips',
   openGraph: {
-    title: 'Christmas Greeting Video Ideas | AI Video Generator',
-    description: 'Create amazing Christmas greeting videos with AI. Generate personalized holiday video messages with lip-sync technology.',
+    title: 'Merry Christmas ai video Marker | AI Video Generator',
+    description: 'Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.',
     url: 'https://www.infinitetalk.net/christmas',
     siteName: 'InfiniteTalk AI',
     images: [
@@ -28,8 +27,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Christmas Greeting Video Ideas | AI Video Generator',
-    description: 'Create amazing Christmas greeting videos with AI. Generate personalized holiday video messages.',
+    title: 'Merry Christmas ai video Marker | AI Video Generator',
+    description: 'Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.',
     images: ['https://www.infinitetalk.net/og-christmas.jpg'],
   },
   alternates: {
@@ -41,8 +40,8 @@ export const metadata: Metadata = {
 const christmasSchemaData = {
   '@context': 'https://schema.org',
   '@type': 'WebPage',
-  name: 'Christmas Greeting Video Ideas',
-  description: 'Create amazing Christmas greeting videos with AI. Generate personalized holiday video messages with lip-sync technology.',
+  name: 'Merry Christmas ai video Marker',
+  description: 'Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.',
   url: 'https://www.infinitetalk.net/christmas',
   mainEntity: {
     '@type': 'SoftwareApplication',
@@ -59,7 +58,7 @@ const christmasSchemaData = {
 
 export default function ChristmasPage() {
   return (
-    <ChristmasPageWrapper>
+    <>
       {/* Breadcrumb structured data */}
       <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -102,7 +101,7 @@ export default function ChristmasPage() {
       <div className="hidden md:block">
         <Footer />
       </div>
-    </ChristmasPageWrapper>
+    </>
   );
 }
 

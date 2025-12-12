@@ -990,10 +990,10 @@ export function ChristmasHeroMobile() {
           {viewState === 'display' && (
             <div className="relative z-10 text-center px-6 mb-8">
               <h1 className="text-3xl md:text-4xl text-yellow-300 mb-3 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                Christmas Greeting Video Ideas
+                Merry Christmas ai video Marker
               </h1>
               <p className="text-sm md:text-base text-white/90 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
-                Upload your photo, and let Santa do the magic! A free, personalized video is just one click away
+                Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.
               </p>
             </div>
           )}
