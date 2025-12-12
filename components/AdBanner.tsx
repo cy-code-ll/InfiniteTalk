@@ -2,15 +2,22 @@
 
 import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { useAdBanner } from './AdBannerContext';
 
 const AD_BANNER_IMAGE_URL = 'https://cfsource.infinitetalk.net/infinitetalk/banner.gif';
+const AD_BANNER_MOBILE_IMAGE_URL = 'https://cfsource.infinitetalk.net/infinitetalk/bannershouji.gif';
 
 export function AdBanner() {
+  const pathname = usePathname();
   const bannerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
+  const mobileImageRef = useRef<HTMLImageElement>(null);
+  const desktopImageRef = useRef<HTMLImageElement>(null);
   const { setAdBannerVisible, setAdBannerHeight } = useAdBanner();
+
+  // Don't show banner on /christmas page
+  const shouldShowBanner = pathname !== '/christmas';
 
   // Update banner height when image loads
   const updateHeight = useCallback(() => {
@@ -21,20 +28,41 @@ export function AdBanner() {
   }, [setAdBannerHeight]);
 
   useEffect(() => {
+    // Don't show banner on /christmas page
+    if (!shouldShowBanner) {
+      setAdBannerVisible(false);
+      setAdBannerHeight(0);
+      return;
+    }
+
     // Show banner immediately
     setAdBannerVisible(true);
 
-    // Update height when image loads
-    const image = imageRef.current;
-    if (image) {
-      if (image.complete) {
-        // Image already loaded
-        updateHeight();
-      } else {
-        // Wait for image to load
-        image.addEventListener('load', updateHeight);
+    // Update height when images load (check both mobile and desktop images)
+    const mobileImage = mobileImageRef.current;
+    const desktopImage = desktopImageRef.current;
+    
+    const checkAndUpdateHeight = () => {
+      // Check mobile image (visible on small screens)
+      if (mobileImage) {
+        if (mobileImage.complete) {
+          updateHeight();
+        } else {
+          mobileImage.addEventListener('load', updateHeight);
+        }
       }
-    }
+      
+      // Check desktop image (visible on medium+ screens)
+      if (desktopImage) {
+        if (desktopImage.complete) {
+          updateHeight();
+        } else {
+          desktopImage.addEventListener('load', updateHeight);
+        }
+      }
+    };
+    
+    checkAndUpdateHeight();
 
     // Also update height on resize
     const handleResize = () => {
@@ -43,12 +71,20 @@ export function AdBanner() {
     window.addEventListener('resize', handleResize);
     
     return () => {
-      if (image) {
-        image.removeEventListener('load', updateHeight);
+      if (mobileImage) {
+        mobileImage.removeEventListener('load', updateHeight);
+      }
+      if (desktopImage) {
+        desktopImage.removeEventListener('load', updateHeight);
       }
       window.removeEventListener('resize', handleResize);
     };
-  }, [setAdBannerVisible, updateHeight]);
+  }, [setAdBannerVisible, updateHeight, shouldShowBanner, setAdBannerHeight]);
+
+  // Don't render banner on /christmas page
+  if (!shouldShowBanner) {
+    return null;
+  }
 
   return (
     <div
@@ -59,14 +95,23 @@ export function AdBanner() {
       )}
       style={{ backgroundColor: '#760103' }}
     >
-      <div className="max-w-8xl mx-auto w-full px-4 sm:px-6 lg:px-8">
+      <div className="max-w-8xl mx-auto w-full md:px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-center w-full">
-          <Link href="/christmas" className="block w-full max-w-[1920px] mx-auto">
+          <Link href="/christmas" className="block w-full md:max-w-[1920px] md:mx-auto">
+            {/* Mobile image */}
             <img
-              ref={imageRef}
+              ref={mobileImageRef}
+              src={AD_BANNER_MOBILE_IMAGE_URL}
+              alt="Advertisement banner"
+              className="w-full h-auto object-contain block cursor-pointer md:hidden"
+              onLoad={updateHeight}
+            />
+            {/* Desktop image */}
+            <img
+              ref={desktopImageRef}
               src={AD_BANNER_IMAGE_URL}
               alt="Advertisement banner"
-              className="w-full h-auto object-contain block cursor-pointer"
+              className="w-full h-auto object-contain block cursor-pointer hidden md:block"
               onLoad={updateHeight}
             />
           </Link>
