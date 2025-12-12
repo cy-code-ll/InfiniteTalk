@@ -3,6 +3,7 @@ import Script from 'next/script';
 import { Footer } from '@/components/Footer';
 import { Upload, Sparkles, Share2 } from 'lucide-react';
 import { ChristmasHero } from '@/components/christmas/ChristmasHero';
+import { ChristmasPageWrapper } from '@/components/christmas/ChristmasPageWrapper';
 
 // SEO metadata - T<60, D<160, K<100
 export const metadata: Metadata = {
@@ -58,7 +59,7 @@ const christmasSchemaData = {
 
 export default function ChristmasPage() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <ChristmasPageWrapper>
       {/* Breadcrumb structured data */}
       <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -86,7 +87,7 @@ export default function ChristmasPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(christmasSchemaData) }}
       />
       
-      <main className="flex-grow relative">
+      <main className="relative md:flex-grow  md:h-auto overflow-hidden md:overflow-visible">
         {/* Fixed background gradient */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-background via-primary/10 via-primary/20 via-primary/15 to-slate-950 -z-10" />
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
@@ -101,7 +102,7 @@ export default function ChristmasPage() {
       <div className="hidden md:block">
         <Footer />
       </div>
-    </div>
+    </ChristmasPageWrapper>
   );
 }
 
