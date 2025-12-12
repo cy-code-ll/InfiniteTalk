@@ -940,7 +940,7 @@ export function ChristmasHeroDesktop() {
   );
 
   const renderDisplay = () => (
-      <div className="relative h-[calc(100vh-4rem)] flex flex-col items-center justify-center overflow-hidden font-mountains">
+      <div className="relative min-h-[var(--christmas-page-height)] flex flex-col items-center justify-center overflow-hidden font-mountains">
       {renderBackground()}
       {/* 整个组件的下雪效果 */}
       <SnowOverlay density={120} />
@@ -1057,7 +1057,7 @@ export function ChristmasHeroDesktop() {
     const shouldUseDesktopContainer = !shouldUseMobileContainer;
 
     return (
-      <div className="relative min-h-screen flex flex-col items-center justify-center py-20 font-mountains">
+      <div className="relative min-h-[var(--christmas-page-height)] flex flex-col items-center justify-center py-20 font-mountains">
         {renderBackground()}
         {/* 整个组件的下雪效果 */}
         <SnowOverlay density={120} />

@@ -19,11 +19,9 @@ export function ChristmasPageWrapper({ children }: { children: React.ReactNode }
                             64; // Navbar height (h-16 = 64px)
 
   return (
-    <div 
-      className="flex flex-col md:min-h-screen overflow-hidden md:overflow-visible md:h-auto"
-      style={{
-        height: `calc(100dvh - ${totalHeaderHeight}px)`,
-      }}
+    <div
+      className="flex flex-col overflow-hidden md:overflow-visible h-[var(--christmas-page-height)] md:h-auto md:min-h-[var(--christmas-page-height)]"
+      style={{ ['--christmas-page-height' as any]: `calc(100dvh - ${totalHeaderHeight}px)` }}
     >
       {children}
     </div>
