@@ -1000,7 +1000,12 @@ export function ChristmasHeroMobile() {
 
           {/* 底部按钮 */}
           {viewState === 'display' && (
-            <div className="absolute bottom-0 left-0 right-0 p-6 pb-8 z-10">
+            <div 
+              className="absolute bottom-0 left-0 right-0 px-6 pt-6 z-10"
+              style={{ 
+                paddingBottom: `calc(2rem + env(safe-area-inset-bottom, 0px))` 
+              }}
+            >
               <Button
                 onClick={handleCustomizeClick}
                 className="w-full bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-lg py-6 text-lg font-semibold shadow-lg flex items-center justify-center gap-2"
