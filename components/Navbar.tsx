@@ -4,12 +4,15 @@ import React from 'react';
 import Link from 'next/link';
 import { NavClient } from './nav/NavClient';
 import { useMaintenanceBanner } from './MaintenanceBannerContext';
+import { useAdBanner } from './AdBannerContext';
 
 export function Navbar() {
   const { isBannerVisible, bannerHeight } = useMaintenanceBanner();
+  const { isAdBannerVisible, adBannerHeight } = useAdBanner();
   
-  // Calculate top position based on banner visibility
-  const topPosition = isBannerVisible && bannerHeight > 0 ? `${bannerHeight}px` : '0px';
+  // Calculate top position based on both banners visibility
+  const totalBannerHeight = (isAdBannerVisible ? adBannerHeight : 0) + (isBannerVisible ? bannerHeight : 0);
+  const topPosition = totalBannerHeight > 0 ? `${totalBannerHeight}px` : '0px';
 
   return (
     <nav 

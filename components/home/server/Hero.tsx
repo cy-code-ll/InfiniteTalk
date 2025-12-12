@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Button } from '../../ui/button';
+import { Sparkles } from 'lucide-react';
 
 // Icon component matching Sections.tsx style
 const RocketIcon = () => (
@@ -37,12 +38,17 @@ export default function Hero() {
               </div>
             </Link>
           </div> */}
-          <div className="inline-flex items-center gap-2 md:gap-3 mb-10 md:mb-12 px-4 md:px-6 py-2.5 md:py-3 rounded-full bg-gradient-to-r from-primary/10 to-primary/5 border border-primary/20 text-primary text-xs md:text-sm font-medium backdrop-blur">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary/70" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
-            </span>
-            <span className="tracking-wide">AI‑Powered Sparse‑Frame Dubbing</span>
+          <div className="flex justify-center mb-10 md:mb-12">
+            <Link href="/christmas" aria-label="Go to Christmas page">
+              <Button
+                variant="outline"
+                className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-full px-5 py-3 text-sm font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+              >
+                <Sparkles className="w-3 h-3 text-yellow-300" />
+                  Christmas AI Video Generator
+                <Sparkles className="w-3 h-3 text-yellow-300" />
+              </Button>
+            </Link>
           </div>
 
           {/* Title */}
