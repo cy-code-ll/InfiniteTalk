@@ -102,6 +102,7 @@ export default function InfiniteTalkGenerator() {
   const [progressInterval, setProgressInterval] = useState<NodeJS.Timeout | null>(null);
   const [isInsufficientCreditsModalOpen, setIsInsufficientCreditsModalOpen] = useState(false);
   const [isInvalidAudioModalOpen, setIsInvalidAudioModalOpen] = useState(false);
+  const [isUpgradeModeModalOpen, setIsUpgradeModeModalOpen] = useState(false);
   const [taskCreated, setTaskCreated] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   // 使用 ref 存储当前的 AbortController，避免 useEffect 依赖导致的问题
@@ -2319,7 +2320,7 @@ export default function InfiniteTalkGenerator() {
                   if (isGenerating) return;
 
                   if (isUpgradeMode) {
-                    window.location.href = '/pricing';
+                    setIsUpgradeModeModalOpen(true);
                     return;
                   }
 
@@ -2458,6 +2459,42 @@ export default function InfiniteTalkGenerator() {
                 className="w-full"
               >
                 OK
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Upgrade Mode Modal */}
+      <Dialog open={isUpgradeModeModalOpen} onOpenChange={setIsUpgradeModeModalOpen}>
+        <DialogContent className="max-w-md mx-auto">
+          <DialogHeader>
+            <DialogTitle className="text-center">Free Trial Limit</DialogTitle>
+          </DialogHeader>
+          <div className="text-center py-6">
+            <div className="w-16 h-16 mx-auto mb-4 bg-orange-100 rounded-full flex items-center justify-center">
+              <X className="w-8 h-8 text-orange-600" />
+            </div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">
+              Free trial limit reached
+            </h3>
+            <p className="text-muted-foreground mb-6">
+              Free times can only be used for 480p/720p videos with audio duration within 15 seconds. Please upgrade your plan to generate longer videos or higher resolution videos.
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button
+                variant="outline"
+                onClick={() => setIsUpgradeModeModalOpen(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => {
+                  setIsUpgradeModeModalOpen(false);
+                  window.open('/pricing', '_blank');
+                }}
+              >
+                Upgrade Plan
               </Button>
             </div>
           </div>
