@@ -601,6 +601,44 @@ export const infiniteTalkApi = {
     return handleApiError(response);
   },
 
+  // 创建InfiniteTalk Christmas任务（合并图片处理和视频生成）
+  createChristmasTask: async (params: {
+    image: File;
+    audio: File;
+    duration: number;
+    resolution?: '720p';
+    image_prompt: string;
+    output_format?: 'png';
+    image_size?: 'auto';
+  }) => {
+    const formData = new FormData();
+    formData.append('image', params.image);
+    formData.append('audio', params.audio);
+    formData.append('duration', params.duration.toString());
+    formData.append('resolution', params.resolution || '720p');
+    formData.append('image_prompt', params.image_prompt);
+    formData.append('output_format', params.output_format || 'png');
+    formData.append('image_size', params.image_size || 'auto');
+
+    // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
+    const token = localStorage.getItem('access_token');
+    const headers: Record<string, string> = {
+      'x-appid': API_CONFIG.APP_ID,
+    };
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/christmas`, {
+      method: 'POST',
+      headers: headers,
+      body: formData,
+    });
+
+    return handleApiError(response);
+  },
+
 };
 
 // 通用上传接口

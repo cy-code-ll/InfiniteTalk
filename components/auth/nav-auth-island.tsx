@@ -51,7 +51,7 @@ function NavAuthIsland({ variant = 'desktop' }: NavAuthIslandProps) {
 
   const coinIconClassName = variant === 'desktop' ? 'h-4 w-4' : 'h-3 w-3';
 
-  // 显示逻辑：有积分显示积分，没有积分显示优惠券，都没有显示0
+  // 显示逻辑：有积分显示积分，没有积分且 level === 0 时显示优惠券，都没有显示0
   const displayInfo = useMemo(() => {
     if (!isSignedIn || isLoadingUserInfo || !userInfo) {
       return null;
@@ -59,8 +59,9 @@ function NavAuthIsland({ variant = 'desktop' }: NavAuthIslandProps) {
 
     const totalCredits = userInfo.total_credits ?? 0;
     const freeTimes = userInfo.free_times ?? 0;
+    const userLevel = userInfo.level ?? 0;
     const hasCredits = totalCredits > 0;
-    const hasFreeVouchers = freeTimes > 0;
+    const hasFreeVouchers = freeTimes > 0 && userLevel === 0;
 
     if (hasCredits) {
       return {

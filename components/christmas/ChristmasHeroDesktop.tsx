@@ -288,13 +288,15 @@ export function ChristmasHeroDesktop() {
   const hasNoCredits = (userInfo?.total_credits ?? 0) === 0;
   const hasAudio = effectiveDuration > 0;
   const isAudioTooLong = hasAudio && Math.ceil(effectiveDuration) > 15;
+  const userLevel = userInfo?.level ?? 0;
 
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
     hasNoCredits &&
     hasAudio &&
-    isAudioTooLong;
+    isAudioTooLong &&
+    userLevel === 0;
 
   // 从 URL 参数读取 tid 和 mid，并设置默认值
   useEffect(() => {
@@ -663,59 +665,6 @@ export function ChristmasHeroDesktop() {
       });
   };
 
-  // 从 URL 下载图片并转为 File
-  const urlToFile = async (url: string, filename: string): Promise<File> => {
-    const response = await fetch(url, { mode: 'cors' });
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.statusText}`);
-    }
-    const blob = await response.blob();
-    return new File([blob], filename, { type: blob.type || 'image/png' });
-  };
-
-  // 轮询 Nano Banana 任务状态
-  const pollNanoBananaTask = async (taskId: string): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const poll = async () => {
-        try {
-          const result = await api.nanoBanana.checkTaskStatus(taskId);
-          
-          if (result.code !== 200) {
-            reject(new Error(result.msg || 'Task check failed'));
-            return;
-          }
-
-          if (!result.data) {
-            reject(new Error('No data returned from task status check'));
-            return;
-          }
-
-          const { status, image_url } = result.data;
-
-          if (status === 1) {
-            // 任务完成
-            if (!image_url) {
-              reject(new Error('No image URL returned'));
-              return;
-            }
-            console.log('Nano Banana task completed, image URL:', image_url);
-            resolve(image_url);
-          } else if (status === -1) {
-            // 任务失败
-            reject(new Error(result.data?.status_msg || 'Task failed'));
-          } else {
-            // 任务进行中，2秒后继续轮询
-            setTimeout(poll, 2000);
-          }
-        } catch (error) {
-          console.error('Error in pollNanoBananaTask:', error);
-          reject(error);
-        }
-      };
-
-      poll();
-    });
-  };
 
   const handleGenerateClick = async () => {
     if (!imageFile || !selectedMusicId) return;
@@ -815,40 +764,7 @@ export function ChristmasHeroDesktop() {
       // 使用用户输入的 prompt
       const finalPrompt = prompt.trim();
 
-      // 步骤1: 上传图片
-      // toast.showToast('Uploading image...', 'info');
-      const uploadResult = await api.upload.uploadImage(imageFile);
-      if (uploadResult.code !== 200 || !uploadResult.data) {
-        throw new Error(uploadResult.msg || 'Failed to upload image');
-      }
-      const uploadedImageUrl = uploadResult.data;
-
-      // 步骤2: 调用 Nano Banana Edit 接口
-      // toast.showToast('Processing image...', 'info');
-      const nanoBananaResult = await api.nanoBanana.createTask({
-        prompt: finalPrompt,
-        image_urls: [uploadedImageUrl],
-        output_format: 'png',
-        image_size: 'auto',
-      });
-
-      if (nanoBananaResult.code !== 200 || !nanoBananaResult.data?.task_id) {
-        throw new Error(nanoBananaResult.msg || 'Failed to create Nano Banana task');
-      }
-
-      const nanoBananaTaskId = nanoBananaResult.data.task_id;
-
-      // 步骤3: 轮询 Nano Banana 任务状态
-      // toast.showToast('Waiting for image processing...', 'info');
-      const processedImageUrl = await pollNanoBananaTask(nanoBananaTaskId);
-      console.log('Processed image URL received:', processedImageUrl);
-
-      // 步骤4: 从 URL 下载处理后的图片并转为 File
-      console.log('Downloading processed image...');
-      const processedImageFile = await urlToFile(processedImageUrl, 'processed-image.png');
-      console.log('Processed image file created:', processedImageFile);
-
-      // 步骤5: 获取音频文件（用于生成视频）
+      // 获取音频文件
       let audioFile: File;
 
       if (selectedMusicId === 'custom' && customAudioFile) {
@@ -885,15 +801,15 @@ export function ChristmasHeroDesktop() {
         });
       }
 
-      // 步骤6: 调用 InfiniteTalk image-to-video 接口
-      // toast.showToast('Generating video...', 'info');
-      const createResult = await api.infiniteTalk.createTask({
-        image: processedImageFile,
+      // 调用 Christmas 专属接口（合并图片处理和视频生成）
+      const createResult = await api.infiniteTalk.createChristmasTask({
+        image: imageFile,
         audio: audioFile,
-        prompt: '', // prompt 为空
         duration: Math.ceil(duration),
-        resolution,
-        topic_tag: '1',
+        resolution: '720p',
+        image_prompt: finalPrompt,
+        output_format: 'png',
+        image_size: 'auto',
       });
 
       if (createResult.code !== 200 || !createResult.data?.task_id) {

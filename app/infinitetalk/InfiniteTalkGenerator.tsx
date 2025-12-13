@@ -1610,13 +1610,15 @@ export default function InfiniteTalkGenerator() {
   const isTrialResolution = resolution === '480p' || resolution === '720p';
   const isNonTrialResolution = !isTrialResolution;
   const isAudioTooLong = hasAudio && Math.ceil(audioDuration) > 15;
+  const userLevel = userInfo?.level ?? 0;
 
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
     hasNoCredits &&
     hasAudio &&
-    (isNonTrialResolution || isAudioTooLong);
+    (isNonTrialResolution || isAudioTooLong) &&
+    userLevel === 0;
 
   // 验证表单 - 使用 useCallback 优化性能
   const validateForm = useCallback((): string | null => {

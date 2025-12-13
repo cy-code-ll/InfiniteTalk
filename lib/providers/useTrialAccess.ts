@@ -19,6 +19,7 @@ export function useTrialAccess<K extends TrialModelKey>(
 
   const totalCredits = userInfo?.total_credits ?? 0;
   const freeTimes = userInfo?.free_times ?? 0;
+  const userLevel = userInfo?.level ?? 0;
 
   const config = trialConfigs[modelKey];
   const isTrialEligible = config ? config.isTrialEligible(params as any) : false;
@@ -28,8 +29,8 @@ export function useTrialAccess<K extends TrialModelKey>(
   if (totalCredits > 0) {
     // User has credits; normal usage.
     mode = 'credits';
-  } else if (totalCredits === 0 && freeTimes > 0 && isTrialEligible) {
-    // No credits but has free trial times and current params match trial config.
+  } else if (totalCredits === 0 && freeTimes > 0 && isTrialEligible && userLevel == 0) {
+    // No credits but has free trial times, current params match trial config, and user level === 0.
     mode = 'trial';
   } else {
     // No credits and no valid trial config.

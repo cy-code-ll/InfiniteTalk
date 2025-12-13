@@ -94,13 +94,15 @@ export default function MultiHero() {
   // 不符合试用条件但有券且无积分 → 显示 Upgrade Plan 按钮
   const isNonTrialResolution = !isTrialResolution;
   const isAudioTooLong = hasDurations && roundedMaxDuration > 15;
+  const userLevel = userInfo?.level ?? 0;
 
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
     hasNoCredits &&
     hasDurations &&
-    (isNonTrialResolution || isAudioTooLong);
+    (isNonTrialResolution || isAudioTooLong) &&
+    userLevel === 0;
 
   // 组件卸载时清理轮询
   useEffect(() => {
