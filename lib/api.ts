@@ -619,6 +619,7 @@ export const infiniteTalkApi = {
     formData.append('image_prompt', params.image_prompt);
     formData.append('output_format', params.output_format || 'png');
     formData.append('image_size', params.image_size || 'auto');
+    formData.append('topic_tag','1'); // 默认为1
 
     // 为FormData请求创建特殊的头部（不包含Content-Type，让浏览器自动设置）
     const token = localStorage.getItem('access_token');
