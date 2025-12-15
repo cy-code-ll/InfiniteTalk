@@ -107,7 +107,7 @@ const TEMPLATES = [
     previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t1-m.mp4',
     videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t1-m.webp',
     prompt:
-      '  In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater, wearing a red Christmas hat, holding a Christmas card, and standing next to a small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
+      'In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater, wearing a red Christmas hat, and standing next to a small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
   {
     id: 't2',
@@ -118,7 +118,7 @@ const TEMPLATES = [
     previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/t2-m.mp4',
     videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/t2-m.webp',
     prompt:
-      '  In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow color tone. The character stands at the front, holding a Christmas card, and the width of the character accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it',
+      'In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow tone. The character stands at the front, and the width of the character accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it.',
   },
   {
     id: 't3',
@@ -156,13 +156,16 @@ const TEMPLATES = [
 ];
 
 const MUSIC_TRACKS = [
-  { id: 'm9', name: 'Fairytale At Christmas', url: '/music/3.mp3', taglist: [] },
-  { id: 'm7', name: 'All I Want For Christmas', url: '/music/1.mp3', taglist: [] },
-  { id: 'm8', name: 'Feliz Navidad', url: '/music/2.mp3', taglist: [] },
-  { id: 'm10', name: 'Santa Tell Me', url: '/music/Santa Tell Me.MP3', taglist: [] },
-  { id: 'm11', name: 'Last Christmas', url: '/music/Last Christmas.MP3', taglist: [] },
-  { id: 'm12', name: 'Snowman', url: '/music/Snowman.MP3', taglist: [] },
-  { id: 'm13', name: 'Mistletoe', url: '/music/Mistletoe.MP3', taglist: [] },
+  { id: 'm9', name: 'Fairytale At Christmas', url: '/music/3.mp3', taglist: ['female'] },
+  { id: 'm7', name: 'All I Want For Christmas', url: '/music/1.mp3', taglist: ['female'] },
+  { id: 'm8', name: 'Feliz Navidad', url: '/music/2.mp3', taglist: ['male'] },
+  { id: 'm10', name: 'Santa Tell Me', url: '/music/Santa Tell Me.MP3', taglist: ['female'] },
+  { id: 'm11', name: 'Last Christmas', url: '/music/Last Christmas.MP3', taglist: ['male'] },
+  { id: 'm12', name: 'Snowman', url: '/music/Snowman.MP3', taglist: ['female'] },
+  { id: 'm13', name: 'Mistletoe', url: '/music/Mistletoe.MP3', taglist: ['male'] },
+  { id: 'm14', name: 'Coming Home This Christmas', url: '/music/Coming Home This Christmas.mp3', taglist: ['male'] },
+  { id: 'm15', name: 'Christmas Tree Farm', url: '/music/Christmas Tree Farm.MP3', taglist: ['female'] },
+  { id: 'm16', name: 'Jingle Bell Rock', url: '/music/Jingle Bell Rock.mp3', taglist: ['male'] },
   { id: 'm1', name: 'Female Family', url: '/music/fmale_fam.mp3', taglist: ['female'] },
   { id: 'm2', name: 'Female Friend', url: '/music/fmale_fir.mp3', taglist: ['female'] },
   { id: 'm3', name: 'Female Colleague', url: '/music/fmale_work.mp3', taglist: ['female'] },
