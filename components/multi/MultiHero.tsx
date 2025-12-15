@@ -1186,6 +1186,12 @@ export default function MultiHero() {
                 {!isUpgradeMode && (
                   <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
                     {(() => {
+                      // 未登录时直接显示 Free
+                      if (!isSignedIn) {
+                        return 'Free';
+                      }
+
+                      // 已登录时保持原逻辑
                       if (
                         hasVouchers &&
                         isTrialResolution &&

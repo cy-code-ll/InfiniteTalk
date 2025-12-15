@@ -83,16 +83,17 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
-        if (!isLoading && !isOAuthLoading) {
-          onOpenChange(false);
-        }
+        // 允许在 loading 状态下关闭，但需要清理 loading 状态
+        setIsLoading(false);
+        setIsOAuthLoading(false);
+        onOpenChange(false);
       }
     };
     window.addEventListener('keydown', onKeyDown);
     return () => {
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [open, isLoading, isOAuthLoading, onOpenChange]);
+  }, [open, onOpenChange]);
 
   const handleGoogleSignIn = useCallback(async () => {
     if (isOAuthLoading || isLoading) return;
@@ -303,7 +304,10 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
       aria-hidden={!open}
       onClick={(e) => {
         // Close modal when clicking on backdrop
-        if (e.target === e.currentTarget && !isLoading && !isOAuthLoading) {
+        // 允许在 loading 状态下关闭，但需要清理 loading 状态
+        if (e.target === e.currentTarget) {
+          setIsLoading(false);
+          setIsOAuthLoading(false);
           onOpenChange(false);
         }
       }}
@@ -321,12 +325,12 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            if (!isLoading && !isOAuthLoading) {
-              onOpenChange(false);
-            }
+            // 允许在 loading 状态下关闭，但需要清理 loading 状态
+            setIsLoading(false);
+            setIsOAuthLoading(false);
+            onOpenChange(false);
           }}
-          className="absolute top-3 right-3 z-10 rounded-xs text-gray-600 hover:text-gray-900 transition-colors focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
-          disabled={isLoading || isOAuthLoading}
+          className="absolute top-3 right-3 z-10 rounded-xs text-gray-600 hover:text-gray-900 transition-colors focus:outline-hidden"
         >
           <X className="w-4 h-4" />
           <span className="sr-only">Close</span>

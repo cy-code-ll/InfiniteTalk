@@ -1377,7 +1377,7 @@ export function ChristmasHeroMobile() {
                   className="absolute -top-2 -right-10 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg"
                   style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}
                 >
-                  {trialAccess.mode === 'trial' && isSignedIn
+                  {!isSignedIn || (trialAccess.mode === 'trial' && isSignedIn)
                     ? 'Free'
                     : effectiveDuration > 0
                       ? `${calculateCredits(effectiveDuration, '720p')} Credits`

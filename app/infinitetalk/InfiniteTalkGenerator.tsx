@@ -2397,7 +2397,7 @@ export default function InfiniteTalkGenerator() {
               {/* Credit cost label - Upgrade 模式下不显示 */}
               {!isUpgradeMode && (
                 <div className="absolute -top-2 -right-2 bg-orange-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-                  {trialAccess.mode === 'trial' && isSignedIn
+                  {!isSignedIn || (trialAccess.mode === 'trial' && isSignedIn)
                     ? 'Free'
                     : audioDuration > 0
                     ? `${creditsCost} Credits`
