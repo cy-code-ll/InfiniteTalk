@@ -875,7 +875,7 @@ export function ChristmasHeroDesktop() {
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center flex-1 mb-10">
         <h1 className="pt-16 text-5xl md:text-6xl text-center mb-6 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           <span className="text-yellow-300">Merry Christmas</span>{' '}
-          <span className="text-white">ai video Marker</span>
+          <span className="text-white">AI video Maker</span>
         </h1>
         <p className="text-lg md:text-xl text-white/90 text-center max-w-3xl mx-auto mb-12 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
           Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.
@@ -992,7 +992,7 @@ export function ChristmasHeroDesktop() {
         <div className="relative z-25 w-full max-w-7xl 2xl:max-w-[1600px] mx-auto px-6 flex flex-col items-center justify-center flex-1">
           <h1 className="text-5xl md:text-6xl text-center mb-4 font-bold tracking-wide" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             <span className="text-yellow-300">Merry Christmas</span>{' '}
-            <span className="text-white">ai video Marker</span>
+            <span className="text-white">AI video Maker</span>
           </h1>
           <p className="text-lg md:text-xl text-white/90 text-center max-w-3xl mx-auto mb-20 leading-relaxed" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>
             Create Christmas videos in minutes with AI. Just pick a template and click to generate, let InfiniteTalk AI handle the scenes, media, voiceovers, and sound effects. Instantly delivers free Christmas video clips with music.
