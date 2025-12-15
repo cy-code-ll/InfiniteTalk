@@ -45,3 +45,39 @@
 AuthIslandVisible：未充值用户优先显示优惠券（即使有赠送积分）
 UserProvider 弹窗：未充值用户有优惠券时弹窗提醒（即使有赠送积分）
 两者逻辑一致：userLevel === 0 是判断是否充值的主要依据。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+现在：先判断试用条件，满足则 mode = 'trial'，否则再判断是否有积分
+试用模式判定条件（已更新）
+现在只需要同时满足：
+freeTimes > 0（有优惠券）
+isTrialEligible === true（符合试用条件）
+resolution === '480p' || resolution === '720p'
+duration > 0
+duration <= 15
+userLevel === 0（未充值用户）
+不再需要：totalCredits === 0
+显示效果对比
+状态	积分	优惠券	音频时长	用户等级	修改前 mode	修改后 mode	显示
+未充值	0	3	≤15s	0	'trial'	'trial'	Free
+未充值	50（赠送）	3	≤15s	0	'credits'	'trial'	Free
+未充值	0	0	≤15s	0	'locked'	'locked'	X Credits
+未充值	50（赠送）	0	≤15s	0	'credits'	'credits'	X Credits
+已充值	0	3	≤15s	1	'locked'	'locked'	X Credits
+关键改进
+未充值用户即使有赠送积分，只要满足试用条件，也会进入试用模式，显示 'Free'
+与 AuthIslandVisible 的逻辑一致：未充值用户优先显示优惠券
+优先级：试用模式 > 积分模式 > 锁定模式
+修改完成，无 linter 错误。

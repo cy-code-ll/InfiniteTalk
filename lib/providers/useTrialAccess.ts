@@ -26,12 +26,12 @@ export function useTrialAccess<K extends TrialModelKey>(
 
   let mode: TrialAccessMode = 'locked';
 
-  if (totalCredits > 0) {
+  // 试用模式：有优惠券 + 符合试用条件 + 未充值用户（即使有赠送积分也优先使用优惠券）
+  if (freeTimes > 0 && isTrialEligible && userLevel == 0) {
+    mode = 'trial';
+  } else if (totalCredits > 0) {
     // User has credits; normal usage.
     mode = 'credits';
-  } else if (totalCredits === 0 && freeTimes > 0 && isTrialEligible && userLevel == 0) {
-    // No credits but has free trial times, current params match trial config, and user level === 0.
-    mode = 'trial';
   } else {
     // No credits and no valid trial config.
     mode = 'locked';
