@@ -55,7 +55,7 @@ export default function AuthIslandVisible() {
   const { isSignedIn } = useUser();
   const { userInfo, isLoadingUserInfo } = useUserInfo();
 
-  // 显示逻辑：有积分显示积分，没有积分且 level === 0 时显示优惠券，都没有显示0
+  // 显示逻辑：未充值用户（level === 0）优先显示优惠券，已充值用户（level > 0）显示积分
   const displayInfo = useMemo(() => {
     if (!isSignedIn || isLoadingUserInfo || !userInfo) {
       return null;
@@ -64,28 +64,33 @@ export default function AuthIslandVisible() {
     const totalCredits = userInfo.total_credits ?? 0;
     const freeTimes = userInfo.free_times ?? 0;
     const userLevel = userInfo.level ?? 0;
-    const hasCredits = totalCredits > 0;
+    const isPaidUser = userLevel > 0;
     const hasFreeVouchers = freeTimes > 0 && userLevel === 0;
 
-    if (hasCredits) {
-      return {
-        type: 'credits' as const,
-        value: totalCredits,
-        icon: CoinsIcon,
-      };
-    } else if (hasFreeVouchers) {
+    // 未充值用户：优先显示优惠券（即使有赠送的积分也显示优惠券）
+    if (hasFreeVouchers) {
       return {
         type: 'voucher' as const,
         value: freeTimes,
         icon: TicketIcon,
       };
-    } else {
+    }
+    
+    // 已充值用户：显示积分
+    if (isPaidUser && totalCredits > 0) {
       return {
         type: 'credits' as const,
-        value: 0,
+        value: totalCredits,
         icon: CoinsIcon,
       };
     }
+    
+    // 其他情况：显示 0
+    return {
+      type: 'credits' as const,
+      value: 0,
+      icon: CoinsIcon,
+    };
   }, [isSignedIn, isLoadingUserInfo, userInfo]);
 
   useEffect(() => {

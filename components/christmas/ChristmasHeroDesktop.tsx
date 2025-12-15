@@ -293,7 +293,6 @@ export function ChristmasHeroDesktop() {
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
-    hasNoCredits &&
     hasAudio &&
     isAudioTooLong &&
     userLevel === 0;
