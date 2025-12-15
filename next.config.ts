@@ -83,17 +83,11 @@ const nextConfig: NextConfig = {
     remotePatterns: [
       {
         protocol: 'https',
-        hostname: 'picsum.photos',
+        hostname: '**',
       },
       {
-        protocol: 'https',
-        hostname: 'cf.framepola.com',
-        pathname: '/**',
-      },
-      {
-        protocol: 'https',
-        hostname: 'cfsource.infinitetalk.net',
-        pathname: '/**',
+        protocol: 'http',
+        hostname: '**',
       },
     ],
   },
