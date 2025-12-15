@@ -307,15 +307,14 @@ export function UserProvider({ children }: UserProviderProps) {
         };
         setUserInfo(userInfoData);
 
-        const hasCredits = userInfoData.total_credits > 0;
         const hasFreeVouchers = userInfoData.free_times > 0;
         const userLevel = userInfoData.level ?? 0;
 
         // 弹窗规则：
         // 1. 只在当前会话中弹一次（useRef 记录，避免轮询多次弹出）
-        // 2. 用户有积分时不弹
-        // 3. 用户没有积分且 free_times 不为 0 且 level === 0 时才弹
-        if (!hasCredits && hasFreeVouchers && userLevel === 0 && !hasShownVoucherRef.current) {
+        // 2. 未充值用户（level === 0）且有优惠券（free_times > 0）时弹窗
+        // 3. 即使有赠送的积分，未充值用户也应该弹窗提醒有优惠券可用
+        if (hasFreeVouchers && userLevel === 0 && !hasShownVoucherRef.current) {
           setVoucherCount(userInfoData.free_times);
           setShowVoucherToast(true);
           hasShownVoucherRef.current = true;
