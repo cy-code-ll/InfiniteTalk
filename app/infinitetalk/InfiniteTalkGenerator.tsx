@@ -1637,7 +1637,7 @@ export default function InfiniteTalkGenerator() {
   // 缓存积分计算结果，避免每次渲染都计算
   const creditsCost = useMemo(() => calculateCredits(), [calculateCredits]);
 
-  // Trial access: InfiniteTalk trial allows 480p/720p and audio length <= 15s when user has free_times and no credits
+  // Trial access: InfiniteTalk trial allows 480p/720p and audio length <= 15s when user has free_times and userLevel === 0 (even if has gifted credits)
   const trialAccess = useTrialAccess('infinitetalk', {
     resolution,
     duration: audioDuration > 0 ? Math.ceil(audioDuration) : 0,

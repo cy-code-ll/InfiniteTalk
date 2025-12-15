@@ -83,18 +83,18 @@ export default function MultiHero() {
 
   const hasVouchers = freeTimes > 0;
   const hasNoCredits = totalCredits === 0;
+  const userLevel = userInfo?.level ?? 0;
 
-  // 满足条件时可以使用优惠券免积分
+  // 满足条件时可以使用优惠券免积分（即使有赠送积分也优先使用优惠券）
   const canUseVoucher =
     hasVouchers &&
-    hasNoCredits &&
     isTrialResolution &&
-    isTrialDuration;
+    isTrialDuration &&
+    userLevel === 0;
 
-  // 不符合试用条件但有券且无积分 → 显示 Upgrade Plan 按钮
+  // 不符合试用条件但有券且未充值 → 显示 Upgrade Plan 按钮
   const isNonTrialResolution = !isTrialResolution;
   const isAudioTooLong = hasDurations && roundedMaxDuration > 15;
-  const userLevel = userInfo?.level ?? 0;
 
   const isUpgradeMode =
     isSignedIn &&
@@ -725,11 +725,12 @@ export default function MultiHero() {
     const isTrialResolution = resolution === '480p' || resolution === '720p';
     const isTrialDuration = roundedMaxDuration > 0 && roundedMaxDuration <= 15;
 
+    const userLevel = userInfo.level ?? 0;
     const canUseVoucher =
       freeTimes > 0 &&
-      totalCredits === 0 &&
       isTrialResolution &&
-      isTrialDuration;
+      isTrialDuration &&
+      userLevel === 0;
 
     if (!canUseVoucher && totalCredits < requiredCredits) {
       setIsInsufficientCreditsModalOpen(true);
@@ -1187,9 +1188,9 @@ export default function MultiHero() {
                     {(() => {
                       if (
                         hasVouchers &&
-                        hasNoCredits &&
                         isTrialResolution &&
-                        isTrialDuration
+                        isTrialDuration &&
+                        userLevel === 0
                       ) {
                         return 'Free';
                       }
