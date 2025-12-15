@@ -76,17 +76,18 @@ function calculateCredits(duration: number, resolution: Resolution): number {
 }
 
 const sampleVideos = [
-  {
-    id: 1,
-    src: 'https://www.infinitetalk2.com/infinitetalk/h2.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h2.webp',
-    poster: '/video/christmas/santa-decorating.webp',
-  },
+
   {
     id: 2,
     src: 'https://www.infinitetalk2.com/infinitetalk/h1.mp4',
     videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h1.webp',
     poster: '/video/christmas/santa-reading.webp',
+  },
+  {
+    id: 1,
+    src: 'https://www.infinitetalk2.com/infinitetalk/h2.mp4',
+    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/h2.webp',
+    poster: '/video/christmas/santa-decorating.webp',
   },
   {
     id: 3,
