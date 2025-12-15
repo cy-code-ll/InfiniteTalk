@@ -888,7 +888,7 @@ export function ChristmasHeroMobile() {
 
           {/* Loading State - 加载层 */}
           {viewState === 'loading' && (
-            <div className="absolute inset-0 z-50 bg-black/70 flex flex-col items-center justify-center p-6">
+            <div className="absolute inset-0 z-30 bg-black/70 flex flex-col items-center justify-center p-6">
               <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mb-6" />
               <h3 className="text-white text-xl font-semibold mb-4" style={{ fontFamily: 'var(--font-poppins), system-ui, -apple-system, sans-serif' }}>Generating Video...</h3>
               <div className="w-full max-w-sm">
@@ -1036,7 +1036,7 @@ export function ChristmasHeroMobile() {
                 <span>{formatTime(resultVideoDuration)}</span>
               </div>
             </div>
-            <div className="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/10">
+            <div className="bg-black/30 backdrop-blur-md rounded-2xl p-2 border border-white/10">
               <div className="flex items-center gap-3 justify-around">
                 {selectedTemplateId && selectedMusicId && (
                   <div className="flex items-center gap-3">
