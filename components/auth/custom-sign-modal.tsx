@@ -298,22 +298,34 @@ export const CustomSignModal = memo(function CustomSignModal({ open, onOpenChang
     : "fixed inset-0 z-50 pointer-events-none bg-transparent hidden";
 
   const modalContent = (
-    <div className={backdropClass} aria-hidden={!open}>
+    <div 
+      className={backdropClass} 
+      aria-hidden={!open}
+      onClick={(e) => {
+        // Close modal when clicking on backdrop
+        if (e.target === e.currentTarget && !isLoading && !isOAuthLoading) {
+          onOpenChange(false);
+        }
+      }}
+    >
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-[calc(100%-2rem)] sm:max-w-[440px] p-4">
         <div
           role="dialog"
           aria-modal="true"
+          onClick={(e) => e.stopPropagation()}
           className={`relative rounded-lg border bg-white shadow-lg ${open ? 'pointer-events-auto' : 'pointer-events-none'} max-h-[90vh] overflow-auto`}
         >
         <button
           type="button"
           aria-label="Close"
-          onClick={() => {
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
             if (!isLoading && !isOAuthLoading) {
               onOpenChange(false);
             }
           }}
-          className="absolute top-3 right-3 rounded-xs text-gray-600 hover:text-gray-900 transition-colors focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          className="absolute top-3 right-3 z-10 rounded-xs text-gray-600 hover:text-gray-900 transition-colors focus:outline-hidden disabled:pointer-events-none disabled:opacity-50"
           disabled={isLoading || isOAuthLoading}
         >
           <X className="w-4 h-4" />
