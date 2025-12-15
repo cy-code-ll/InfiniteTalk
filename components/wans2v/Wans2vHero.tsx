@@ -123,17 +123,22 @@ export function Wans2vHero() {
   };
 
   // 💾 保存表单到 IndexedDB
-  const saveFormCache = async () => {
+  const saveFormCache = async (overrides?: { 
+    audioFile?: File | null; 
+    audioDuration?: number;
+    imageFile?: File | null;
+    resolution?: '480P' | '720P';
+  }) => {
     try {
       await saveToIndexedDB(CACHE_KEY, {
         // 文件
-        imageFile: imageFile,
-        audioFile: audioFile,
+        imageFile: overrides?.imageFile !== undefined ? overrides.imageFile : imageFile,
+        audioFile: overrides?.audioFile !== undefined ? overrides.audioFile : audioFile,
 
         // 表单数据
         prompt: prompt,
-        resolution: resolution,
-        audioDuration: audioDuration,
+        resolution: overrides?.resolution !== undefined ? overrides.resolution : resolution,
+        audioDuration: overrides?.audioDuration !== undefined ? overrides.audioDuration : audioDuration,
       });
       console.log('✅ Wans2v form cached to IndexedDB');
     } catch (error) {
@@ -214,6 +219,10 @@ export function Wans2vHero() {
     const file = event.target.files?.[0];
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
+      // 立即保存缓存，确保上传操作被保存（不等待防抖）
+      setTimeout(() => {
+        saveFormCache({ imageFile: file });
+      }, 0);
     } else {
       toast.showToast('Please select a valid image file', 'error');
     }
@@ -225,6 +234,10 @@ export function Wans2vHero() {
     const file = event.dataTransfer.files[0];
     if (file && file.type.startsWith('image/')) {
       setImageFile(file);
+      // 立即保存缓存，确保上传操作被保存（不等待防抖）
+      setTimeout(() => {
+        saveFormCache({ imageFile: file });
+      }, 0);
     } else {
       toast.showToast('Please drop a valid image file', 'error');
     }
@@ -263,6 +276,10 @@ export function Wans2vHero() {
       // 校验通过，设置文件
       setAudioFile(file);
       setAudioDuration(duration);
+      // 立即保存缓存，确保上传操作被保存（不等待防抖）
+      setTimeout(() => {
+        saveFormCache({ audioFile: file, audioDuration: duration });
+      }, 0);
     }
   };
 
@@ -301,6 +318,10 @@ export function Wans2vHero() {
       // 校验通过，设置文件
       setAudioFile(file);
       setAudioDuration(duration);
+      // 立即保存缓存，确保上传操作被保存（不等待防抖）
+      setTimeout(() => {
+        saveFormCache({ audioFile: file, audioDuration: duration });
+      }, 0);
     }
   };
 
@@ -311,6 +332,9 @@ export function Wans2vHero() {
     if (audioInputRef.current) {
       audioInputRef.current.value = '';
     }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    // 使用 overrides 参数明确设置 audioFile 为 null，避免状态更新延迟导致的问题
+    saveFormCache({ audioFile: null, audioDuration: 0 });
   };
 
   // 📥 页面加载时恢复缓存数据
@@ -680,7 +704,11 @@ export function Wans2vHero() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setImageFile(null)}
+                      onClick={() => {
+                        setImageFile(null);
+                        // 立即更新缓存，确保删除操作被保存（不等待防抖）
+                        saveFormCache({ imageFile: null });
+                      }}
                       className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/20 hover:bg-white/30 rounded-full shadow-sm"
                     >
                       <X className="h-4 w-4 text-foreground" />
@@ -817,7 +845,11 @@ export function Wans2vHero() {
                   <Button
                     type="button"
                     variant={resolution === '480P' ? 'default' : 'outline'}
-                    onClick={() => setResolution('480P')}
+                    onClick={() => {
+                      setResolution('480P');
+                      // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                      saveFormCache({ resolution: '480P' });
+                    }}
                     size="sm"
                     className="px-6"
                   >
@@ -826,7 +858,11 @@ export function Wans2vHero() {
                   <Button
                     type="button"
                     variant={resolution === '720P' ? 'default' : 'outline'}
-                    onClick={() => setResolution('720P')}
+                    onClick={() => {
+                      setResolution('720P');
+                      // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                      saveFormCache({ resolution: '720P' });
+                    }}
                     size="sm"
                     className="px-6"
                   >

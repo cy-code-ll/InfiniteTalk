@@ -124,20 +124,28 @@ export default function MultiHero() {
   };
 
   // 💾 保存表单到 IndexedDB
-  const saveFormCache = async () => {
+  const saveFormCache = async (overrides?: { 
+    leftAudioFile?: File | null; 
+    rightAudioFile?: File | null; 
+    leftAudioDuration?: number; 
+    rightAudioDuration?: number;
+    imageFile?: File | null;
+    resolution?: '480p' | '720p' | '1080p';
+    order?: 'meanwhile' | 'left_right' | 'right_left';
+  }) => {
     try {
       await saveToIndexedDB(CACHE_KEY, {
         // 文件
-        imageFile: imageFile,
-        leftAudioFile: leftAudioFile,
-        rightAudioFile: rightAudioFile,
+        imageFile: overrides?.imageFile !== undefined ? overrides.imageFile : imageFile,
+        leftAudioFile: overrides?.leftAudioFile !== undefined ? overrides.leftAudioFile : leftAudioFile,
+        rightAudioFile: overrides?.rightAudioFile !== undefined ? overrides.rightAudioFile : rightAudioFile,
         
         // 表单数据
         prompt: prompt,
-        order: order,
-        resolution: resolution,
-        leftAudioDuration: leftAudioDuration,
-        rightAudioDuration: rightAudioDuration,
+        order: overrides?.order !== undefined ? overrides.order : order,
+        resolution: overrides?.resolution !== undefined ? overrides.resolution : resolution,
+        leftAudioDuration: overrides?.leftAudioDuration !== undefined ? overrides.leftAudioDuration : leftAudioDuration,
+        rightAudioDuration: overrides?.rightAudioDuration !== undefined ? overrides.rightAudioDuration : rightAudioDuration,
       });
       console.log('✅ Multi form cached to IndexedDB');
     } catch (error) {
@@ -284,6 +292,10 @@ export default function MultiHero() {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('image/')) {
         setImageFile(file);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ imageFile: file });
+        }, 0);
       } else {
         toast.showToast('Please select a valid image file', 'error');
       }
@@ -297,6 +309,10 @@ export default function MultiHero() {
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('image/')) {
         setImageFile(file);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ imageFile: file });
+        }, 0);
       } else {
         toast.showToast('Please drop a valid image file', 'error');
       }
@@ -327,13 +343,12 @@ export default function MultiHero() {
 
         // 校验通过，设置文件
         setLeftAudioFile(file);
-        if (validation.duration) {
-          setLeftAudioDuration(validation.duration);
-        } else {
-          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
-          const duration = await getAudioDuration(file);
-          setLeftAudioDuration(duration);
-        }
+        const finalDuration = validation.duration || await getAudioDuration(file);
+        setLeftAudioDuration(finalDuration);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ leftAudioFile: file, leftAudioDuration: finalDuration });
+        }, 0);
       }
     });
   };
@@ -364,13 +379,12 @@ export default function MultiHero() {
 
         // 校验通过，设置文件
         setLeftAudioFile(file);
-        if (validation.duration) {
-          setLeftAudioDuration(validation.duration);
-        } else {
-          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
-          const duration = await getAudioDuration(file);
-          setLeftAudioDuration(duration);
-        }
+        const finalDuration = validation.duration || await getAudioDuration(file);
+        setLeftAudioDuration(finalDuration);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ leftAudioFile: file, leftAudioDuration: finalDuration });
+        }, 0);
       }
     });
   };
@@ -399,13 +413,12 @@ export default function MultiHero() {
 
         // 校验通过，设置文件
         setRightAudioFile(file);
-        if (validation.duration) {
-          setRightAudioDuration(validation.duration);
-        } else {
-          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
-          const duration = await getAudioDuration(file);
-          setRightAudioDuration(duration);
-        }
+        const finalDuration = validation.duration || await getAudioDuration(file);
+        setRightAudioDuration(finalDuration);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ rightAudioFile: file, rightAudioDuration: finalDuration });
+        }, 0);
       }
     });
   };
@@ -436,15 +449,36 @@ export default function MultiHero() {
 
         // 校验通过，设置文件
         setRightAudioFile(file);
-        if (validation.duration) {
-          setRightAudioDuration(validation.duration);
-        } else {
-          // 如果 decodeAudioData 没有返回时长，使用 Audio 对象作为备用
-          const duration = await getAudioDuration(file);
-          setRightAudioDuration(duration);
-        }
+        const finalDuration = validation.duration || await getAudioDuration(file);
+        setRightAudioDuration(finalDuration);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ rightAudioFile: file, rightAudioDuration: finalDuration });
+        }, 0);
       }
     });
+  };
+
+  // 删除左侧音频
+  const removeLeftAudio = () => {
+    setLeftAudioFile(null);
+    setLeftAudioDuration(0);
+    if (leftAudioInputRef.current) {
+      leftAudioInputRef.current.value = '';
+    }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    saveFormCache({ leftAudioFile: null, leftAudioDuration: 0 });
+  };
+
+  // 删除右侧音频
+  const removeRightAudio = () => {
+    setRightAudioFile(null);
+    setRightAudioDuration(0);
+    if (rightAudioInputRef.current) {
+      rightAudioInputRef.current.value = '';
+    }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    saveFormCache({ rightAudioFile: null, rightAudioDuration: 0 });
   };
 
   // 📥 页面加载时恢复缓存数据
@@ -989,7 +1023,12 @@ export default function MultiHero() {
                 </div>
                 <select
                   value={order}
-                  onChange={(e) => setOrder(e.target.value as 'meanwhile' | 'left_right' | 'right_left')}
+                  onChange={(e) => {
+                    const newOrder = e.target.value as 'meanwhile' | 'left_right' | 'right_left';
+                    setOrder(newOrder);
+                    // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                    saveFormCache({ order: newOrder });
+                  }}
                   className="w-full px-3 py-2 bg-white/5 backdrop-blur-sm border border-white/20 rounded-lg text-white focus:outline-none focus:border-primary/50 hover:bg-white/10 transition-colors"
                 >
                   <option value="meanwhile" className="bg-slate-900/90 text-white backdrop-blur-sm">Meanwhile</option>
@@ -1047,7 +1086,11 @@ export default function MultiHero() {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setImageFile(null)}
+                      onClick={() => {
+                        setImageFile(null);
+                        // 立即更新缓存，确保删除操作被保存（不等待防抖）
+                        saveFormCache({ imageFile: null });
+                      }}
                       className="absolute top-2 right-2 h-8 w-8 p-0 bg-white/20 hover:bg-white/30 rounded-full shadow-sm"
                     >
                       <X className="h-4 w-4 text-foreground" />
@@ -1089,7 +1132,11 @@ export default function MultiHero() {
                   <Button
                     type="button"
                     variant={resolution === '480p' ? 'default' : 'outline'}
-                    onClick={() => setResolution('480p')}
+                    onClick={() => {
+                      setResolution('480p');
+                      // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                      saveFormCache({ resolution: '480p' });
+                    }}
                     size="sm"
                     className="px-3"
                   >
@@ -1101,7 +1148,11 @@ export default function MultiHero() {
                   <Button
                     type="button"
                     variant={resolution === '720p' ? 'default' : 'outline'}
-                    onClick={() => setResolution('720p')}
+                    onClick={() => {
+                      setResolution('720p');
+                      // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                      saveFormCache({ resolution: '720p' });
+                    }}
                     size="sm"
                     className="px-3"
                   >
@@ -1113,7 +1164,11 @@ export default function MultiHero() {
                   <Button
                     type="button"
                     variant={resolution === '1080p' ? 'default' : 'outline'}
-                    onClick={() => setResolution('1080p')}
+                    onClick={() => {
+                      setResolution('1080p');
+                      // 立即保存缓存，确保切换操作被保存（不等待防抖）
+                      saveFormCache({ resolution: '1080p' });
+                    }}
                     size="sm"
                     className="px-3"
                   >

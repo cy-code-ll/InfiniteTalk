@@ -302,22 +302,31 @@ export default function InfiniteTalkGenerator() {
   };
 
   // 💾 保存表单到 IndexedDB
-  const saveFormCache = async () => {
+  const saveFormCache = async (overrides?: { 
+    audio?: File | null; 
+    audioDuration?: number;
+    resolution?: '480p' | '720p' | '1080p';
+    image?: File | null;
+    video?: File | null;
+    videoFirstFrame?: string | null;
+    maskImageDataForImage?: string | null;
+    maskImageDataForVideo?: string | null;
+  }) => {
     try {
       await saveToIndexedDB(CACHE_KEY, {
         // 文件
-        image: selectedImage,
-        video: selectedVideo,
-        audio: selectedAudio,
-        maskImageDataForImage: maskImageDataForImage,
-        maskImageDataForVideo: maskImageDataForVideo,
-        videoFirstFrame: videoFirstFrame,
+        image: overrides?.image !== undefined ? overrides.image : selectedImage,
+        video: overrides?.video !== undefined ? overrides.video : selectedVideo,
+        audio: overrides?.audio !== undefined ? overrides.audio : selectedAudio,
+        maskImageDataForImage: overrides?.maskImageDataForImage !== undefined ? overrides.maskImageDataForImage : maskImageDataForImage,
+        maskImageDataForVideo: overrides?.maskImageDataForVideo !== undefined ? overrides.maskImageDataForVideo : maskImageDataForVideo,
+        videoFirstFrame: overrides?.videoFirstFrame !== undefined ? overrides.videoFirstFrame : videoFirstFrame,
 
         // 表单数据
         prompt: prompt,
-        resolution: resolution,
+        resolution: overrides?.resolution !== undefined ? overrides.resolution : resolution,
         tabMode: tabMode,
-        audioDuration: audioDuration,
+        audioDuration: overrides?.audioDuration !== undefined ? overrides.audioDuration : audioDuration,
       });
       console.log('✅ Form cached to IndexedDB');
     } catch (error) {
@@ -423,6 +432,10 @@ export default function InfiniteTalkGenerator() {
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
         setMaskImageDataForImage(null);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ image: file, maskImageDataForImage: null });
+        }, 0);
       }
     });
   };
@@ -435,6 +448,10 @@ export default function InfiniteTalkGenerator() {
       if (file && file.type.startsWith('image/')) {
         setSelectedImage(file);
         setMaskImageDataForImage(null);
+        // 立即保存缓存，确保上传操作被保存（不等待防抖）
+        setTimeout(() => {
+          saveFormCache({ image: file, maskImageDataForImage: null });
+        }, 0);
       } else {
         toast.error('Please drop a valid image file');
       }
@@ -506,11 +523,19 @@ export default function InfiniteTalkGenerator() {
       const file = event.target.files?.[0];
       if (file && file.type.startsWith('video/')) {
         setSelectedVideo(file);
-        setMaskImageDataForVideo(null)
+        setMaskImageDataForVideo(null);
+        // 立即保存缓存（先保存视频文件，第一帧稍后更新）
+        setTimeout(() => {
+          saveFormCache({ video: file, maskImageDataForVideo: null });
+        }, 0);
         // 提取第一帧
         extractVideoFirstFrame(file)
           .then(frameDataUrl => {
             setVideoFirstFrame(frameDataUrl);
+            // 第一帧提取完成后，再次保存缓存
+            setTimeout(() => {
+              saveFormCache({ video: file, videoFirstFrame: frameDataUrl });
+            }, 0);
           })
           .catch(error => {
             console.error('Failed to extract video first frame:', error);
@@ -527,10 +552,19 @@ export default function InfiniteTalkGenerator() {
       const file = event.dataTransfer.files[0];
       if (file && file.type.startsWith('video/')) {
         setSelectedVideo(file);
+        setMaskImageDataForVideo(null);
+        // 立即保存缓存（先保存视频文件，第一帧稍后更新）
+        setTimeout(() => {
+          saveFormCache({ video: file, maskImageDataForVideo: null });
+        }, 0);
         // 提取第一帧
         extractVideoFirstFrame(file)
           .then(frameDataUrl => {
             setVideoFirstFrame(frameDataUrl);
+            // 第一帧提取完成后，再次保存缓存
+            setTimeout(() => {
+              saveFormCache({ video: file, videoFirstFrame: frameDataUrl });
+            }, 0);
           })
           .catch(error => {
             console.error('Failed to extract video first frame:', error);
@@ -737,11 +771,6 @@ export default function InfiniteTalkGenerator() {
 
   // 🔄 自动保存（防抖）
   useEffect(() => {
-    // 只有在有数据时才保存
-    if (!selectedImage && !selectedVideo && !selectedAudio) {
-      return;
-    }
-
     const timer = setTimeout(() => {
       saveFormCache();
     }, 2000); // 2秒防抖
@@ -849,6 +878,8 @@ export default function InfiniteTalkGenerator() {
     if (imageInputRef.current) {
       imageInputRef.current.value = '';
     }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    saveFormCache({ image: null, maskImageDataForImage: null });
   };
 
   // 删除选中的视频
@@ -859,6 +890,8 @@ export default function InfiniteTalkGenerator() {
     if (videoInputRef.current) {
       videoInputRef.current.value = '';
     }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    saveFormCache({ video: null, videoFirstFrame: null, maskImageDataForVideo: null });
   };
 
   // 统一的删除处理函数：如果有mask先删除mask，否则删除图片/视频
@@ -867,6 +900,8 @@ export default function InfiniteTalkGenerator() {
       // 先删除mask
       setMaskImageDataForImage(null);
       toast.showToast('Mask removed', 'info');
+      // 立即更新缓存，确保删除操作被保存（不等待防抖）
+      saveFormCache({ maskImageDataForImage: null });
     } else {
       // 删除图片
       removeSelectedImage();
@@ -879,6 +914,8 @@ export default function InfiniteTalkGenerator() {
       // 先删除mask
       setMaskImageDataForVideo(null);
       toast.showToast('Mask removed', 'info');
+      // 立即更新缓存，确保删除操作被保存（不等待防抖）
+      saveFormCache({ maskImageDataForVideo: null });
     } else {
       // 删除视频
       removeSelectedVideo();
@@ -892,6 +929,9 @@ export default function InfiniteTalkGenerator() {
     if (audioInputRef.current) {
       audioInputRef.current.value = '';
     }
+    // 立即更新缓存，确保删除操作被保存（不等待防抖）
+    // 使用 overrides 参数明确设置 audio 为 null，避免状态更新延迟导致的问题
+    saveFormCache({ audio: null, audioDuration: 0 });
   };
 
   // 遮罩绘制相关函数
@@ -1854,6 +1894,9 @@ export default function InfiniteTalkGenerator() {
     startTransition(() => {
       setResolution(newResolution);
     });
+    // 立即保存缓存，确保分辨率变化被保存（不等待防抖）
+    // 使用 overrides 参数明确设置新的分辨率值
+    saveFormCache({ resolution: newResolution });
   }, [resolution]);
 
   // 右侧预览区域：memo 化，避免与按钮点击等无关状态导致的重渲染
