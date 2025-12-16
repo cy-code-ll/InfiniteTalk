@@ -83,47 +83,47 @@ const TEMPLATES = [
   {
     id: 't1',
     name: 'Cozy Home',
-    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/1.png',
-    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t1-m.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t1-m.webp',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/1.png',
+    previewVideo: 'https://static.infinitetalk2.com/infinitetalk/t1-m.mp4',
+    videoPoster: 'https://static.infinitetalk2.com/infinitetalk/t1-m.webp',
     prompt:
       'In the suburbs of Christmas, snow falls on Christmas trees, and the roofs and windowsills of small wooden houses are covered with a thick layer of white snow. There is a flower wreath made of pine cones and red berries hanging at the door. The character is wearing a Christmas sweater, wearing a red Christmas hat, and standing next to a small wooden house. The character width accounts for 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
   {
     id: 't2',
     name: 'Living Room',
-    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/2.png',
-    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t2-m.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t2-m.webp',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/2.png',
+    previewVideo: 'https://static.infinitetalk2.com/infinitetalk/t2-m.mp4',
+    videoPoster: 'https://static.infinitetalk2.com/infinitetalk/t2-m.webp',
     prompt:
       'In the center of the living room, there is a super large and lush real pine tree! It is covered with various retro glass ball ornaments, with warm yellow white string lights on. Snow is drifting outside the window, the feeling of night. The overall atmosphere inside the house is warm, with a soft yellow tone. The character stands at the front, and the width of the character accounts for 70% of the page. About 70% of the page is high, wearing an ugly Christmas sweater printed on it.',
   },
   {
     id: 't3',
     name: 'Church Interior',
-    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/3.png',
-    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t3-m.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t3-m.webp',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/3.png',
+    previewVideo: 'https://static.infinitetalk2.com/infinitetalk/t3-m.mp4',
+    videoPoster: 'https://static.infinitetalk2.com/infinitetalk/t3-m.webp',
     prompt:
       '  The interior of the Christmas church is decorated with a large number of green holly branches and red potted poinsettias in the night background. The main lighting comes from chandeliers and lit candles. The character is in the center of the video, wearing a red Christmas hat, and the width of the character accounts for 70% of the page. The height accounts for about 70% of the page, wearing an ugly Christmas sweater, making people instantly feel the lively, excited, and energetic atmosphere of the holiday night.',
   },
   {
     id: 't4',
     name: 'Pine Forest',
-    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/4.png',
-    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/t4-m.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/t4-m.webp',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/4.png',
+    previewVideo: 'https://static.infinitetalk2.com/infinitetalk/t4-m.mp4',
+    videoPoster: 'https://static.infinitetalk2.com/infinitetalk/t4-m.webp',
     prompt:
       '  A pine forest in the outskirts, covered in snow on the ground, with yellow lights shining from the windows of the small wooden houses on the farm, warm and romantic. Most importantly, countless warm light strings, only white or amber, are wrapped around the pine trees in the forest, outlining their contours. As dusk falls and the lights begin to dominate the view, the entire scene becomes poetic and romantic. The character is wearing a Christmas sweater and a red Christmas hat, with a width of 70% of the page. The proportion of height on the page is about 70%, making people instantly feel the lively, excited, and energetic atmosphere of the festival night.',
   },
   {
     id: 't5',
     name: 'Merry Christmas',
-    thumbnail: 'https://www.infinitetalk2.com/infinitetalk/5.png',
-    previewVideo: 'https://www.infinitetalk2.com/infinitetalk/5_pc.mp4',
-    videoPoster: 'https://www.infinitetalk2.com/infinitetalk/5_pc.webp',
-    previewVideomobile: 'https://www.infinitetalk2.com/infinitetalk/5-m.mp4',
-    videoPostermobile: 'https://www.infinitetalk2.com/infinitetalk/5_m.webp',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/5.png',
+    previewVideo: 'https://static.infinitetalk2.com/infinitetalk/5_pc.mp4',
+    videoPoster: 'https://static.infinitetalk2.com/infinitetalk/5_pc.webp',
+    previewVideomobile: 'https://static.infinitetalk2.com/infinitetalk/5-m.mp4',
+    videoPostermobile: 'https://static.infinitetalk2.com/infinitetalk/5_m.webp',
     prompt:
       'The background is a simple texture of Christmas red, with a large white artistic font "Merry Christmas" designed on top of it, which accounts for 80% of the width of the page. The artistic font is divided into two lines, one line displays "Merry" and the other line displays "Christmas", with the same font style. There is a real-life Christmas tree with gifts and colorful lights hanging on it. The background space is decorated with fewer Christmas elements, and the layout is coordinated. The overall style is simple and atmospheric, with the character standing at the front wearing a green Christmas sweater. The character width accounts for 70% of the page. The proportion of height on the page is about 80%, making people instantly feel the color impact and vibrant atmosphere of the festival.',
   }
@@ -857,10 +857,10 @@ export function ChristmasHeroMobile() {
           {/* 背景视频 */}
           <video
             key={templatePreviewVideo || 'default'}
-            src={templatePreviewVideo || "https://www.infinitetalk2.com/infinitetalk/h2.mp4"}
+            src={templatePreviewVideo || "https://static.infinitetalk2.com/infinitetalk/h2.mp4"}
             poster={templatePreviewVideo
-              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://www.infinitetalk2.com/infinitetalk/h2.webp'
-              : 'https://www.infinitetalk2.com/infinitetalk/h2.webp'}
+              ? TEMPLATES.find(t => t.previewVideo === templatePreviewVideo)?.videoPoster || 'https://static.infinitetalk2.com/infinitetalk/h2.webp'
+              : 'https://static.infinitetalk2.com/infinitetalk/h2.webp'}
             className="absolute inset-0 w-full h-full object-cover"
             autoPlay
             loop

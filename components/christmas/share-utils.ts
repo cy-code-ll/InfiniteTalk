@@ -48,7 +48,7 @@ export const generateChristmasShareUrl = (
   // 根据当前环境选择基础地址
   // 测试版 https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2
   // 正式版 https://www.infinitetalk2.com/infinitetalk/christmas
-  const baseUrl = 'https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2';
+  const baseUrl = 'https://www.infinitetalk2.com/infinitetalk/christmas';
   
   // 从视频 URL 中提取日期部分
   const datePart = extractDateFromVideoUrl(videoUrl);

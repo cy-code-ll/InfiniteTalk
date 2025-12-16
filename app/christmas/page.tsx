@@ -58,7 +58,7 @@ const christmasSchemaData = {
 
 export default function ChristmasPage() {
   return (
-    <>
+    <div className="flex flex-col min-h-screen">
       {/* Breadcrumb structured data */}
       <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
@@ -86,7 +86,7 @@ export default function ChristmasPage() {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(christmasSchemaData) }}
       />
       
-      <main className="relative md:flex-grow  md:h-auto overflow-hidden md:overflow-visible">
+      <main className="relative flex-grow flex flex-col overflow-hidden md:overflow-visible">
         {/* Fixed background gradient */}
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-br from-background via-primary/10 via-primary/20 via-primary/15 to-slate-950 -z-10" />
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
@@ -97,11 +97,11 @@ export default function ChristmasPage() {
         {/* Additional sections can be added here */}
       </main>
       
-      {/* Footer - Hidden on mobile */}
-      <div className="hidden md:block">
+      {/* Footer - Hidden on mobile, always at bottom */}
+      <div className="hidden md:block mt-auto">
         <Footer />
       </div>
-    </>
+    </div>
   );
 }
 

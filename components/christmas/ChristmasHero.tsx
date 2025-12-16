@@ -13,7 +13,7 @@ function ChristmasHeroContent() {
       </div>
       
       {/* Desktop: hidden on small screens, visible on medium and larger screens */}
-      <div className="hidden md:block">
+      <div className="hidden md:block h-full">
         <ChristmasHeroDesktop />
       </div>
     </>
