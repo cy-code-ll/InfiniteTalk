@@ -2221,11 +2221,12 @@ export default function InfiniteTalkGenerator() {
               <div className="flex justify-between items-center text-sm mb-3">
                 <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
                 <Link
-                  href="/audio-tools"
+                  href="https://www.merrychristmasmusic.net/"
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-primary hover:text-primary/80 underline"
-                  onClick={handleAudioToolsClick}
                 >
-                  Audio Cut
+                  more audio
                 </Link>
               </div>
               <div className="relative">
