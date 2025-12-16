@@ -119,7 +119,7 @@ const TEMPLATES = [
   {
     id: 't5',
     name: 'Merry Christmas',
-    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/5.png',
+    thumbnail: 'https://static.infinitetalk2.com/infinitetalk/infinitetalk_5.png',
     previewVideo: 'https://static.infinitetalk2.com/infinitetalk/5_pc.mp4',
     videoPoster: 'https://static.infinitetalk2.com/infinitetalk/5_pc.webp',
     previewVideomobile: 'https://static.infinitetalk2.com/infinitetalk/5-m.mp4',
