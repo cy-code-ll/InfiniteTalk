@@ -51,19 +51,23 @@ function NavAuthIsland({ variant = 'desktop' }: NavAuthIslandProps) {
 
   const coinIconClassName = variant === 'desktop' ? 'h-4 w-4' : 'h-3 w-3';
 
-  // 显示逻辑：未充值用户（level === 0）优先显示优惠券，已充值用户（level > 0）显示积分
+  // 显示逻辑：按照 pointsrules.md 的规则
+  // 1. 未充值用户（level === 0）且有优惠券 → 显示优惠券
+  // 2. 其他情况 → 显示积分图标 + 实际积分数值
   const displayInfo = useMemo(() => {
     if (!isSignedIn || isLoadingUserInfo || !userInfo) {
       return null;
     }
 
-    const totalCredits = userInfo.total_credits ?? 0;
+    // 计算总积分：优先使用 total_credits，如果没有则使用 free_limit + remaining_limit
+    const totalCredits = userInfo.total_credits ?? 
+      ((userInfo.free_limit ?? 0) + (userInfo.remaining_limit ?? 0));
     const freeTimes = userInfo.free_times ?? 0;
     const userLevel = userInfo.level ?? 0;
     const isPaidUser = userLevel > 0;
     const hasFreeVouchers = freeTimes > 0 && userLevel === 0;
 
-    // 未充值用户：优先显示优惠券（即使有赠送的积分也显示优惠券）
+    // 规则1: 未充值用户且有优惠券 → 显示优惠券（即使有赠送的积分也显示优惠券）
     if (hasFreeVouchers) {
       return {
         type: 'voucher' as const,
@@ -72,19 +76,10 @@ function NavAuthIsland({ variant = 'desktop' }: NavAuthIslandProps) {
       };
     }
     
-    // 已充值用户：显示积分
-    if (isPaidUser && totalCredits > 0) {
-      return {
-        type: 'credits' as const,
-        value: totalCredits,
-        icon: CoinsIcon,
-      };
-    }
-    
-    // 其他情况：显示 0
+    // 其他情况 → 显示积分图标 + 实际积分数值
     return {
       type: 'credits' as const,
-      value: 0,
+      value: totalCredits,
       icon: CoinsIcon,
     };
   }, [isSignedIn, isLoadingUserInfo, userInfo]);
