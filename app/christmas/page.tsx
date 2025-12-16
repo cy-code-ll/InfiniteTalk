@@ -58,7 +58,7 @@ const christmasSchemaData = {
 
 export default function ChristmasPage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col">
       {/* Breadcrumb structured data */}
       <Script id="ld-json-breadcrumb" type="application/ld+json" strategy="afterInteractive"
         dangerouslySetInnerHTML={{ __html: JSON.stringify({
