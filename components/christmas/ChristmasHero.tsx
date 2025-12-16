@@ -4,6 +4,7 @@ import React, { Suspense } from 'react';
 import { ChristmasHeroMobile } from './ChristmasHeroMobile';
 import { ChristmasHeroDesktop } from './ChristmasHeroDesktop';
 
+
 function ChristmasHeroContent() {
   return (
     <>
