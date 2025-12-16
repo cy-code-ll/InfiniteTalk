@@ -2,29 +2,70 @@
 
 export type SocialPlatform = 'twitter' | 'facebook' | 'whatsapp';
 
+// 分享链接基础地址配置
+// const SHARE_BASE_URLS = {
+//   // 测试版地址
+//   test: 'https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2',
+//   // 正式版地址
+//   production: 'https://www.infinitetalk2.com/infinitetalk/christmas',
+// } as const;
+
+
+/**
+ * 从视频 URL 中提取日期部分
+ * @param videoUrl - 视频 URL，格式如：https://cf.infinitetalk.net/topic_1/infinitetalk/2512/16/44748.mp4
+ * @returns 日期字符串，格式如：2512-16-44748
+ */
+const extractDateFromVideoUrl = (videoUrl: string): string | null => {
+  try {
+    // 匹配 /infinitetalk/数字/数字/数字.mp4 的模式
+    const match = videoUrl.match(/\/infinitetalk\/(\d+)\/(\d+)\/(\d+)\.mp4/);
+    if (match && match.length === 4) {
+      // 返回 2512-16-44748 格式
+      return `${match[1]}-${match[2]}-${match[3]}`;
+    }
+    return null;
+  } catch (error) {
+    console.error('Failed to extract date from video URL:', error);
+    return null;
+  }
+};
+
 /**
  * 生成 Christmas 视频分享链接
- * @param videoUrl - 生成后的视频 URL
+ * @param videoUrl - 生成后的视频 URL，格式如：https://cf.infinitetalk.net/topic_1/infinitetalk/2512/16/44748.mp4
  * @param templateId - 模板 ID (如 't1', 't2', 't3')
  * @param musicId - 音乐 ID (如 'm1', 'm2', ...)
- * @returns 分享页面 URL，格式：example.com?v=https://123.mp4&tid=t1&mid=m1
+ * @returns 分享页面 URL，格式：
+ *   - 测试版：https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2/2512-16-44748-templateId-musicId.html
+ *   - 正式版：https://www.infinitetalk2.com/infinitetalk/christmas/2512-16-44748-templateId-musicId.html
  */
 export const generateChristmasShareUrl = (
   videoUrl: string,
   templateId: string,
   musicId: string
 ): string => {
-  const baseUrl = 'https://www.infinitetalk2.com/infinitetalk/christmas.html';
-  const sharePageUrl = `${baseUrl}`;
+  // 根据当前环境选择基础地址
+  // 测试版 https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2
+  // 正式版 https://www.infinitetalk2.com/infinitetalk/christmas
+  const baseUrl = 'https://infinitetalk-chirsmas-share.vercel.app/infinitetalk/christmas2';
   
-  // 构建查询参数
-  const params = new URLSearchParams({
-    v: videoUrl,
-    tid: templateId,
-    mid: musicId,
-  });
+  // 从视频 URL 中提取日期部分
+  const datePart = extractDateFromVideoUrl(videoUrl);
   
-  return `${sharePageUrl}?${params.toString()}`;
+  if (!datePart) {
+    // 如果无法提取日期，使用旧的查询参数格式作为后备方案
+    console.warn('Failed to extract date from video URL, using fallback format');
+    const params = new URLSearchParams({
+      v: videoUrl,
+      tid: templateId,
+      mid: musicId,
+    });
+    return `${baseUrl}.html?${params.toString()}`;
+  }
+  
+  // 生成新格式的分享链接：christmas2/2512-16-44748-templateId-musicId.html
+  return `${baseUrl}/${datePart}-${templateId}-${musicId}.html`;
 };
 
 /**
