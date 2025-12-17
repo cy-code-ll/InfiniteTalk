@@ -2220,14 +2220,22 @@ export default function InfiniteTalkGenerator() {
               </div>
               <div className="flex justify-between items-center text-sm mb-3">
                 <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
-                <Link
-                  href="https://www.merrychristmasmusic.net/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-primary hover:text-primary/80 underline"
-                >
-                  more audio
-                </Link>
+                <div className="flex items-center gap-4">
+                  <Link
+                    href="/audio-tools"
+                    className="text-primary hover:text-primary/80 underline"
+                  >
+                    Audio Cut
+                  </Link>
+                  <Link
+                    href="https://www.merrychristmasmusic.net/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:text-primary/80 underline"
+                  >
+                    more audio
+                  </Link>
+                </div>
               </div>
               <div className="relative">
                 {selectedAudio ? (
