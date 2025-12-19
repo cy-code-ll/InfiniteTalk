@@ -2218,12 +2218,12 @@ export default function InfiniteTalkGenerator() {
                   </audio>
                 </div>
               </div>
-              <div className="flex justify-between items-center text-sm mb-3">
-                <span className="text-slate-400">MP3,WAV,M4A,OGG,FLAC</span>
-                <div className="flex items-center gap-4">
+              <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 sm:gap-0 text-sm mb-3">
+                <span className="text-slate-400 text-xs sm:text-sm">MP3,WAV,M4A,OGG,FLAC</span>
+                <div className="flex items-center gap-3 sm:gap-4 flex-wrap">
                   <Link
                     href="/audio-tools"
-                    className="text-primary hover:text-primary/80 underline"
+                    className="text-primary hover:text-primary/80 underline text-xs sm:text-sm whitespace-nowrap"
                   >
                     Audio Cut
                   </Link>
@@ -2231,9 +2231,9 @@ export default function InfiniteTalkGenerator() {
                     href="https://www.merrychristmasmusic.net/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-primary hover:text-primary/80 underline"
+                    className="text-primary hover:text-primary/80 underline text-xs sm:text-sm whitespace-nowrap"
                   >
-                    more audio
+                    More Audio
                   </Link>
                 </div>
               </div>
