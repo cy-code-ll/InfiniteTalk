@@ -14,6 +14,7 @@ Disallow: /sign-in/    # Authentication pages
 Disallow: /sign-up/    # Authentication pages
 Disallow: /profile/    # User profile pages
 Disallow: /sso-callback/  # SSO callback pages (not meant for indexing)
+Disallow: /custom-pricing/  # Custom pricing page (not meant for indexing)
 # Note: Static assets are allowed (no Disallow for /static/)
 
 # -------------------------------------
@@ -26,6 +27,7 @@ Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
 Disallow: /sso-callback/
+Disallow: /custom-pricing/
 
 # -------------------------------------
 # 🔎 Bingbot rules (search indexing allowed)
@@ -37,6 +39,7 @@ Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
 Disallow: /sso-callback/
+Disallow: /custom-pricing/
 
 # -------------------------------------
 # 🔎 Baiduspider rules
@@ -48,6 +51,7 @@ Disallow: /sign-in/
 Disallow: /sign-up/
 Disallow: /profile/
 Disallow: /sso-callback/
+Disallow: /custom-pricing/
 
 # -------------------------------------
 # 🤖 AI Crawler Rules (LLM-specific bots - restricted)
