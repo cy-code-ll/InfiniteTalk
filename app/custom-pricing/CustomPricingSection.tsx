@@ -213,9 +213,9 @@ export default function CustomPricingSection() {
                   <div className="text-2xl font-semibold text-primary mb-2">
                     {plan.credits.toLocaleString()} Credits
                   </div>
-                  <div className="text-sm text-slate-400">
+                  {/* <div className="text-sm text-slate-400">
                     {plan.creditsPerDollar} per credit
-                  </div>
+                  </div> */}
                 </div>
 
                 <Button 
