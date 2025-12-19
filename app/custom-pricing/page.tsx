@@ -121,7 +121,7 @@ export default function CustomPricingPage() {
         <div className="fixed inset-0 w-screen h-screen bg-gradient-to-tl from-transparent via-primary/5 to-transparent -z-10" />
         
         <CustomPricingSection />
-        <CTA />
+      
       </main>
       
       {/* Footer without friendly links */}

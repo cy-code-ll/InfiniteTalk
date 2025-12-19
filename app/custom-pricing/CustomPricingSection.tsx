@@ -53,7 +53,7 @@ export default function CustomPricingSection() {
       buttonText: 'Get 44,000 Credits',
       features: [
         '44,000 Credits included',
-        '$0.045 per credit',
+   
         ...commonFeatures
       ]
     },
@@ -69,7 +69,7 @@ export default function CustomPricingSection() {
       buttonText: 'Get 66,000 Credits',
       features: [
         '66,000 Credits included',
-        '$0.045 per credit',
+      
         ...commonFeatures
       ]
     },
@@ -85,7 +85,7 @@ export default function CustomPricingSection() {
       buttonText: 'Get 110,000 Credits',
       features: [
         '110,000 Credits included',
-        '$0.045 per credit',
+      
         ...commonFeatures
       ]
     }
@@ -259,57 +259,7 @@ export default function CustomPricingSection() {
           })}
         </div>
 
-        {/* Trust Badges */}
-        <div className="mt-16 mb-12">
-          <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
-            {/* 7-Day Refund Guarantee */}
-            <Link href="/refund" aria-label="Refund Policy" className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-green-500/10 to-green-600/5 border border-green-500/20 rounded-xl backdrop-blur-sm hover:border-green-400/40 transition-colors">
-              <div className="flex-shrink-0 w-10 h-10 bg-green-500/20 rounded-full flex items-center justify-center">
-                <DollarSign className="w-5 h-5 text-green-400" />
-              </div>
-              <div className="text-left">
-                <div className="text-white font-semibold">7‑Day Refund</div>
-                <div className="text-slate-400 text-sm">Money-back guarantee</div>
-              </div>
-            </Link>
-
-            {/* Secure Payment by Stripe */}
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl backdrop-blur-sm">
-              <div className="flex-shrink-0 w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
-                <Shield className="w-5 h-5 text-blue-400" />
-              </div>
-              <div className="text-left">
-                <div className="text-white font-semibold">Secure Payment</div>
-                <div className="text-slate-400 text-sm">Powered by Stripe</div>
-              </div>
-            </div>
-
-            {/* 24/7 Support */}
-            <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-purple-500/10 to-purple-600/5 border border-purple-500/20 rounded-xl backdrop-blur-sm">
-              <div className="flex-shrink-0 w-10 h-10 bg-purple-500/20 rounded-full flex items-center justify-center">
-                <MessageCircle className="w-5 h-5 text-purple-400" />
-              </div>
-              <div className="text-left">
-                <div className="text-white font-semibold">24/7 Support</div>
-                <div className="text-slate-400 text-sm">Always here to help</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional pricing info */}
-        <div className="mt-8 text-center">
-          <p className="text-white mb-4">
-            Enterprise credit packages • Best value per credit • Bulk processing available
-          </p>
-          <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 text-white">
-            <span>✓ Large credit packages</span>
-            <span>✓ Credits never expire</span>
-            <span>✓ Secure payments</span>
-            <span>✓ Priority support</span>
-            <span>✓ Bulk processing</span>
-          </div>
-        </div>
+      
       </div>
     </section>
   );
