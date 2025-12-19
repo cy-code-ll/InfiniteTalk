@@ -88,6 +88,16 @@ export default function ProfilePage() {
   const [isCloseAccountDialogOpen, setIsCloseAccountDialogOpen] = useState(false);
   const [isClosingAccount, setIsClosingAccount] = useState(false);
 
+  // 作品保留政策提示框显示状态
+  const [showRetentionPolicyAlert, setShowRetentionPolicyAlert] = useState(() => {
+    // 从localStorage读取用户是否已关闭提示框
+    if (typeof window !== 'undefined') {
+      const closed = localStorage.getItem('retentionPolicyAlertClosed');
+      return closed !== 'true';
+    }
+    return true;
+  });
+
   // 打开发票弹窗
   const handleOpenInvoiceDialog = (payLogId: number) => {
     setSelectedPayLogId(payLogId);
@@ -591,6 +601,35 @@ export default function ProfilePage() {
               )}
             </Button>
           </div>
+          {/* 作品保留政策提示框 */}
+          {showRetentionPolicyAlert && (
+            <div className="bg-gray-100 border border-orange-300 rounded-lg p-2 flex items-start gap-2 mb-4">
+              <div className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-600 flex items-center justify-center">
+                <span className="text-white text-[10px] font-bold">i</span>
+              </div>
+              <div className="flex-1">
+                <div className="text-orange-900 font-semibold mb-1.5 text-xs">Content Retention Policy Reminder</div>
+                <div className="text-orange-800 text-xs leading-tight">
+                  <div>Your creations are only retained for the last 6 months.</div>
+                  <div> Any works older than 6 months will be automatically deleted on a rolling monthly basis.
+                  Please make sure to back up and download any important content in time.</div>
+                </div>
+              </div>
+              {/* <button
+                onClick={() => {
+                  setShowRetentionPolicyAlert(false);
+                  // 保存到localStorage，记住用户已关闭提示框
+                  if (typeof window !== 'undefined') {
+                    localStorage.setItem('retentionPolicyAlertClosed', 'true');
+                  }
+                }}
+                className="flex-shrink-0 w-5 h-5 rounded-full bg-orange-600 flex items-center justify-center hover:bg-orange-700 transition-colors"
+                aria-label="关闭提示"
+              >
+                <span className="text-white text-[10px] font-bold">×</span>
+              </button> */}
+            </div>
+          )}
         </div>
 
         {/* 视频历史区域（按日期分组） */}
