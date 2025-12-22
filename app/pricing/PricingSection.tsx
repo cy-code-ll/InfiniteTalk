@@ -428,6 +428,63 @@ export default function PricingSection() {
             })}
           </div>
 
+          {/* Free and Enterprise Cards */}
+          <div className="flex flex-col md:flex-row gap-8 max-w-7xl mx-auto mt-16">
+            {/* Free Plan Card */}
+            <div className="relative flex-1 p-6 rounded-2xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-white">
+                  Free
+                </h2>
+                <span className="text-4xl font-bold text-white">
+                  $0
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-slate-300 leading-relaxed text-left">
+                  Free to create 2 videos (15s, 720p / 480p). Perfect for trying out our AI video generation technology. No credit card required, just sign up and start creating.
+                </p>
+              </div>
+
+              <div className="flex justify-start">
+                <Link
+                  href="/infinitetalk"
+                  className="block w-auto px-8 py-2.5 font-semibold text-center transition-all duration-200 bg-black hover:bg-gray-900 text-white border border-slate-600 hover:border-slate-500 rounded-md"
+                >
+                  Try for free
+                </Link>
+              </div>
+            </div>
+
+            {/* Enterprise/Custom Plan Card */}
+            <div className="relative flex-1 p-6 rounded-2xl border border-slate-700/50 bg-gradient-to-b from-slate-800/60 to-slate-900/60 backdrop-blur-sm transition-all duration-300 hover:scale-105">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-2xl font-bold text-white">
+                  Enterprise
+                </h2>
+                <span className="text-4xl font-bold text-white">
+                  Custom
+                </span>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-slate-300 leading-relaxed text-left">
+                  Customized solutions for large organizations. If your monthly spending points exceed 10,000, we offer advanced security and purchasing methods tailored to your needs.
+                </p>
+              </div>
+
+              <div className="flex justify-start">
+                <Link
+                  href="mailto:support@infinitetalk.net?subject=Enterprise Inquiry"
+                  className="block w-auto px-8 py-2.5 font-semibold text-center transition-all duration-200 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl rounded-md"
+                >
+                  Contact us
+                </Link>
+              </div>
+            </div>
+          </div>
+
           {/* Trust Badges */}
           <div className="mt-16 mb-12">
             <div className="flex flex-wrap justify-center gap-8 max-w-4xl mx-auto">
