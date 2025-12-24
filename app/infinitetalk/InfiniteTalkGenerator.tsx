@@ -1655,6 +1655,7 @@ export default function InfiniteTalkGenerator() {
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
+    hasNoCredits &&
     hasAudio &&
     (isNonTrialResolution || isAudioTooLong) &&
     userLevel === 0;
