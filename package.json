@@ -36,7 +36,7 @@
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.503.0",
     "music-metadata": "^11.10.3",
-    "next": "15.3.6",
+    "next": "15.3.8",
     "next-intl": "^4.0.2",
     "react": "^19.2.1",
     "react-datepicker": "^8.3.0",
