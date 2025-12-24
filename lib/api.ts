@@ -226,6 +226,18 @@ export const paymentApi = {
     return handleApiError(response);
   },
 
+  createPaypalnewSession: async (priceId: string) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/paypal`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        price_id: priceId,
+      }),
+    });
+
+    return handleApiError(response);
+  },
+
   // 获取订阅记录
   getSubscriptions: async () => {
     const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/subscriptions`, {
