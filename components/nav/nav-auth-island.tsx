@@ -1,7 +1,7 @@
 'use client';
 
 import { useUser } from '@clerk/nextjs';
-import AuthButton from './auth-button';
+import AuthButton from '../auth/auth-button';
 import { useUserInfo } from '@/lib/providers';
 import { memo, useMemo } from 'react';
 
@@ -88,7 +88,7 @@ function NavAuthIsland({ variant = 'desktop' }: NavAuthIslandProps) {
   const prewarm = () => {
     try {
       // 触发菜单模块的解析与缓存
-      import('./user-profile-menu');
+      import('../auth/user-profile-menu');
     } catch {}
   };
 

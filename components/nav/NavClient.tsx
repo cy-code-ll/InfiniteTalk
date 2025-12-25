@@ -37,7 +37,7 @@ const LoadingSpinner = () => (
 );
 
 // Lazy load auth island
-const NavAuthIsland = dynamic(() => import('../auth/nav-auth-island'), {
+const NavAuthIsland = dynamic(() => import('./nav-auth-island'), {
   ssr: false,
   loading: () => (
     <div className="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-gray-800 rounded-full border border-gray-200 dark:border-gray-700">
