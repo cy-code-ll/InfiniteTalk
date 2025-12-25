@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import { useAdBanner } from '@/components/AdBannerContext';
-import { useMaintenanceBanner } from '@/components/MaintenanceBannerContext';
+import { useAdBanner } from '@/components/adBanner/AdBannerContext';
+import { useMaintenanceBanner } from '@/components/Maintenance/MaintenanceBannerContext';
 
 export function MainContentWrapper({ children }: { children: React.ReactNode }) {
   const { isAdBannerVisible, adBannerHeight } = useAdBanner();

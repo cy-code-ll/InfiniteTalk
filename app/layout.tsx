@@ -1,11 +1,11 @@
 import './globals.css'
 import Script from 'next/script';
 import { Navbar } from '@/components/Navbar';
-import { MaintenanceBanner } from '@/components/MaintenanceBanner';
-import { MaintenanceModalWrapper } from '@/components/MaintenanceModalWrapper';
-import { MaintenanceBannerProvider } from '@/components/MaintenanceBannerContext';
-import { AdBanner } from '@/components/AdBanner';
-import { AdBannerProvider } from '@/components/AdBannerContext';
+import { MaintenanceBanner } from '@/components/Maintenance/MaintenanceBanner';
+import { MaintenanceModalWrapper } from '@/components/Maintenance/MaintenanceModalWrapper';
+import { MaintenanceBannerProvider } from '@/components/Maintenance/MaintenanceBannerContext';
+import { AdBanner } from '@/components/adBanner/AdBanner';
+import { AdBannerProvider } from '@/components/adBanner/AdBannerContext';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
@@ -127,7 +127,7 @@ export default function RootLayout({
           <ToastProvider>
             <UserProvider>
               <AuthModalProvider>
-                <AdBannerProvider>
+                <AdBannerProvider >
                   <MaintenanceBannerProvider>
                     <AdBanner />
                     <MaintenanceBanner />

@@ -6,11 +6,11 @@
 
 ## 核心组件
 
-- **`components/MaintenanceBanner.tsx`** - 维护横幅组件
-- **`components/MaintenanceBannerContext.tsx`** - 维护横幅 Context
-- **`components/MaintenanceModal.tsx`** - 维护模态框组件
-- **`components/MaintenanceModalWrapper.tsx`** - 维护模态框动态导入包装器
-- **`components/MainContentWrapper.tsx`** - 主内容包装器（计算头部高度）
+- **`components/Maintenance/MaintenanceBanner.tsx`** - 维护横幅组件
+- **`components/Maintenance/MaintenanceBannerContext.tsx`** - 维护横幅 Context
+- **`components/Maintenance/MaintenanceModal.tsx`** - 维护模态框组件
+- **`components/Maintenance/MaintenanceModalWrapper.tsx`** - 维护模态框动态导入包装器
+- **`components/Maintenance/MainContentWrapper.tsx`** - 主内容包装器（计算头部高度）
 
 ---
 

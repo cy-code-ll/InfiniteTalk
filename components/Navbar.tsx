@@ -3,8 +3,8 @@
 import React from 'react';
 import Link from 'next/link';
 import { NavClient } from './nav/NavClient';
-import { useMaintenanceBanner } from './MaintenanceBannerContext';
-import { useAdBanner } from './AdBannerContext';
+import { useMaintenanceBanner } from './Maintenance/MaintenanceBannerContext';
+import { useAdBanner } from './adBanner/AdBannerContext';
 
 export function Navbar() {
   const { isBannerVisible, bannerHeight } = useMaintenanceBanner();

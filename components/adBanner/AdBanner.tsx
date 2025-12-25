@@ -4,7 +4,7 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { useAdBanner } from './AdBannerContext';
+import { useAdBanner } from '../adBanner/AdBannerContext';
 
 const AD_BANNER_IMAGE_URL = 'https://cfsource.infinitetalk.net/infinitetalk/banner.gif';
 const AD_BANNER_MOBILE_IMAGE_URL = 'https://cfsource.infinitetalk.net/infinitetalk/bannershouji.gif';
