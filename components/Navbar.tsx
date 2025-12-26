@@ -4,19 +4,16 @@ import React from 'react';
 import Link from 'next/link';
 import { NavClient } from './nav/NavClient';
 import { useMaintenanceBanner } from './Maintenance/MaintenanceBannerContext';
-import { useAdBanner } from './adBanner/AdBannerContext';
 
 export function Navbar() {
   const { isBannerVisible, bannerHeight } = useMaintenanceBanner();
-  const { isAdBannerVisible, adBannerHeight } = useAdBanner();
   
-  // Calculate top position based on both banners visibility
-  const totalBannerHeight = (isAdBannerVisible ? adBannerHeight : 0) + (isBannerVisible ? bannerHeight : 0);
-  const topPosition = totalBannerHeight > 0 ? `${totalBannerHeight}px` : '0px';
+  // Calculate top position based on maintenance banner visibility
+  const topPosition = isBannerVisible ? `${bannerHeight}px` : '0px';
 
   return (
     <nav 
-      className="sticky left-0 right-0 z-50 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-lg border-b border-primary/20 shadow-xl"
+      className="sticky top-0 left-0 right-0 z-50 bg-gradient-to-r from-slate-900/90 via-slate-800/90 to-slate-900/90 backdrop-blur-lg border-b border-primary/20 shadow-xl"
       style={{ top: topPosition }}
     >
       <div className="max-w-8xl mx-auto px-4 sm:px-6 lg:px-8">

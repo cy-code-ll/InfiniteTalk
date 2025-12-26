@@ -4,8 +4,8 @@ import { Navbar } from '@/components/Navbar';
 import { MaintenanceBanner } from '@/components/Maintenance/MaintenanceBanner';
 import { MaintenanceModalWrapper } from '@/components/Maintenance/MaintenanceModalWrapper';
 import { MaintenanceBannerProvider } from '@/components/Maintenance/MaintenanceBannerContext';
-import { AdBanner } from '@/components/adBanner/AdBanner';
-import { AdBannerProvider } from '@/components/adBanner/AdBannerContext';
+// import { AdBanner } from '@/components/adBanner/AdBanner';
+// import { AdBannerProvider } from '@/components/adBanner/AdBannerContext';
 import { ToastProvider } from '@/components/ui/toast-provider';
 import { UserProvider } from '@/lib/providers';
 import { metadata, schemaData } from '@/lib/seo-config';
@@ -93,7 +93,7 @@ export default function RootLayout({
           }
           html {
             scroll-behavior: smooth;
-            overflow-x: hidden;
+            overflow-x: clip;
           }
           body {
             background-color: var(--background);
@@ -101,7 +101,7 @@ export default function RootLayout({
             font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
             margin: 0;
             padding: 0;
-            overflow-x: hidden;
+            overflow-x: clip;
           }
           .font-poppins {
             font-family: var(--font-poppins), system-ui, -apple-system, sans-serif;
@@ -127,9 +127,9 @@ export default function RootLayout({
           <ToastProvider>
             <UserProvider>
               <AuthModalProvider>
-                <AdBannerProvider >
+                {/* <AdBannerProvider > */}
                   <MaintenanceBannerProvider>
-                    <AdBanner />
+                    {/* <AdBanner /> */}
                     <MaintenanceBanner />
                     <Navbar />
                     <MaintenanceModalWrapper />
@@ -137,7 +137,7 @@ export default function RootLayout({
                       {children}
                     </main>
                   </MaintenanceBannerProvider>
-                </AdBannerProvider>
+                {/* </AdBannerProvider> */}
               </AuthModalProvider>
             </UserProvider>
           </ToastProvider>

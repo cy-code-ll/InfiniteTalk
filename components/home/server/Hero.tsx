@@ -39,16 +39,15 @@ export default function Hero() {
             </Link>
           </div> */}
           <div className="flex justify-center mb-10 md:mb-12">
-            <Link href="/christmas" aria-label="Go to Christmas page">
+            {/* <Link href="/infinitetalk" aria-label="Go to AI Video Generator"> */}
               <Button
                 variant="outline"
-                className="bg-gradient-to-r from-[#DC2626] to-[#B91C1C] hover:from-[#B91C1C] hover:to-[#991B1B] text-white border-2 border-white rounded-full px-5 py-3 text-sm font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2"
+                className="border-2 border-primary/30 bg-transparent hover:bg-primary/10 text-primary hover:text-primary px-6 py-3 text-sm font-semibold transition-all hover:scale-105 shadow-lg flex items-center justify-center gap-2 rounded-full"
               >
-                <Sparkles className="w-3 h-3 text-yellow-300" />
-                  Christmas AI Video Generator
-                <Sparkles className="w-3 h-3 text-yellow-300" />
+                <RocketIcon />
+                AI Video Generator
               </Button>
-            </Link>
+            {/* </Link> */}
           </div>
 
           {/* Title */}
