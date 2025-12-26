@@ -302,8 +302,8 @@ export default function InfiniteTalkGenerator() {
   };
 
   // 💾 保存表单到 IndexedDB
-  const saveFormCache = async (overrides?: { 
-    audio?: File | null; 
+  const saveFormCache = async (overrides?: {
+    audio?: File | null;
     audioDuration?: number;
     resolution?: '480p' | '720p' | '1080p';
     image?: File | null;
@@ -1501,6 +1501,28 @@ export default function InfiniteTalkGenerator() {
     }
   }, [isMaskModalOpen, handleMouseMove, handleMouseUp]);
 
+  // 检查画布是否有绘制内容
+  const hasCanvasContent = (): boolean => {
+    if (!canvasRef.current) return false;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+
+    // 获取画布的 ImageData
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // 检查是否有 alpha 值大于 0 的像素（即用户有绘制）
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 0) {
+        return true; // 找到有内容的像素
+      }
+    }
+
+    return false; // 画布为空
+  };
+
   const generateMaskImage = (): string => {
     if (!canvasRef.current) return '';
 
@@ -1571,6 +1593,14 @@ export default function InfiniteTalkGenerator() {
   };
 
   const handleUseMask = () => {
+    // 检查画布是否有绘制内容
+    if (!hasCanvasContent()) {
+      // 如果画布为空，不生成遮罩，直接关闭弹窗
+      setIsMaskModalOpen(false);
+      setMousePosition(null);
+      return;
+    }
+
     const maskData = generateMaskImage();
     // 根据当前模式保存到对应的状态
     if (tabMode === 'image-to-video') {
@@ -2401,8 +2431,8 @@ export default function InfiniteTalkGenerator() {
                 {isGenerating
                   ? 'Generating...'
                   : isUpgradeMode
-                  ? 'Upgrade Plan'
-                  : 'Generate Video'}
+                    ? 'Upgrade Plan'
+                    : 'Generate Video'}
               </Button>
               {/* Credit cost label - Upgrade 模式下不显示 */}
               {!isUpgradeMode && (
@@ -2410,11 +2440,10 @@ export default function InfiniteTalkGenerator() {
                   {!isSignedIn || (trialAccess.mode === 'trial' && isSignedIn)
                     ? 'Free'
                     : audioDuration > 0
-                    ? `${creditsCost} Credits`
-                    : `${
-                        resolution === '480p'
-                          ? '5'
-                          : resolution === '720p'
+                      ? `${creditsCost} Credits`
+                      : `${resolution === '480p'
+                        ? '5'
+                        : resolution === '720p'
                           ? '10'
                           : '15'
                       } Credits`}
