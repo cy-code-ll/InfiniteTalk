@@ -222,6 +222,7 @@ export function ChristmasHeroMobile() {
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
+    hasNoCredits &&
     hasAudio &&
     isAudioTooLong &&
     userLevel === 0;

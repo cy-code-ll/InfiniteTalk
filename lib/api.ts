@@ -226,6 +226,18 @@ export const paymentApi = {
     return handleApiError(response);
   },
 
+  createPaypalnewSession: async (priceId: string) => {
+    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/paypal`, {
+      method: 'POST',
+      headers: getHeaders(),
+      body: JSON.stringify({
+        price_id: priceId,
+      }),
+    });
+
+    return handleApiError(response);
+  },
+
   // 获取订阅记录
   getSubscriptions: async () => {
     const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/pay/subscriptions`, {
@@ -428,13 +440,35 @@ export const infiniteTalkApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk`, {
-      method: 'POST',
-      headers: headers,
-      body: formData,
-    });
+    const apiUrl = `${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk`;
+    let httpStatus: number | string = 'N/A';
+    let response: Response | null = null;
 
-    return handleApiError(response);
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+      httpStatus = response.status;
+      return await handleApiError(response);
+    } catch (error) {
+      // 事件统计 - 只在报错时记录，包含详细信息
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        // 判断是否是跨域错误
+        const isCorsError = errorMessage.includes('CORS') || 
+                          errorMessage.includes('Failed to fetch') || 
+                          errorMessage.includes('NetworkError') ||
+                          (error instanceof TypeError && !response);
+        const errorType = isCorsError ? 'CORS/Network' : 'API';
+        const errorInfo = `Status:${httpStatus}|Type:${errorType}|Error:${errorMessage.substring(0, 100)}|URL:${apiUrl}`;
+        setTimeout(() => {
+          (window as any)._czc.push(['_trackEvent', 'API错误', 'createTask失败', errorInfo, 1, '']);
+        }, 0);
+      }
+      throw error;
+    }
   },
 
   // 检查InfiniteTalk任务状态
@@ -552,13 +586,35 @@ export const infiniteTalkApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/video-to-video`, {
-      method: 'POST',
-      headers: headers,
-      body: formData,
-    });
+    const apiUrl = `${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/video-to-video`;
+    let httpStatus: number | string = 'N/A';
+    let response: Response | null = null;
 
-    return handleApiError(response);
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+      httpStatus = response.status;
+      return await handleApiError(response);
+    } catch (error) {
+      // 事件统计 - 只在报错时记录，包含详细信息
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        // 判断是否是跨域错误
+        const isCorsError = errorMessage.includes('CORS') || 
+                          errorMessage.includes('Failed to fetch') || 
+                          errorMessage.includes('NetworkError') ||
+                          (error instanceof TypeError && !response);
+        const errorType = isCorsError ? 'CORS/Network' : 'API';
+        const errorInfo = `Status:${httpStatus}|Type:${errorType}|Error:${errorMessage.substring(0, 100)}|URL:${apiUrl}`;
+        setTimeout(() => {
+          (window as any)._czc.push(['_trackEvent', 'API错误', 'createVideoToVideoTask失败', errorInfo, 1, '']);
+        }, 0);
+      }
+      throw error;
+    }
   },
 
   // 创建InfiniteTalk Multi任务
@@ -592,13 +648,35 @@ export const infiniteTalkApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/multi`, {
-      method: 'POST',
-      headers: headers,
-      body: formData,
-    });
+    const apiUrl = `${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/multi`;
+    let httpStatus: number | string = 'N/A';
+    let response: Response | null = null;
 
-    return handleApiError(response);
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+      httpStatus = response.status;
+      return await handleApiError(response);
+    } catch (error) {
+      // 事件统计 - 只在报错时记录，包含详细信息
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        // 判断是否是跨域错误
+        const isCorsError = errorMessage.includes('CORS') || 
+                          errorMessage.includes('Failed to fetch') || 
+                          errorMessage.includes('NetworkError') ||
+                          (error instanceof TypeError && !response);
+        const errorType = isCorsError ? 'CORS/Network' : 'API';
+        const errorInfo = `Status:${httpStatus}|Type:${errorType}|Error:${errorMessage.substring(0, 100)}|URL:${apiUrl}`;
+        setTimeout(() => {
+          (window as any)._czc.push(['_trackEvent', 'API错误', 'createMultiTask失败', errorInfo, 1, '']);
+        }, 0);
+      }
+      throw error;
+    }
   },
 
   // 创建InfiniteTalk Christmas任务（合并图片处理和视频生成）
@@ -631,13 +709,35 @@ export const infiniteTalkApi = {
       headers['Authorization'] = `Bearer ${token}`;
     }
 
-    const response = await fetch(`${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/christmas`, {
-      method: 'POST',
-      headers: headers,
-      body: formData,
-    });
+    const apiUrl = `${API_CONFIG.VIDOR_AI_BASE}/api/task/wavespeedai/infinitetalk/christmas`;
+    let httpStatus: number | string = 'N/A';
+    let response: Response | null = null;
 
-    return handleApiError(response);
+    try {
+      response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: headers,
+        body: formData,
+      });
+      httpStatus = response.status;
+      return await handleApiError(response);
+    } catch (error) {
+      // 事件统计 - 只在报错时记录，包含详细信息
+      if (typeof window !== 'undefined' && (window as any)._czc) {
+        const errorMessage = error instanceof Error ? error.message : String(error);
+        // 判断是否是跨域错误
+        const isCorsError = errorMessage.includes('CORS') || 
+                          errorMessage.includes('Failed to fetch') || 
+                          errorMessage.includes('NetworkError') ||
+                          (error instanceof TypeError && !response);
+        const errorType = isCorsError ? 'CORS/Network' : 'API';
+        const errorInfo = `Status:${httpStatus}|Type:${errorType}|Error:${errorMessage.substring(0, 100)}|URL:${apiUrl}`;
+        setTimeout(() => {
+          (window as any)._czc.push(['_trackEvent', 'API错误', 'createChristmasTask失败', errorInfo, 1, '']);
+        }, 0);
+      }
+      throw error;
+    }
   },
 
 };

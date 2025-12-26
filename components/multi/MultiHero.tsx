@@ -99,6 +99,7 @@ export default function MultiHero() {
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
+    hasNoCredits &&
     hasDurations &&
     (isNonTrialResolution || isAudioTooLong) &&
     userLevel === 0;

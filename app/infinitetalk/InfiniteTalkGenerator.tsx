@@ -1655,6 +1655,7 @@ export default function InfiniteTalkGenerator() {
   const isUpgradeMode =
     isSignedIn &&
     hasVouchers &&
+    hasNoCredits &&
     hasAudio &&
     (isNonTrialResolution || isAudioTooLong) &&
     userLevel === 0;
@@ -2227,14 +2228,14 @@ export default function InfiniteTalkGenerator() {
                   >
                     Audio Cut
                   </Link>
-                  <Link
+                  {/* <Link
                     href="https://www.merrychristmasmusic.net/"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-primary hover:text-primary/80 underline text-xs sm:text-sm whitespace-nowrap"
                   >
                     More Audio
-                  </Link>
+                  </Link> */}
                 </div>
               </div>
               <div className="relative">

@@ -22,7 +22,7 @@ interface PricingPlan {
   buttonText: string;
 }
 
-export default function PricingSection() {
+export default function PaypalPricingSection() {
   const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
   const { user, isSignedIn } = useUser();
   const { openAuthModal } = useAuthModal();
@@ -31,7 +31,7 @@ export default function PricingSection() {
   const pricingPlans: PricingPlan[] = [
     {
       key: 'Starter',
-      priceId: 'price_1S0bzJ2LCxiz8WFQshNuYpsJ',
+      priceId: 'NDJTR44N799Z4',
       popular: false,
       title: 'Starter',
       price: '$9.9',
@@ -49,7 +49,7 @@ export default function PricingSection() {
     },
     {
       key: 'premium',
-      priceId: 'price_1S0bze2LCxiz8WFQJBMjVxi0', 
+      priceId: 'QMJ93FXMGBS9L', 
       popular: false,
       title: 'Pro',
       price: '$29.9',
@@ -68,7 +68,7 @@ export default function PricingSection() {
     },
     {
       key: 'ultimate',
-      priceId: 'price_1S0bzt2LCxiz8WFQXQ5Foe8K', 
+      priceId: 'WABCVVEUUVFKU', 
       popular: true,
       title: 'Ultimate',
       price: '$49.9',
@@ -88,7 +88,7 @@ export default function PricingSection() {
     },
     {
       key: 'enterprise',
-      priceId: 'price_1S3sev2LCxiz8WFQana9TXxD', 
+      priceId: 'ZEHV56WLR4SWQ', 
       popular: false,
       title: 'Enterprise',
       price: '$99.9',
@@ -98,88 +98,6 @@ export default function PricingSection() {
       features: [
         '1800 Credits included',
         '$0.055 per credit',
-        'HD video generation',
-        'Lip-sync & body animation',
-        'Download enabled',
-        'Commercial use license',
-        'Priority support',
-        'Best value per credit',
-        'Bulk processing'
-      ]
-    }
-  ];
-
-  // 订阅计划（Subscription）
-  const subscriptionPlans: PricingPlan[] = [
-    {
-      key: 'sub-starter',
-      priceId: 'price_1SOBEv2LCxiz8WFQL3g9wyoE',
-      popular: false,
-      title: 'Starter',
-      price: '$9.9',
-      priceAmount: 9.9,
-      credits: 100,
-      buttonText: 'Subscribe 100 Credits',
-      features: [
-        '100 Credits included',
-        '$0.099 per credit',
-        'HD video generation',
-        'Lip-sync & body animation',
-        'Download enabled',
-        'Email support'
-      ]
-    },
-    {
-      key: 'sub-pro',
-      priceId: 'price_1SOBFm2LCxiz8WFQMOiwvH65',
-      popular: false,
-      title: 'Pro',
-      price: '$29.9',
-      priceAmount: 29.9,
-      credits: 480,
-      buttonText: 'Subscribe 480 Credits',
-      features: [
-        '480 Credits included',
-        '$0.062 per credit',
-        'HD video generation',
-        'Lip-sync & body animation',
-        'Download enabled',
-        'Commercial use license',
-        'Priority support'
-      ]
-    },
-    {
-      key: 'sub-ultimate',
-      priceId: 'price_1SOBGA2LCxiz8WFQnTEEHxXH',
-      popular: true,
-      title: 'Ultimate',
-      price: '$49.9',
-      priceAmount: 49.9,
-      credits: 990,
-      buttonText: 'Subscribe 990 Credits',
-      features: [
-        '990 Credits included',
-        '$0.050 per credit',
-        'HD video generation',
-        'Lip-sync & body animation',
-        'Download enabled',
-        'Commercial use license',
-        'Priority support',
-        'Best value per credit'
-      ]
-    },
-    {
-      key: 'sub-enterprise',
-      priceId: 'price_1SOBGa2LCxiz8WFQllMRPdsp',
-      popular: false,
-      title: 'Enterprise',
-      price: '$99.9',
-      priceAmount: 99.9,
-      credits: 2200,
-      buttonText: 'Subscribe 2200 Credits',
-      features: [
-        '2200 Credits included',
-        '$0.045 per credit',
         'HD video generation',
         'Lip-sync & body animation',
         'Download enabled',
@@ -210,7 +128,7 @@ export default function PricingSection() {
     }
 
     // 3. 缓存支付信息到本地存储
-    const selectedPlan = [...pricingPlans, ...subscriptionPlans].find(plan => plan.key === planKey);
+    const selectedPlan = pricingPlans.find(plan => plan.key === planKey);
     if (selectedPlan) {
       localStorage.setItem('selectedPlan', JSON.stringify({
         key: selectedPlan.key,
@@ -223,15 +141,12 @@ export default function PricingSection() {
       
       // CNZZ 事件追踪 - 点击购买积分
       if (typeof window !== 'undefined' && (window as any)._czc) {
-        // 判断是一次性购买还是订阅
-        const isSubscription = planKey.startsWith('sub-');
-        const planType = isSubscription ? '订阅套餐' : '一次性套餐';
-        const trackData = ['_trackEvent', '用户操作', '购买积分套餐', planType, selectedPlan.priceAmount, ''];
+        const trackData = ['_trackEvent', '用户操作', '购买积分套餐', 'PayPal套餐', selectedPlan.priceAmount, ''];
         (window as any)._czc.push(trackData);
         console.log('✅ CNZZ 事件追踪成功:', {
           事件类别: '用户操作',
           事件动作: '购买积分套餐',
-          套餐类型: planType,
+          套餐类型: 'PayPal套餐',
           价格: selectedPlan.priceAmount,
           套餐名称: selectedPlan.title,
           完整数据: trackData
@@ -243,7 +158,7 @@ export default function PricingSection() {
 
     setLoadingPlan(planKey); // 设置当前加载的计划
     try {
-      const data = await api.payment.createPaypalSession(priceId);
+      const data = await api.payment.createPaypalnewSession(priceId);
 
       // 检查返回的数据结构是否符合预期
       const checkoutUrl = data?.data?.url || data?.url;
@@ -273,23 +188,15 @@ export default function PricingSection() {
         {/* SEO-optimized heading */}
         <div className="text-center mb-16">
           <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-            InfiniteTalk AI Pricing Plans
+            InfiniteTalk AI Pricing Plans - PayPal
           </h1>
           <p className="text-xl md:text-2xl text-slate-300 mb-4 max-w-3xl mx-auto">
-            Purchase credits to generate AI-powered talking videos. Credits never expire.
+            Purchase credits to generate AI-powered talking videos with PayPal. Credits never expire.
           </p>
-          <div className="mt-4 mb-4">
-            <Link 
-              href="/paypal-pricing" 
-              className="text-base md:text-lg text-slate-400 hover:text-primary transition-colors max-w-3xl mx-auto block underline"
-            >
-              Want to pay with PayPal? View PayPal pricing plans here.
-            </Link>
-          </div>
+     
         </div>
 
-        {/* One-time purchase plans */}
-        <div className="text-white text-xl font-semibold mb-6">One-time Credits</div>
+        {/* Pricing plans */}
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto mb-16">
             {pricingPlans.map((plan) => {
               const isFree = plan.key === 'free';
@@ -331,77 +238,6 @@ export default function PricingSection() {
                           : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 hover:border-slate-500'
                     )}
                     onClick={() => !isFree && handleUpgradeClick(plan.priceId, plan.key)}
-                    disabled={loadingPlan === plan.key}
-                  >
-                    {loadingPlan === plan.key 
-                      ? (
-                          <span className="flex items-center justify-center">
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Processing...
-                          </span>
-                        )
-                      : plan.buttonText
-                    }
-                  </Button>
-
-                  <div className="space-y-4">
-                    <ul className="space-y-3">
-                      {plan.features.map((feature, featureIndex) => (
-                        <li key={featureIndex} className="flex items-start space-x-3">
-                          <Check className={cn(
-                            'w-5 h-5 mt-0.5 flex-shrink-0',
-                            plan.popular ? 'text-primary' : 'text-slate-400'
-                          )} />
-                          <span className="text-slate-300 leading-relaxed">
-                            {feature}
-                          </span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Subscription plans */}
-          <div className="text-white text-xl font-semibold mb-6">Subscription Plans</div>
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-8xl mx-auto">
-            {subscriptionPlans.map((plan) => {
-              return (
-                <div
-                  key={plan.key}
-                  className={cn(
-                    'relative p-8 rounded-2xl border backdrop-blur-sm transition-all duration-300 hover:scale-105',
-                    plan.popular 
-                      ? 'bg-gradient-to-b from-slate-800/90 to-slate-900/90 border-primary/50 shadow-2xl shadow-primary/20' 
-                      : 'bg-gradient-to-b from-slate-800/60 to-slate-900/60 border-slate-700/50 hover:border-slate-600/50'
-                  )}
-                >
-                  {plan.popular && (
-                    <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary to-primary/80 text-white px-6 py-2 rounded-full text-sm font-semibold">
-                      Most Popular
-                    </div>
-                  )}
-
-                  <h2 className="text-2xl font-bold text-white mb-4 text-center">
-                    {plan.title}
-                  </h2>
-
-                  <div className="text-center mb-8">
-                    <span className="text-5xl font-bold text-white">
-                      {plan.price}
-                    </span>
-                  </div>
-
-                  <Button 
-                    className={cn(
-                      'w-full mb-8 py-3 font-semibold transition-all duration-200',
-                      plan.popular
-                        ? 'bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-white shadow-lg hover:shadow-xl'
-                        : 'bg-slate-700 hover:bg-slate-600 text-white border border-slate-600 hover:border-slate-500'
-                    )}
-                    onClick={() => handleUpgradeClick(plan.priceId, plan.key)}
                     disabled={loadingPlan === plan.key}
                   >
                     {loadingPlan === plan.key 
@@ -506,14 +342,14 @@ export default function PricingSection() {
                 </div>
               </Link>
 
-              {/* Secure Payment by Stripe */}
+              {/* Secure Payment by PayPal */}
               <div className="flex items-center gap-3 px-6 py-4 bg-gradient-to-br from-blue-500/10 to-blue-600/5 border border-blue-500/20 rounded-xl backdrop-blur-sm">
                 <div className="flex-shrink-0 w-10 h-10 bg-blue-500/20 rounded-full flex items-center justify-center">
                   <Shield className="w-5 h-5 text-blue-400" />
                 </div>
                 <div className="text-left">
                   <div className="text-white font-semibold">Secure Payment</div>
-                  <div className="text-slate-400 text-sm">Powered by Stripe</div>
+                  <div className="text-slate-400 text-sm">Powered by PayPal</div>
                 </div>
               </div>
 
@@ -533,13 +369,13 @@ export default function PricingSection() {
           {/* Additional pricing info */}
           <div className="mt-8 text-center">
             <p className="text-white mb-4 ">
-              Choose one-time credits or subscription • Flexible billing options
+              Purchase credits to generate AI-powered talking videos • Credits never expire
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-slate-500 text-white">
-              <span>✓ Choose one-time or subscription</span>
               <span>✓ Credits never expire</span>
               <span>✓ Secure payments</span>
               <span>✓ Email support</span>
+              <span>✓ PayPal payment</span>
             </div>
           </div>
       </div>
