@@ -123,6 +123,8 @@ export default function InfiniteTalkGenerator() {
   const [canvasHistory, setCanvasHistory] = useState<ImageData[]>([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [mousePosition, setMousePosition] = useState<{ x: number; y: number } | null>(null);
+  const [hasCanvasDrawing, setHasCanvasDrawing] = useState(false);
+  const [maskError, setMaskError] = useState<string | null>(null);
   const drawingRafRef = useRef<number | null>(null);
   const pendingDrawRef = useRef<{ x: number; y: number } | null>(null);
   const originalImageSizeRef = useRef<{ width: number; height: number } | null>(null);
@@ -304,8 +306,8 @@ export default function InfiniteTalkGenerator() {
   };
 
   // 💾 保存表单到 IndexedDB
-  const saveFormCache = async (overrides?: { 
-    audio?: File | null; 
+  const saveFormCache = async (overrides?: {
+    audio?: File | null;
     audioDuration?: number;
     resolution?: '480p' | '720p' | '1080p';
     image?: File | null;
@@ -819,6 +821,10 @@ export default function InfiniteTalkGenerator() {
   // 初始化画布（带重试机制）
   useEffect(() => {
     if (isMaskModalOpen) {
+      // 重置状态
+      setHasCanvasDrawing(false);
+      setMaskError(null);
+
       if ((tabMode === 'image-to-video' && selectedImage) ||
         (tabMode === 'video-to-video' && videoFirstFrame)) {
         // 延迟初始化，确保DOM已渲染，带重试机制
@@ -1228,6 +1234,12 @@ export default function InfiniteTalkGenerator() {
       setCanvasHistory(newHistory);
       setHistoryIndex(newHistory.length - 1);
     }
+
+    // 更新绘制状态
+    if (hasCanvasContent()) {
+      setHasCanvasDrawing(true);
+      setMaskError(null);
+    }
   };
 
   const undoCanvas = () => {
@@ -1238,6 +1250,14 @@ export default function InfiniteTalkGenerator() {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
           ctx.putImageData(canvasHistory[newIndex], 0, 0);
+          // 更新绘制状态
+          setTimeout(() => {
+            const hasContent = hasCanvasContent();
+            setHasCanvasDrawing(hasContent);
+            if (hasContent) {
+              setMaskError(null);
+            }
+          }, 0);
         }
       }
     }
@@ -1251,6 +1271,14 @@ export default function InfiniteTalkGenerator() {
         const ctx = canvasRef.current.getContext('2d');
         if (ctx) {
           ctx.putImageData(canvasHistory[newIndex], 0, 0);
+          // 更新绘制状态
+          setTimeout(() => {
+            const hasContent = hasCanvasContent();
+            setHasCanvasDrawing(hasContent);
+            if (hasContent) {
+              setMaskError(null);
+            }
+          }, 0);
         }
       }
     }
@@ -1356,10 +1384,16 @@ export default function InfiniteTalkGenerator() {
       if (canvasX >= 0 && canvasX < canvas.width && canvasY >= 0 && canvasY < canvas.height) {
         ctx.getImageData(Math.floor(canvasX), Math.floor(canvasY), 1, 1);
       }
+
+      // 标记已有绘制内容，并清除错误提示
+      if (!hasCanvasDrawing) {
+        setHasCanvasDrawing(true);
+        setMaskError(null);
+      }
     } catch (error) {
       console.error('Error drawing on canvas', error);
     }
-  }, [brushSize]);
+  }, [brushSize, hasCanvasDrawing]);
 
   const draw = (e: React.MouseEvent<HTMLCanvasElement> | React.TouchEvent<HTMLCanvasElement>) => {
     if (!isDrawing || !canvasRef.current) return;
@@ -1503,6 +1537,28 @@ export default function InfiniteTalkGenerator() {
     }
   }, [isMaskModalOpen, handleMouseMove, handleMouseUp]);
 
+  // 检查画布是否有绘制内容
+  const hasCanvasContent = (): boolean => {
+    if (!canvasRef.current) return false;
+
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+
+    // 获取画布的 ImageData
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    // 检查是否有 alpha 值大于 0 的像素（即用户有绘制）
+    for (let i = 3; i < data.length; i += 4) {
+      if (data[i] > 0) {
+        return true; // 找到有内容的像素
+      }
+    }
+
+    return false; // 画布为空
+  };
+
   const generateMaskImage = (): string => {
     if (!canvasRef.current) return '';
 
@@ -1573,6 +1629,16 @@ export default function InfiniteTalkGenerator() {
   };
 
   const handleUseMask = () => {
+    // 检查画布是否有绘制内容
+    if (!hasCanvasContent()) {
+      // 如果画布为空，显示错误提示，不关闭弹窗
+      setMaskError('Please draw on the image before applying the mask');
+      return;
+    }
+
+    // 清除错误提示
+    setMaskError(null);
+
     const maskData = generateMaskImage();
     // 根据当前模式保存到对应的状态
     if (tabMode === 'image-to-video') {
@@ -1587,6 +1653,7 @@ export default function InfiniteTalkGenerator() {
 
   const handleCancelMask = () => {
     setIsMaskModalOpen(false);
+    setMaskError(null);
 
     // 清理待处理的 RAF
     if (drawingRafRef.current !== null) {
@@ -2415,8 +2482,8 @@ export default function InfiniteTalkGenerator() {
                 {isGenerating
                   ? 'Generating...'
                   : isUpgradeMode
-                  ? 'Upgrade Plan'
-                  : 'Generate Video'}
+                    ? 'Upgrade Plan'
+                    : 'Generate Video'}
               </Button>
               {/* Credit cost label - Upgrade 模式下不显示 */}
               {!isUpgradeMode && (
@@ -2424,11 +2491,10 @@ export default function InfiniteTalkGenerator() {
                   {!isSignedIn || (trialAccess.mode === 'trial' && isSignedIn)
                     ? 'Free'
                     : audioDuration > 0
-                    ? `${creditsCost} Credits`
-                    : `${
-                        resolution === '480p'
-                          ? '5'
-                          : resolution === '720p'
+                      ? `${creditsCost} Credits`
+                      : `${resolution === '480p'
+                        ? '5'
+                        : resolution === '720p'
                           ? '10'
                           : '15'
                       } Credits`}
@@ -2688,19 +2754,32 @@ export default function InfiniteTalkGenerator() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex items-center space-x-3">
-                        <button
-                          onClick={handleCancelMask}
-                          className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleUseMask}
-                          className="flex-1 py-2 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Use Mask
-                        </button>
+                      <div className="space-y-2">
+                        {maskError && (
+                          <div className="text-red-400 text-sm text-center">
+                            {maskError}
+                          </div>
+                        )}
+                        <div className="flex items-center space-x-3">
+                          <button
+                            onClick={handleCancelMask}
+                            className="flex-1 py-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleUseMask}
+                            disabled={!hasCanvasDrawing}
+                            className={cn(
+                              "flex-1 py-2 text-white text-sm font-medium rounded-lg transition-colors",
+                              hasCanvasDrawing
+                                ? "bg-primary hover:bg-primary/80"
+                                : "bg-slate-600/50 text-slate-400 cursor-not-allowed"
+                            )}
+                          >
+                            Confirm
+                          </button>
+                        </div>
                       </div>
                     </div>
 
@@ -2744,19 +2823,32 @@ export default function InfiniteTalkGenerator() {
                         </div>
                       </div>
 
-                      <div className="flex items-center space-x-4">
-                        <button
-                          onClick={handleCancelMask}
-                          className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Cancel
-                        </button>
-                        <button
-                          onClick={handleUseMask}
-                          className="py-2 w-25 bg-primary hover:bg-primary/80 text-white text-sm font-medium rounded-lg transition-colors"
-                        >
-                          Use Mask
-                        </button>
+                      <div className="flex flex-col items-end space-y-2">
+                        {maskError && (
+                          <div className="text-red-400 text-sm">
+                            {maskError}
+                          </div>
+                        )}
+                        <div className="flex items-center space-x-4">
+                          <button
+                            onClick={handleCancelMask}
+                            className="w-20 py-2 ml-2 bg-slate-600 hover:bg-slate-500 text-white text-sm font-medium rounded-lg transition-colors"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            onClick={handleUseMask}
+                            disabled={!hasCanvasDrawing}
+                            className={cn(
+                              "py-2 w-25 text-white text-sm font-medium rounded-lg transition-colors",
+                              hasCanvasDrawing
+                                ? "bg-primary hover:bg-primary/80"
+                                : "bg-slate-600/50 text-slate-400 cursor-not-allowed"
+                            )}
+                          >
+                            Confirm
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
