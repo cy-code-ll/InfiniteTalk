@@ -107,6 +107,8 @@ export default function InfiniteTalkGenerator() {
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   // 使用 ref 存储当前的 AbortController，避免 useEffect 依赖导致的问题
   const abortControllerRef = useRef<AbortController | null>(null);
+  // 使用 ref 作为同步锁，避免状态更新延迟导致的重复提交
+  const isGeneratingRef = useRef<boolean>(false);
   const previewAudioRef = useRef<HTMLAudioElement | null>(null);
   const [previewAudioUrl, setPreviewAudioUrl] = useState<string | null>(null);
   const [isPreviewPlaying, setIsPreviewPlaying] = useState(false);
@@ -1678,6 +1680,11 @@ export default function InfiniteTalkGenerator() {
 
   // 生成视频 - 使用 useCallback 优化性能
   const handleGenerate = useCallback(async () => {
+    // ✅ 同步锁检查：如果已经在生成中，直接返回（避免重复提交）
+    if (isGeneratingRef.current) {
+      return;
+    }
+
     // CNZZ 事件追踪 - 异步执行，不阻塞主线程
     if (typeof window !== 'undefined' && (window as any)._czc) {
       // 使用 setTimeout 将事件追踪推迟到下一个事件循环
@@ -1758,6 +1765,8 @@ export default function InfiniteTalkGenerator() {
 
     // 立即更新关键状态（用户可见的反馈）- 使用 React 18 自动批处理
     // 这些更新会被自动批处理，减少重渲染次数
+    // ✅ 同步设置 ref 锁，避免状态更新延迟导致的重复提交
+    isGeneratingRef.current = true;
     setIsGenerating(true);
 
     // 创建新的 AbortController - 这个很快，保持同步
@@ -1851,6 +1860,8 @@ export default function InfiniteTalkGenerator() {
       setResultVideoUrl(''); // 清除结果视频URL
       setResultTaskId(''); // 清除任务ID
     } finally {
+      // ✅ 重置同步锁和状态
+      isGeneratingRef.current = false;
       setIsGenerating(false);
       abortControllerRef.current = null;
       setAbortController(null); // 清理 AbortController
@@ -2371,7 +2382,10 @@ export default function InfiniteTalkGenerator() {
             <div className="relative">
               <Button
                 onClick={() => {
-                  if (isGenerating) return;
+                  // ✅ 同步锁检查：立即检查 ref，避免状态更新延迟导致的重复提交
+                  if (isGeneratingRef.current || isGenerating) {
+                    return;
+                  }
 
                   if (isUpgradeMode) {
                     setIsUpgradeModeModalOpen(true);
